@@ -876,11 +876,56 @@ function cycleTheme() {
   var isLight = bgColor[1] !== '0' && bgColor[1] !== '1';
   var spiralColor = isLight ? '#1a0a0a' : '#f5f2ed';
 
+  var lightOverrides = isLight ? (
+    /* Letters */
+    '.letter:hover { color: ' + accent + ' !important; }' +
+    '.letter:hover + .letter { color: ' + t.vars['--muted'] + ' !important; }' +
+    /* Body text that uses hardcoded light rgba */
+    '.about-body { color: rgba(26,10,10,0.65) !important; }' +
+    '.about-body em { color: ' + t.vars['--white'] + ' !important; }' +
+    '.cs-body { color: rgba(26,10,10,0.6) !important; }' +
+    '.cs-body em { color: ' + t.vars['--white'] + ' !important; }' +
+    '.skill-list { color: rgba(26,10,10,0.55) !important; }' +
+    '.section-count { color: rgba(26,10,10,0.35) !important; }' +
+    '.project-desc { color: rgba(26,10,10,0.55) !important; }' +
+    '.project-index { color: rgba(26,10,10,0.35) !important; }' +
+    '.project-year { color: rgba(26,10,10,0.35) !important; }' +
+    '.project-arrow { color: rgba(26,10,10,0.5) !important; border-color: rgba(26,10,10,0.15) !important; }' +
+    '.next-label { color: rgba(26,10,10,0.4) !important; }' +
+    '.next-arrow { color: rgba(26,10,10,0.5) !important; border-color: rgba(26,10,10,0.15) !important; }' +
+    '.cs-meta-value { color: ' + t.vars['--white'] + ' !important; }' +
+    '.cs-nav-logo { color: rgba(26,10,10,0.4) !important; }' +
+    '.footer-copy { color: ' + t.vars['--muted'] + ' !important; }' +
+    /* Borders & dividers */
+    '.hero-descriptor { border-top-color: rgba(26,10,10,0.1) !important; }' +
+    '.hero-scroll { color: rgba(26,10,10,0.4) !important; }' +
+    '.hero-scroll::after { background: rgba(26,10,10,0.3) !important; }' +
+    '.marquee-wrapper { border-top-color: rgba(26,10,10,0.06) !important; border-bottom-color: rgba(26,10,10,0.06) !important; }' +
+    '.project-item { border-right-color: rgba(26,10,10,0.06) !important; border-bottom-color: rgba(26,10,10,0.06) !important; }' +
+    '.project-item::before { background: rgba(26,10,10,0.04) !important; }' +
+    '.about-section { border-top-color: rgba(26,10,10,0.06) !important; }' +
+    '.about-left { border-right-color: rgba(26,10,10,0.06) !important; border-bottom-color: rgba(26,10,10,0.06) !important; }' +
+    '.skill-item { border-color: rgba(26,10,10,0.08) !important; }' +
+    '.contact-section { border-top-color: rgba(26,10,10,0.06) !important; }' +
+    '.contact-email { border-color: rgba(26,10,10,0.15) !important; }' +
+    'footer { border-top-color: rgba(26,10,10,0.06) !important; }' +
+    '.footer-links a { border-color: rgba(26,10,10,0.2) !important; color: ' + t.vars['--white'] + ' !important; }' +
+    '.footer-links a:hover { border-color: ' + accent + ' !important; color: ' + accent + ' !important; }' +
+    '.cs-hero { border-bottom-color: rgba(26,10,10,0.06) !important; }' +
+    '.cs-meta { border-top-color: rgba(26,10,10,0.06) !important; }' +
+    '.cs-statement { border-bottom-color: rgba(26,10,10,0.06) !important; }' +
+    '.cs-next { border-top-color: rgba(26,10,10,0.06) !important; }' +
+    '.next-arrow { border-color: rgba(26,10,10,0.15) !important; }' +
+    '.img-gap { background: rgba(26,10,10,0.06) !important; }' +
+    '#page-replica2, #page-spiral, #page-posterfolio, #page-mixedmedia { border-bottom-color: rgba(26,10,10,0.06) !important; }'
+  ) : '';
+
   dynStyle.textContent =
     '.letter:hover { -webkit-text-stroke: 2px ' + accent + ' !important; }' +
     '#theme-btn svg { stroke: ' + accent + ' !important; }' +
     '.cursor path { stroke: ' + accent + ' !important; }' +
-    '.bg-spirals path { stroke: ' + spiralColor + ' !important; }';
+    '.bg-spirals path { stroke: ' + spiralColor + ' !important; }' +
+    lightOverrides;
 
 }
 </script>
