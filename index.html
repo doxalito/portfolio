@@ -232,9 +232,10 @@
     background: var(--off-black);
   }
   .footer-copy { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--muted); }
-  .footer-links { display: flex; gap: 2rem; }
-  .footer-links a { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-  .footer-links a:hover { color: var(--white); }
+  .footer-links { display: flex; gap: 1rem; }
+  .footer-links a { display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); text-decoration: none; border: 1px solid rgba(245,242,237,0.2); padding: 0.5rem 1rem; transition: border-color 0.2s, color 0.2s; }
+  .footer-links a:hover { border-color: var(--white); color: var(--white); }
+  .footer-links a svg { flex-shrink: 0; }
 
   /* ===================== CASE STUDY PAGE ===================== */
   #page-replica2 {
@@ -590,9 +591,14 @@
   <footer>
     <p class="footer-copy">© 2025 DOXAL — Oscar Penverne. All rights reserved.</p>
     <div class="footer-links">
-      <a href="https://instagram.com/oscar_pvrn" target="_blank">Instagram</a>
-      <a href="https://instagram.com/spiral.collectif" target="_blank">Spiral Collectif</a>
-
+      <a href="https://instagram.com/oscar_pvrn" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @oscar_pvrn
+      </a>
+      <a href="https://instagram.com/spiral.collectif" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @spiral.collectif
+      </a>
     </div>
   </footer>
 </div>
