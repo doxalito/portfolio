@@ -877,9 +877,6 @@ function cycleTheme() {
   var spiralColor = isLight ? '#1a0a0a' : '#f5f2ed';
 
   var lightOverrides = isLight ? (
-    /* Letters */
-    '.letter:hover { color: ' + accent + ' !important; }' +
-    '.letter:hover + .letter { color: ' + t.vars['--muted'] + ' !important; }' +
     /* Body text that uses hardcoded light rgba */
     '.about-body { color: rgba(26,10,10,0.65) !important; }' +
     '.about-body em { color: ' + t.vars['--white'] + ' !important; }' +
