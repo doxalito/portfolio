@@ -549,13 +549,13 @@
         <div class="project-meta"><span class="project-year">2023 — 2024</span><div class="project-arrow">→</div></div>
       </div>
 
-      <div class="project-item fade-in" style="transition-delay:0.1s">
+      <div class="project-item fade-in" style="transition-delay:0.1s" onclick="openProject('mixedmedia')">
         <p class="project-index">04</p>
         <div class="project-visual">
-          <div class="project-visual-inner pv-4"><span class="placeholder-visual">Dessin — ajoute ton visuel</span></div>
+          <div class="project-visual-inner pv-4"><span class="placeholder-visual">Mixed Media — ajoute ton visuel</span></div>
         </div>
         <p class="project-category">Illustration & Character Design</p>
-        <h3 class="project-title">Dessin</h3>
+        <h3 class="project-title">Mixed Media</h3>
         <p class="project-desc">Ink-based character illustration — figures with TV heads, oversized hands, tangled cables. A personal visual language at the edge of graffiti and comic.</p>
         <div class="project-meta"><span class="project-year">2023 — 2025</span><div class="project-arrow">→</div></div>
       </div>
@@ -1000,6 +1000,58 @@ function cycleTheme() {
 
   <div class="cs-next">
     <div><p class="next-label">Next Project</p><p class="next-title">Spiral Collectif</p></div>
+    <button class="next-arrow">→</button>
+  </div>
+</div>
+
+<!-- ==================== PAGE: MIXED MEDIA ==================== -->
+<div id="page-mixedmedia" style="position:fixed;inset:0;z-index:300;background:var(--black);overflow-y:auto;display:none;">
+  <div class="cs-nav">
+    <button class="cs-back-btn" onclick="closeProject()">← Back</button>
+    <span class="cs-nav-logo">DOXAL<span style="color:var(--red)">.</span> &nbsp;04 / 04</span>
+  </div>
+
+  <section class="cs-hero">
+    <p class="cs-eyebrow">Illustration & Character Design</p>
+    <h1 class="cs-title">Mixed<br><em>Media</em></h1>
+    <div class="cs-meta">
+      <div><p class="cs-meta-label">Type</p><p class="cs-meta-value">Personal Work</p></div>
+      <div><p class="cs-meta-label">Period</p><p class="cs-meta-value">2023 — 2025</p></div>
+      <div><p class="cs-meta-label">Tools</p><p class="cs-meta-value">Ink, Photoshop, Procreate</p></div>
+      <div><p class="cs-meta-label">Discipline</p><p class="cs-meta-value">Illustration</p></div>
+    </div>
+  </section>
+
+  <div class="cs-statement">
+    <p class="cs-quote">&ldquo;A recurring character placed in worlds that don't belong to him.&rdquo;</p>
+    <p class="cs-body">
+      A personal visual language built around a single figure — the TV-head character. Ink-based, lo-fi, and deliberately rough. Placed in real photographs, digital environments and underground contexts.<br><br>
+      The character appears across fanzines, stickers, collages and digital illustration — a signature that runs through everything made under the Spiral umbrella.
+    </p>
+  </div>
+
+  <div class="cs-visuals">
+    <p class="cs-section-label">Illustrations</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 3rem;">
+      <img src="DOXAL SLAY.jpg" style="width:100%;height:auto;display:block;" alt="TV Head — DOXAL SLAY"/>
+      <img src="img-poster-backrooms.jpg" style="width:100%;height:auto;display:block;" alt="TV Head — Backrooms"/>
+    </div>
+
+    <div style="height:1px;background:rgba(245,242,237,0.06);margin:3rem 0 0;"></div>
+    <p class="cs-section-label">Fanzine Spiral — Vol. 1</p>
+    <div style="padding:0 3rem;">
+      <iframe src="Spiral Final 1.pdf" style="width:100%;height:80vh;border:none;display:block;" title="Fanzine Spiral Vol. 1"></iframe>
+    </div>
+
+    <div style="height:1px;background:rgba(245,242,237,0.06);margin:3rem 0 0;"></div>
+    <p class="cs-section-label">Fanzine Spiral — Vol. 2</p>
+    <div style="padding:0 3rem;">
+      <iframe src="Spiral Final 2.pdf" style="width:100%;height:80vh;border:none;display:block;" title="Fanzine Spiral Vol. 2"></iframe>
+    </div>
+  </div>
+
+  <div class="cs-next">
+    <div><p class="next-label">Next Project</p><p class="next-title">Replica 2</p></div>
     <button class="next-arrow">→</button>
   </div>
 </div>
