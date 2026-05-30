@@ -45,9 +45,11 @@
 
   /* ===================== PORTFOLIO PAGE ===================== */
   nav {
-    display: flex; justify-content: flex-end; align-items: center; gap: 3rem;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     padding: 1.5rem 3rem;
   }
+  nav > :last-child { justify-self: end; }
   .nav-logo {
     font-family: var(--display); font-weight: 900; font-size: 0.75rem;
     letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); text-decoration: none;
@@ -446,18 +448,14 @@
 </svg>
 
 <!-- LOGO FIXE — direct child of body -->
-<a href="#" class="nav-logo" style="position:fixed;top:1.5rem;left:3rem;z-index:50;">DOXAL<span>.</span></a>
+<a href="#" class="nav-logo" style="position:fixed;top:1.5rem;left:3rem;z-index:50;mix-blend-mode:difference;color:#fff;">DOXAL<span style="color:#fff;">.</span></a>
 
 <!-- ==================== PAGE: PORTFOLIO ==================== -->
 <div id="page-home" class="page active">
   <nav>
-    <div></div>
-    <ul class="nav-links">
-      <li><a href="#work">Work</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
+    <div></div><!-- spacer gauche -->
     <div id="theme-wrapper" onclick="cycleTheme()" style="
+      justify-self: center;
       display: flex; align-items: center; gap: 0.6rem;
       cursor: pointer;
       padding: 0.5rem 1rem 0.5rem 0.8rem;
@@ -474,6 +472,11 @@
         <span id="theme-pip" style="font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);">Noir / Rouge</span>
       </div>
     </div>
+    <ul class="nav-links" style="justify-self:end;">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
   </nav>
 
   <section class="hero">
