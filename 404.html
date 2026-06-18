@@ -28,75 +28,58 @@
     height: 100vh; overflow: hidden; position: relative;
   }
 
-  /* ============ VORTEX ============ */
+  /* ============ SPIRAL ============ */
   .vortex-stage {
     position: fixed; inset: 0; z-index: 0; overflow: hidden;
     background: var(--black);
+    display: flex; align-items: center; justify-content: center;
   }
-  .vortex-spin {
-    position: absolute; top: 50%; left: 50%;
-    width: 180vmax; height: 180vmax;
-    margin-top: -90vmax; margin-left: -90vmax;
-    border-radius: 50%;
-    background: repeating-conic-gradient(
-      from 0deg,
-      #0a0a0a 0deg 6deg,
-      #e01a1a 6deg 9deg,
-      #0a0a0a 9deg 18deg,
-      #1a0505 18deg 21deg,
-      #0a0a0a 21deg 30deg,
-      #e01a1a 30deg 33deg,
-      #0a0a0a 33deg 42deg,
-      #1a0505 42deg 45deg,
-      #0a0a0a 45deg 54deg,
-      #e01a1a 54deg 57deg,
-      #0a0a0a 57deg 60deg
-    );
-    animation: spinVortex 5s linear infinite;
+  #spiralCanvas {
+    width: 145vmax; height: 145vmax;
+    animation: spinVortex 9s linear infinite;
     will-change: transform;
-    transform-origin: center center;
+    filter: url(#grungeWobble) contrast(1.15);
   }
   @keyframes spinVortex { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .vortex-rings { position: absolute; inset: 0; }
-  .ring {
-    position: absolute; top: 50%; left: 50%;
-    width: 16px; height: 16px; margin: -8px 0 0 -8px;
-    border-radius: 50%;
-    border: 4px solid var(--red);
-    opacity: 0;
-    animation: fallIn 2.2s cubic-bezier(0.55, 0, 0.85, 0.4) infinite;
-    will-change: transform, opacity;
-  }
-  @keyframes fallIn {
-    0% { transform: scale(0.1); opacity: 0.9; }
-    80% { opacity: 0.4; }
-    100% { transform: scale(170); opacity: 0; }
-  }
-
   .vortex-vignette {
     position: absolute; inset: 0;
-    background: radial-gradient(circle at center, rgba(10,10,10,0) 0%, rgba(10,10,10,0) 22%, rgba(10,10,10,0.85) 68%, var(--black) 100%);
+    background: radial-gradient(circle at center, rgba(10,10,10,0) 0%, rgba(10,10,10,0) 38%, rgba(10,10,10,0.55) 75%, rgba(10,10,10,0.85) 100%);
     z-index: 1;
   }
 
-  /* ============ FLICKERING 404s ============ */
-  .glitch-field { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-  .g404 {
-    position: absolute; font-family: var(--display); font-weight: 900;
-    color: var(--red); letter-spacing: -0.03em; white-space: nowrap;
-    animation-name: flicker; animation-timing-function: steps(1, end); animation-iteration-count: infinite;
-    text-shadow: 0 0 14px rgba(224,26,26,0.6);
+  /* ============ FILM GRAIN ============ */
+  .grain-overlay {
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.7 0.7 0.7 0 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 180px 180px;
+    opacity: 0.22;
+    mix-blend-mode: overlay;
+    animation: grainShift 0.5s steps(6) infinite;
   }
-  @keyframes flicker {
-    0%, 100% { opacity: 0; }
-    4% { opacity: 1; }
-    7% { opacity: 0; }
-    11% { opacity: 1; }
-    14% { opacity: 0; }
-    52% { opacity: 0; }
-    55% { opacity: 1; }
-    58% { opacity: 0; }
+  @keyframes grainShift {
+    0% { transform: translate(0,0); }
+    16% { transform: translate(-2%,2%); }
+    32% { transform: translate(1%,-3%); }
+    48% { transform: translate(-3%,1%); }
+    64% { transform: translate(2%,3%); }
+    80% { transform: translate(-1%,-2%); }
+    100% { transform: translate(0,0); }
+  }
+
+  /* ============ CURSOR 404 TRAIL ============ */
+  .trail-field { position: fixed; inset: 0; z-index: 35; pointer-events: none; overflow: hidden; }
+  .trail404 {
+    position: fixed; top: 0; left: 0; --rot: 0deg;
+    font-family: var(--display); font-weight: 900;
+    letter-spacing: -0.03em; white-space: nowrap;
+    filter: url(#scribbleWobble);
+    transform: translate(-50%, -50%) rotate(var(--rot));
+    animation: trailFade 1s ease-out forwards;
+  }
+  @keyframes trailFade {
+    0% { opacity: 0.85; transform: translate(-50%, -50%) rotate(var(--rot)) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot)) scale(0.6); }
   }
 
   /* ============ LOGO ============ */
@@ -114,21 +97,12 @@
     align-items: center; justify-content: center; text-align: center;
     padding: 3rem;
   }
-  .err-eyebrow {
-    font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: var(--red); margin-bottom: 1.5rem;
-    display: flex; align-items: center; gap: 1rem;
-  }
-  .err-eyebrow::before, .err-eyebrow::after { content: ''; display: block; width: 2rem; height: 1px; background: var(--red); }
-
   #err-text {
     font-family: var(--display); font-weight: 900;
     font-size: clamp(6rem, 24vw, 18rem); line-height: 0.82;
     letter-spacing: -0.04em;
     display: flex; justify-content: center;
-    -webkit-text-stroke: 7px var(--white);
-    paint-order: stroke fill; color: var(--black);
-    filter: drop-shadow(0 0 30px rgba(224,26,26,0.35));
+    color: var(--white);
   }
   #err-text span { display: inline-block; }
 
@@ -139,13 +113,6 @@
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
   .err-sub.visible { opacity: 1; transform: translateY(0); }
-
-  .err-desc {
-    font-size: 0.7rem; letter-spacing: 0.05em; color: var(--muted);
-    max-width: 28rem; margin-top: 1.1rem; line-height: 1.6;
-    opacity: 0; transition: opacity 0.6s ease 0.2s;
-  }
-  .err-desc.visible { opacity: 1; }
 
   .err-back {
     margin-top: 2.5rem; display: inline-flex; align-items: center; gap: 0.8rem;
@@ -161,23 +128,6 @@
   .err-back .arrow { transition: transform 0.3s; }
   .err-back:hover .arrow { transform: translateX(4px); }
 
-  /* ============ MARQUEE ============ */
-  .marquee-wrapper {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-    overflow: hidden;
-    border-top: 1px solid rgba(245,242,237,0.1);
-    padding: 1.1rem 0; background: rgba(17,17,17,0.85);
-    backdrop-filter: blur(4px);
-  }
-  .marquee-track { display: flex; width: max-content; animation: marquee 18s linear infinite; }
-  .marquee-track span {
-    font-family: var(--display); font-weight: 200; font-size: 0.7rem;
-    letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
-    padding: 0 3rem; white-space: nowrap;
-  }
-  .marquee-track span.accent { color: var(--red); }
-  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
   @media (max-width: 768px) {
     body { overflow-y: auto; height: auto; }
     .nav-logo { left: 1.5rem; }
@@ -187,84 +137,117 @@
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden;">
+  <defs>
+    <filter id="grungeWobble" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.009 0.014" numOctaves="4" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="34" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="scribbleWobble" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.09" numOctaves="3" seed="11" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
-<!-- VORTEX -->
+<!-- SPIRAL -->
 <div class="vortex-stage">
-  <div class="vortex-spin"></div>
-  <div class="vortex-rings" id="vortexRings"></div>
+  <canvas id="spiralCanvas"></canvas>
   <div class="vortex-vignette"></div>
 </div>
 
-<!-- FLICKERING 404 FIELD -->
-<div class="glitch-field" id="glitchField"></div>
+<!-- FILM GRAIN -->
+<div class="grain-overlay"></div>
+
+<!-- CURSOR 404 TRAIL -->
+<div class="trail-field" id="trailField"></div>
 
 <!-- LOGO -->
 <a href="index.html" class="nav-logo">DOXAL<span>.</span></a>
 
 <!-- CONTENT -->
 <div class="err-wrap">
-  <p class="err-eyebrow">Erreur de trajectoire</p>
   <h1 id="err-text"><span>4</span><span>0</span><span>4</span></h1>
   <p class="err-sub" id="errSub">La boucle s'est brisée ici</p>
-  <p class="err-desc" id="errDesc">La page que tu cherches n'existe pas, ou plus. Elle s'est perdue quelque part entre Bordeaux, la Chine et le Mexique.</p>
   <a href="index.html" class="err-back" id="errBack">Retour à l'accueil<span class="arrow">→</span></a>
 </div>
 
-<div class="marquee-wrapper">
-  <div class="marquee-track">
-    <span>PAGE INTROUVABLE</span><span class="accent">—</span><span>PAGE INTROUVABLE</span><span class="accent">—</span>
-    <span>PAGE INTROUVABLE</span><span class="accent">—</span><span>PAGE INTROUVABLE</span><span class="accent">—</span>
-    <span>PAGE INTROUVABLE</span><span class="accent">—</span><span>PAGE INTROUVABLE</span><span class="accent">—</span>
-    <span>PAGE INTROUVABLE</span><span class="accent">—</span><span>PAGE INTROUVABLE</span><span class="accent">—</span>
-    <span>PAGE INTROUVABLE</span><span class="accent">—</span><span>PAGE INTROUVABLE</span><span class="accent">—</span>
-  </div>
-</div>
-
 <script>
-  // VORTEX RINGS — staggered tunnel-falling effect
+  // SPIRAL CANVAS — true logarithmic swirl, black/charcoal bands, drawn once then rotated via CSS
   (function() {
-    var container = document.getElementById('vortexRings');
-    var count = 9;
-    for (var i = 0; i < count; i++) {
-      var ring = document.createElement('div');
-      ring.className = 'ring';
-      ring.style.animationDelay = (i * (2.6 / count)) + 's';
-      container.appendChild(ring);
+    var size = 760;
+    var canvas = document.getElementById('spiralCanvas');
+    canvas.width = size; canvas.height = size;
+    var ctx = canvas.getContext('2d');
+    var cx = size / 2, cy = size / 2;
+    var maxR = Math.sqrt(2) * size / 2;
+    var arms = 10;
+    var armAngle = (Math.PI * 2) / arms;
+    var twistTurns = 3.2;
+    var img = ctx.createImageData(size, size);
+    var data = img.data;
+    var black = [10, 10, 10], gray = [85, 85, 85];
+    for (var y = 0; y < size; y++) {
+      for (var x = 0; x < size; x++) {
+        var dx = x - cx, dy = y - cy;
+        var r = Math.sqrt(dx * dx + dy * dy);
+        var theta = Math.atan2(dy, dx);
+        var twisted = theta + twistTurns * (r / maxR) * Math.PI * 2;
+        var a = twisted % (Math.PI * 2);
+        if (a < 0) a += Math.PI * 2;
+        var band = Math.floor(a / armAngle);
+        var c = (band % 2 === 0) ? black : gray;
+        var idx = (y * size + x) * 4;
+        data[idx] = c[0]; data[idx + 1] = c[1]; data[idx + 2] = c[2]; data[idx + 3] = 255;
+      }
     }
+    ctx.putImageData(img, 0, 0);
   })();
 
-  // FLICKERING 404 FIELD — scattered, randomized blink
+  // CURSOR 404 TRAIL — laggy follower that drops fading "404"s as it moves
   (function() {
-    var field = document.getElementById('glitchField');
-    var count = 26;
-    for (var i = 0; i < count; i++) {
-      var el = document.createElement('span');
-      el.className = 'g404';
-      el.textContent = '404';
-      var size = (0.7 + Math.random() * 2.6).toFixed(2);
-      var top = (Math.random() * 96).toFixed(1);
-      var left = (Math.random() * 92).toFixed(1);
-      var rot = (Math.random() * 30 - 15).toFixed(1);
-      var dur = (2.2 + Math.random() * 3.5).toFixed(2);
-      var delay = (Math.random() * 4).toFixed(2);
-      var isWhite = Math.random() > 0.6;
-      el.style.fontSize = size + 'rem';
-      el.style.top = top + '%';
-      el.style.left = left + '%';
-      el.style.transform = 'rotate(' + rot + 'deg)';
-      el.style.animationDuration = dur + 's';
-      el.style.animationDelay = delay + 's';
-      if (isWhite) {
-        el.style.color = 'var(--white)';
-        el.style.textShadow = '0 0 14px rgba(245,242,237,0.5)';
-      }
-      field.appendChild(el);
+    if (!window.matchMedia('(min-width: 769px)').matches) return;
+    var field = document.getElementById('trailField');
+    var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    var fx = mx, fy = my;
+    document.addEventListener('mousemove', function(e) { mx = e.clientX; my = e.clientY; });
+
+    function follow() {
+      fx += (mx - fx) * 0.09;
+      fy += (my - fy) * 0.09;
+      requestAnimationFrame(follow);
     }
+    follow();
+
+    var lastSpawn = 0;
+    var minDist = 26;
+    var lastX = fx, lastY = fy;
+    function spawnLoop() {
+      var dist = Math.hypot(fx - lastX, fy - lastY);
+      var now = Date.now();
+      if (dist > minDist || now - lastSpawn > 220) {
+        lastX = fx; lastY = fy; lastSpawn = now;
+        var el = document.createElement('span');
+        el.className = 'trail404';
+        el.textContent = '404';
+        var size = (1 + Math.random() * 1.4).toFixed(2);
+        var rot = (Math.random() * 20 - 10).toFixed(1);
+        var isWhite = Math.random() > 0.45;
+        el.style.fontSize = size + 'rem';
+        el.style.left = fx + 'px';
+        el.style.top = fy + 'px';
+        el.style.setProperty('--rot', rot + 'deg');
+        el.style.color = isWhite ? 'var(--white)' : 'var(--red)';
+        field.appendChild(el);
+        setTimeout(function() { el.remove(); }, 1050);
+      }
+      requestAnimationFrame(spawnLoop);
+    }
+    spawnLoop();
   })();
 
   setTimeout(function() { document.getElementById('errSub').classList.add('visible'); }, 500);
-  setTimeout(function() { document.getElementById('errDesc').classList.add('visible'); }, 650);
-  setTimeout(function() { document.getElementById('errBack').classList.add('visible'); }, 800);
+  setTimeout(function() { document.getElementById('errBack').classList.add('visible'); }, 700);
 </script>
 
 </body>
