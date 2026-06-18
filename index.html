@@ -701,6 +701,7 @@
 
     // Step 4: hide intro
     setTimeout(function() {
+      window.scrollTo(0, 0);
       intro.classList.add('hide');
       setTimeout(function() { intro.style.display = 'none'; }, 600);
     }, 2400);
