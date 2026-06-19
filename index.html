@@ -470,16 +470,19 @@
     .about-aside { margin-top: 1.5rem; }
     .disc-section { padding: 4rem 1.5rem 2rem; }
     .disc-head { margin-bottom: 2.5rem; }
-    .disc-stack { padding-bottom: 0; }
-    .disc-card { position: static; width: 100%; margin-left: 0; margin-top: 1.5rem; transform: none; }
-    .disc-card:hover { transform: none; }
     .disc-inner { min-height: 0; padding: 2.5rem 1.5rem 2.75rem; }
     .disc-ghost { font-size: clamp(6rem, 30vw, 9rem); }
     .about-sticky { position: static; top: auto; }
     .about-disc-layout .about-left { order: 2; padding-top: 4rem; }
     .about-disc-layout .about-right { order: 1; }
-    .about-disc-layout .disc-card { width: 100%; margin-left: 0; }
     .about-disc-layout .disc-inner { min-height: 0; }
+
+    /* Lighten heavy display-font outline strokes: at mobile font sizes a
+       desktop-calibrated stroke width reads as bold/cramped, not thin display type */
+    .hero-name { -webkit-text-stroke-width: 2.5px; letter-spacing: -0.02em; }
+    .section-title { -webkit-text-stroke-width: 1px; }
+    .cs-title { -webkit-text-stroke-width: 1.5px; }
+    .contact-title { -webkit-text-stroke-width: 1.5px; }
 
     /* Case study pages: reduce side padding & uncramp dense image grids */
     .cs-hero { padding: 4rem 1.5rem 2.5rem; }
