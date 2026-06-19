@@ -258,6 +258,26 @@
   }
   .project-cta:hover .project-cta-arrow { background: var(--red); color: var(--white); border-color: var(--red); transform: translateX(0.3rem); }
 
+  .game-card { cursor: default; }
+  .game-wrap {
+    width: 100%; aspect-ratio: 1/1;
+    background: var(--charcoal); margin-bottom: 2rem;
+    overflow: hidden; position: relative;
+  }
+  .game-wrap canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+  .game-score {
+    position: absolute; top: 0.9rem; right: 1rem;
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--white) 55%, transparent);
+  }
+  .game-msg {
+    position: absolute; inset: 0; display: flex; flex-direction: column; gap: 0.5rem;
+    align-items: center; justify-content: center; text-align: center;
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--white); background: rgba(10,10,10,0.55); pointer-events: none;
+  }
+  .game-msg span { font-size: 0.6rem; letter-spacing: 0.02em; text-transform: none; color: var(--muted); }
+
   .about-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(245,242,237,0.06); }
   .about-left { padding: 6rem 3rem; border-right: 1px solid rgba(245,242,237,0.06); }
   .about-right { padding: 6rem 3rem; }
@@ -441,6 +461,7 @@
   .fade-in.visible { opacity: 1; transform: none; }
 
   @media (max-width: 768px) {
+    #gameCard { display: none; }
     nav { padding: 1.5rem; grid-template-columns: auto 1fr auto; }
     #theme-wrapper { padding: 0.4rem 0.7rem; gap: 0.4rem; }
     #theme-wrapper span:first-child { display: none; }
@@ -769,12 +790,17 @@
         <div class="project-meta"><span class="project-year">2026</span><div class="project-arrow">→</div></div>
       </div>
 
-      <a href="#contact" class="project-cta fade-in" style="transition-delay:0.1s">
-        <span class="project-cta-ghost">06</span>
-        <p class="project-cta-label">Et la suite ?</p>
-        <h3 class="project-cta-title">Envie de<br>collaborer ?</h3>
-        <div class="project-cta-arrow">↓</div>
-      </a>
+      <div class="project-cta game-card fade-in" id="gameCard" style="transition-delay:0.1s">
+        <p class="project-index">06</p>
+        <div class="game-wrap" id="gameWrap">
+          <canvas id="dinoCanvas"></canvas>
+          <div class="game-score" id="gameScore">00000</div>
+          <div class="game-msg" id="gameMsg">Cliquez pour jouer<br><span>Espace ou clic pour sauter</span></div>
+        </div>
+        <p class="project-category">Mini-jeu</p>
+        <h3 class="project-title">DOXAL Run</h3>
+        <p class="project-desc">Un petit jeu caché dans un coin du site, pour les fois où la connexion (ou la patience) lâche.</p>
+      </div>
     </div>
   </section>
 
@@ -1500,6 +1526,132 @@ function cycleTheme() {
   <span id="lightbox-close">Click to close</span>
   <img id="lightbox-img" src="" alt=""/>
 </div>
+
+<script>
+(function() {
+  var canvas = document.getElementById('dinoCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var wrap = document.getElementById('gameWrap');
+  var msg = document.getElementById('gameMsg');
+  var scoreEl = document.getElementById('gameScore');
+
+  var W, H, groundY;
+  function resize() {
+    var rect = wrap.getBoundingClientRect();
+    W = canvas.width = Math.round(rect.width);
+    H = canvas.height = Math.round(rect.height);
+    groundY = H - 28;
+  }
+
+  var state = 'idle'; // idle | running | over
+  var player, obstacles, speed, score, lastSpawn, frame;
+
+  function reset() {
+    player = { x: 26, y: groundY - 26, w: 20, h: 26, vy: 0, jumping: false };
+    obstacles = [];
+    speed = 4.5;
+    score = 0;
+    lastSpawn = 0;
+    frame = 0;
+    scoreEl.textContent = '00000';
+  }
+
+  function colors() {
+    var cs = getComputedStyle(document.documentElement);
+    return {
+      red: (cs.getPropertyValue('--red') || '#e01a1a').trim(),
+      white: (cs.getPropertyValue('--white') || '#f5f2ed').trim()
+    };
+  }
+
+  function spawnObstacle() {
+    var h = 16 + Math.random() * 24;
+    obstacles.push({ x: W + 10, y: groundY - h, w: 10 + Math.random() * 12, h: h });
+  }
+
+  function draw() {
+    var c = colors();
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(245,242,237,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY + 0.5);
+    ctx.lineTo(W, groundY + 0.5);
+    ctx.stroke();
+    ctx.fillStyle = c.red;
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle = 'rgba(245,242,237,0.7)';
+    obstacles.forEach(function(o) { ctx.fillRect(o.x, o.y, o.w, o.h); });
+  }
+
+  function loop() {
+    if (state !== 'running') return;
+    frame++;
+    player.vy += 0.55;
+    player.y += player.vy;
+    if (player.y > groundY - player.h) {
+      player.y = groundY - player.h;
+      player.vy = 0;
+      player.jumping = false;
+    }
+
+    if (frame - lastSpawn > Math.max(34, 70 - speed * 3)) {
+      spawnObstacle();
+      lastSpawn = frame;
+    }
+
+    for (var i = obstacles.length - 1; i >= 0; i--) {
+      obstacles[i].x -= speed;
+      if (obstacles[i].x + obstacles[i].w < 0) obstacles.splice(i, 1);
+    }
+
+    for (var j = 0; j < obstacles.length; j++) {
+      var o = obstacles[j];
+      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
+        state = 'over';
+        msg.innerHTML = 'Perdu — score ' + Math.floor(score / 5) + '<br><span>Cliquez pour réessayer</span>';
+        msg.style.display = 'flex';
+        draw();
+        return;
+      }
+    }
+
+    score++;
+    speed += 0.0025;
+    scoreEl.textContent = String(Math.floor(score / 5)).padStart(5, '0');
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function jump() {
+    if (state === 'idle' || state === 'over') {
+      reset();
+      state = 'running';
+      msg.style.display = 'none';
+      requestAnimationFrame(loop);
+      return;
+    }
+    if (state === 'running' && !player.jumping) {
+      player.vy = -9.5;
+      player.jumping = true;
+    }
+  }
+
+  resize();
+  reset();
+  draw();
+  window.addEventListener('resize', resize);
+  wrap.addEventListener('click', jump);
+  window.addEventListener('keydown', function(e) {
+    if (e.code !== 'Space') return;
+    var r = wrap.getBoundingClientRect();
+    if (r.bottom > 0 && r.top < window.innerHeight) {
+      e.preventDefault();
+      jump();
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
