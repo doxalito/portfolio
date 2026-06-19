@@ -293,6 +293,23 @@
   }
   .disc-card:hover .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
 
+  /* DISCIPLINES EMBEDDED AS ABOUT LEFT COLUMN */
+  .about-disc-layout { align-items: stretch; }
+  .about-disc-layout .about-left { padding-top: 5rem; }
+  .about-sticky { position: sticky; top: 6rem; }
+  .about-disc-layout .disc-stack { padding-bottom: 10vh; }
+  .about-disc-layout .disc-card {
+    width: 88%; margin-left: calc(var(--i) * 3.5%);
+    --peek: 2.6rem; box-shadow: 0 -6px 36px rgba(0,0,0,0.5);
+  }
+  .about-disc-layout .disc-card:not(:first-child) { margin-top: 2rem; }
+  .about-disc-layout .disc-bar { padding: 0.85rem 1.4rem; }
+  .about-disc-layout .disc-inner { min-height: 30vh; padding: 1.8rem 1.4rem 2.1rem; }
+  .about-disc-layout .disc-title { font-size: clamp(1.25rem, 2.2vw, 1.9rem); margin-bottom: 1rem; }
+  .about-disc-layout .disc-desc { font-size: 0.7rem; }
+  .about-disc-layout .disc-list { margin-top: 1.5rem; }
+  .about-disc-layout .disc-ghost { font-size: 7.5rem; right: 0.6rem; bottom: 0; }
+
   .contact-section { padding: 8rem 3rem; border-top: 1px solid rgba(245,242,237,0.06); display: flex; flex-direction: column; align-items: center; text-align: center; }
   .contact-overline { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--red); margin-bottom: 2rem; }
   .contact-title { font-family: var(--display); font-weight: 900; font-size: clamp(3rem, 8vw, 7rem); letter-spacing: -0.04em; line-height: 0.9; margin-bottom: 3rem; -webkit-text-stroke: 3px var(--white); paint-order: stroke fill; }
@@ -395,6 +412,11 @@
     .disc-card { position: static; width: 100%; margin-left: 0; margin-top: 1.5rem; }
     .disc-inner { min-height: 0; padding: 2.5rem 1.5rem 2.75rem; }
     .disc-ghost { font-size: clamp(6rem, 30vw, 9rem); }
+    .about-sticky { position: static; top: auto; }
+    .about-disc-layout .about-left { order: 2; padding-top: 4rem; }
+    .about-disc-layout .about-right { order: 1; }
+    .about-disc-layout .disc-card { width: 100%; margin-left: 0; }
+    .about-disc-layout .disc-inner { min-height: 0; }
   }
 
   /* INTRO */
@@ -665,27 +687,10 @@
     </div>
   </section>
 
-  <section id="about" class="about-section">
-    <div class="about-left">
-      <p class="section-label">À propos</p>
-      <p class="about-aside">DOXAL<span>.</span><br>Oscar Penverne<br>Bordeaux — LISAA</p>
-    </div>
-    <div class="about-right">
-      <p class="about-statement fade-in">"EVERYTHING YOU THOUGHT WOULD HAPPEN, WILL NEVER HAPPEN"</p>
-      <p class="about-body">
-        Je suis Oscar Penverne, je travaille sous le nom <em>DOXAL</em>, designer graphique et directeur artistique basé à Bordeaux, étudiant à la LISAA. Mon travail se situe à l'intersection du <em>design graphique, de la culture musicale et de l'expérimentation visuelle</em>, façonné par une identité construite entre la France, la Chine et le Mexique.
-      </p>
-    </div>
-  </section>
-
-  <section id="disciplines" class="disc-section">
-    <div class="disc-head fade-in">
-      <p class="section-label">Disciplines</p>
-      <h2 class="disc-heading">Quatre<br><em>terrains de jeu</em></h2>
-      <p class="disc-intro">Du concept à l'objet fini — là où je passe le plus de temps. Faites défiler, chaque carte se pose sur la précédente.</p>
-    </div>
-
-    <div class="disc-stack">
+  <section id="about" class="about-section about-disc-layout">
+    <div class="about-left" id="disciplines">
+      <p class="section-label" style="margin-bottom:2rem">Disciplines</p>
+      <div class="disc-stack">
       <article class="disc-card" style="--i:0">
         <div class="disc-bar">
           <div class="disc-bar-left"><span class="disc-num">01</span><span class="disc-tag">Design</span></div>
@@ -753,6 +758,17 @@
           </ul>
         </div>
       </article>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-sticky">
+        <p class="section-label">À propos</p>
+        <p class="about-statement fade-in">"EVERYTHING YOU THOUGHT WOULD HAPPEN, WILL NEVER HAPPEN"</p>
+        <p class="about-body">
+          Je suis Oscar Penverne, je travaille sous le nom <em>DOXAL</em>, designer graphique et directeur artistique basé à Bordeaux, étudiant à la LISAA. Mon travail se situe à l'intersection du <em>design graphique, de la culture musicale et de l'expérimentation visuelle</em>, façonné par une identité construite entre la France, la Chine et le Mexique.
+        </p>
+        <p class="about-aside">DOXAL<span>.</span><br>Oscar Penverne<br>Bordeaux — LISAA</p>
+      </div>
     </div>
   </section>
 
