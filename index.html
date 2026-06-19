@@ -228,6 +228,70 @@
   .skill-item { padding: 1.5rem; border: 1px solid rgba(245,242,237,0.06); margin: -1px 0 0 -1px; }
   .skill-label { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--red); margin-bottom: 0.5rem; }
   .skill-list { font-size: 0.65rem; line-height: 1.7; color: rgba(245,242,237,0.5); }
+  .about-aside { margin-top: 2.5rem; font-family: var(--mono); font-size: 0.65rem; line-height: 2.1; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--white) 45%, transparent); }
+  .about-aside span { color: var(--red); }
+
+  /* ===================== DISCIPLINES (STICKY STACK) ===================== */
+  .disc-section { padding: 7rem 3rem 4rem; border-top: 1px solid color-mix(in srgb, var(--white) 6%, transparent); scroll-margin-top: 2rem; }
+  .disc-head { margin-bottom: 4.5rem; }
+  .disc-heading {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(2rem, 5.5vw, 4.5rem); line-height: 0.95;
+    letter-spacing: -0.03em; margin: 1.4rem 0 1.6rem;
+    -webkit-text-stroke: 2px var(--white); paint-order: stroke fill;
+  }
+  .disc-heading em { font-style: normal; font-weight: 400; color: var(--cream); -webkit-text-stroke: 0; }
+  .disc-intro { font-size: 0.75rem; line-height: 1.85; color: color-mix(in srgb, var(--white) 50%, transparent); max-width: 42ch; }
+
+  .disc-stack { position: relative; padding-bottom: 28vh; }
+  .disc-card {
+    --peek: 3.4rem;
+    position: sticky;
+    top: calc(50px + var(--i) * var(--peek));
+    width: 72%;
+    margin-left: calc(var(--i) * 6.5%);
+    margin-top: 2.5rem;
+    background: var(--off-black);
+    border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    border-top: 2px solid var(--red);
+    box-shadow: 0 -8px 50px rgba(0,0,0,0.55);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .disc-card:first-child { margin-top: 0; }
+  .disc-card:hover { border-color: color-mix(in srgb, var(--white) 28%, transparent); box-shadow: 0 -8px 64px rgba(0,0,0,0.72); }
+  .disc-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.05rem 1.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--white) 8%, transparent);
+    background: color-mix(in srgb, var(--charcoal) 55%, transparent);
+  }
+  .disc-bar-left { display: flex; align-items: baseline; gap: 1.1rem; }
+  .disc-num { font-family: var(--mono); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; color: var(--red); }
+  .disc-tag { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--white); }
+  .disc-count { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: color-mix(in srgb, var(--white) 35%, transparent); }
+  .disc-inner { position: relative; padding: 3rem 1.75rem 3.25rem; min-height: 46vh; display: flex; flex-direction: column; }
+  .disc-ghost {
+    position: absolute; right: 1.2rem; bottom: 0.2rem;
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(7rem, 18vw, 14rem); line-height: 0.78;
+    color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--white) 7%, transparent);
+    pointer-events: none; user-select: none;
+  }
+  .disc-title {
+    position: relative; font-family: var(--display); font-weight: 700;
+    font-size: clamp(1.6rem, 3.5vw, 3rem); line-height: 1; letter-spacing: -0.02em;
+    color: var(--white); margin-bottom: 1.4rem; max-width: 18ch;
+  }
+  .disc-desc { position: relative; font-size: 0.74rem; line-height: 1.85; color: color-mix(in srgb, var(--white) 55%, transparent); max-width: 40ch; margin-bottom: auto; }
+  .disc-list { position: relative; display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.5rem; }
+  .disc-list li {
+    list-style: none; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--white) 65%, transparent);
+    border: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    padding: 0.5rem 0.85rem; transition: color 0.2s, border-color 0.2s;
+  }
+  .disc-card:hover .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
 
   .contact-section { padding: 8rem 3rem; border-top: 1px solid rgba(245,242,237,0.06); display: flex; flex-direction: column; align-items: center; text-align: center; }
   .contact-overline { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--red); margin-bottom: 2rem; }
@@ -324,6 +388,13 @@
     .img-grid-2, .img-grid-3 { grid-template-columns: 1fr; }
     .cs-next { flex-direction: column; gap: 2rem; padding: 3rem 1.5rem; }
     footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .about-aside { margin-top: 1.5rem; }
+    .disc-section { padding: 4rem 1.5rem 2rem; }
+    .disc-head { margin-bottom: 2.5rem; }
+    .disc-stack { padding-bottom: 0; }
+    .disc-card { position: static; width: 100%; margin-left: 0; margin-top: 1.5rem; }
+    .disc-inner { min-height: 0; padding: 2.5rem 1.5rem 2.75rem; }
+    .disc-ghost { font-size: clamp(6rem, 30vw, 9rem); }
   }
 
   /* INTRO */
@@ -489,6 +560,7 @@
     <ul class="nav-links" style="justify-self:end;">
       <li><a href="#work">Projets</a></li>
       <li><a href="#about">À propos</a></li>
+      <li><a href="#disciplines">Disciplines</a></li>
       <li><a href="#contact">Contact</a></li>
       <li><a href="404.html">404</a></li>
     </ul>
@@ -596,19 +668,91 @@
   <section id="about" class="about-section">
     <div class="about-left">
       <p class="section-label">À propos</p>
+      <p class="about-aside">DOXAL<span>.</span><br>Oscar Penverne<br>Bordeaux — LISAA</p>
+    </div>
+    <div class="about-right">
       <p class="about-statement fade-in">"EVERYTHING YOU THOUGHT WOULD HAPPEN, WILL NEVER HAPPEN"</p>
       <p class="about-body">
         Je suis Oscar Penverne, je travaille sous le nom <em>DOXAL</em>, designer graphique et directeur artistique basé à Bordeaux, étudiant à la LISAA. Mon travail se situe à l'intersection du <em>design graphique, de la culture musicale et de l'expérimentation visuelle</em>, façonné par une identité construite entre la France, la Chine et le Mexique.
       </p>
     </div>
-    <div class="about-right">
-      <p class="section-label" style="margin-bottom:2rem">Disciplines</p>
-      <div class="skills-grid fade-in">
-        <div class="skill-item"><p class="skill-label">Design</p><p class="skill-list">Identité Visuelle<br>Typographie<br>Éditorial</p></div>
-        <div class="skill-item"><p class="skill-label">Direction</p><p class="skill-list">Direction Artistique<br>Développement Concept<br>Branding</p></div>
-        <div class="skill-item"><p class="skill-label">Image</p><p class="skill-list">Photographie<br>Traitement d'Image<br>Recherche Visuelle</p></div>
-        <div class="skill-item"><p class="skill-label">Outils</p><p class="skill-list">Illustrator<br>Photoshop<br>InDesign</p></div>
-      </div>
+  </section>
+
+  <section id="disciplines" class="disc-section">
+    <div class="disc-head fade-in">
+      <p class="section-label">Disciplines</p>
+      <h2 class="disc-heading">Quatre<br><em>terrains de jeu</em></h2>
+      <p class="disc-intro">Du concept à l'objet fini — là où je passe le plus de temps. Faites défiler, chaque carte se pose sur la précédente.</p>
+    </div>
+
+    <div class="disc-stack">
+      <article class="disc-card" style="--i:0">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">01</span><span class="disc-tag">Design</span></div>
+          <span class="disc-count">01 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">01</span>
+          <h3 class="disc-title">Identité<br>& Typographie</h3>
+          <p class="disc-desc">Construire des systèmes visuels cohérents — du logotype à la grille, jusqu'à la mise en page éditoriale.</p>
+          <ul class="disc-list">
+            <li>Identité Visuelle</li>
+            <li>Typographie</li>
+            <li>Éditorial</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:1">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">02</span><span class="disc-tag">Direction</span></div>
+          <span class="disc-count">02 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">02</span>
+          <h3 class="disc-title">Direction<br>Artistique</h3>
+          <p class="disc-desc">Donner une direction à une idée — définir un concept, un ton et un univers de marque qui tiennent dans la durée.</p>
+          <ul class="disc-list">
+            <li>Direction Artistique</li>
+            <li>Développement Concept</li>
+            <li>Branding</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:2">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">03</span><span class="disc-tag">Image</span></div>
+          <span class="disc-count">03 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">03</span>
+          <h3 class="disc-title">Image<br>& Recherche</h3>
+          <p class="disc-desc">Photographier, retoucher et chercher la bonne image — la matière première avant le bon message.</p>
+          <ul class="disc-list">
+            <li>Photographie</li>
+            <li>Traitement d'Image</li>
+            <li>Recherche Visuelle</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:3">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">04</span><span class="disc-tag">Outils</span></div>
+          <span class="disc-count">04 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">04</span>
+          <h3 class="disc-title">L'atelier<br>au quotidien</h3>
+          <p class="disc-desc">La suite Adobe au bout des doigts, du premier croquis vectoriel à l'export final prêt pour l'impression.</p>
+          <ul class="disc-list">
+            <li>Illustrator</li>
+            <li>Photoshop</li>
+            <li>InDesign</li>
+          </ul>
+        </div>
+      </article>
     </div>
   </section>
 
