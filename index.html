@@ -246,20 +246,28 @@
   .disc-stack { position: relative; padding-bottom: 28vh; }
   .disc-card {
     --peek: 3.4rem;
+    --rot: 0deg; --shiftx: 0%; --shifty: 0px; --topjit: 0px;
     position: sticky;
-    top: calc(50px + var(--i) * var(--peek));
+    top: calc(50px + var(--i) * var(--peek) + var(--topjit));
     width: 72%;
-    margin-left: calc(var(--i) * 6.5%);
+    margin-left: var(--shiftx);
     margin-top: 2.5rem;
     background: var(--off-black);
     border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
     border-top: 2px solid var(--red);
     box-shadow: 0 -8px 50px rgba(0,0,0,0.55);
     overflow: hidden;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transform: rotate(var(--rot)) translateY(var(--shifty));
+    transform-origin: top center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .disc-card:first-child { margin-top: 0; }
-  .disc-card:hover { border-color: color-mix(in srgb, var(--white) 28%, transparent); box-shadow: 0 -8px 64px rgba(0,0,0,0.72); }
+  .disc-card:hover {
+    border-color: color-mix(in srgb, var(--white) 28%, transparent);
+    box-shadow: 0 -8px 64px rgba(0,0,0,0.72);
+    transform: rotate(calc(var(--rot) * 0.3)) translateY(var(--shifty)) scale(1.015);
+    z-index: 5;
+  }
   .disc-bar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.05rem 1.75rem;
@@ -299,7 +307,7 @@
   .about-sticky { position: sticky; top: 6rem; }
   .about-disc-layout .disc-stack { padding-bottom: 10vh; }
   .about-disc-layout .disc-card {
-    width: 88%; margin-left: calc(var(--i) * 3.5%);
+    width: 88%;
     --peek: 2.6rem; box-shadow: 0 -6px 36px rgba(0,0,0,0.5);
   }
   .about-disc-layout .disc-card:not(:first-child) { margin-top: 2rem; }
@@ -409,7 +417,8 @@
     .disc-section { padding: 4rem 1.5rem 2rem; }
     .disc-head { margin-bottom: 2.5rem; }
     .disc-stack { padding-bottom: 0; }
-    .disc-card { position: static; width: 100%; margin-left: 0; margin-top: 1.5rem; }
+    .disc-card { position: static; width: 100%; margin-left: 0; margin-top: 1.5rem; transform: none; }
+    .disc-card:hover { transform: none; }
     .disc-inner { min-height: 0; padding: 2.5rem 1.5rem 2.75rem; }
     .disc-ghost { font-size: clamp(6rem, 30vw, 9rem); }
     .about-sticky { position: static; top: auto; }
@@ -691,7 +700,7 @@
     <div class="about-left" id="disciplines">
       <p class="section-label" style="margin-bottom:2rem">Disciplines</p>
       <div class="disc-stack">
-      <article class="disc-card" style="--i:0">
+      <article class="disc-card" style="--i:0; --rot:-2.2deg; --shiftx:1%; --shifty:0px; --topjit:0px;">
         <div class="disc-bar">
           <div class="disc-bar-left"><span class="disc-num">01</span><span class="disc-tag">Design</span></div>
           <span class="disc-count">01 / 04</span>
@@ -708,7 +717,7 @@
         </div>
       </article>
 
-      <article class="disc-card" style="--i:1">
+      <article class="disc-card" style="--i:1; --rot:3.4deg; --shiftx:8%; --shifty:8px; --topjit:12px;">
         <div class="disc-bar">
           <div class="disc-bar-left"><span class="disc-num">02</span><span class="disc-tag">Direction</span></div>
           <span class="disc-count">02 / 04</span>
@@ -725,7 +734,7 @@
         </div>
       </article>
 
-      <article class="disc-card" style="--i:2">
+      <article class="disc-card" style="--i:2; --rot:-3.6deg; --shiftx:2%; --shifty:-6px; --topjit:-10px;">
         <div class="disc-bar">
           <div class="disc-bar-left"><span class="disc-num">03</span><span class="disc-tag">Image</span></div>
           <span class="disc-count">03 / 04</span>
@@ -742,7 +751,7 @@
         </div>
       </article>
 
-      <article class="disc-card" style="--i:3">
+      <article class="disc-card" style="--i:3; --rot:2deg; --shiftx:10%; --shifty:14px; --topjit:16px;">
         <div class="disc-bar">
           <div class="disc-bar-left"><span class="disc-num">04</span><span class="disc-tag">Outils</span></div>
           <span class="disc-count">04 / 04</span>
