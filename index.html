@@ -218,6 +218,38 @@
   }
   .project-item:hover .project-arrow { background: var(--red); color: var(--white); border-color: var(--red); }
 
+  .project-cta {
+    border-bottom: 1px solid rgba(245,242,237,0.06);
+    padding: 3rem; cursor: pointer;
+    display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+    position: relative; overflow: hidden; text-decoration: none;
+    transition: background 0.3s ease;
+  }
+  .project-cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--charcoal); transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1); z-index: 0;
+  }
+  .project-cta:hover::before { transform: scaleY(1); }
+  .project-cta > * { position: relative; z-index: 1; }
+  .project-cta-ghost {
+    font-family: var(--display); font-weight: 900; font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: 1; color: rgba(245,242,237,0.06); margin-bottom: 1.5rem;
+    transition: color 0.4s ease;
+  }
+  .project-cta:hover .project-cta-ghost { color: rgba(245,242,237,0.1); }
+  .project-cta-label { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--red); margin-bottom: 0.75rem; }
+  .project-cta-title { font-family: var(--display); font-weight: 700; font-size: clamp(1.2rem, 2.5vw, 2rem); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1.5rem; transition: color 0.2s; }
+  .project-cta:hover .project-cta-title { color: var(--cream); }
+  .project-cta-arrow {
+    width: 2rem; height: 2rem; border: 1px solid rgba(245,242,237,0.12);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: var(--muted);
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.3s ease;
+  }
+  .project-cta:hover .project-cta-arrow { background: var(--red); color: var(--white); border-color: var(--red); transform: translateX(0.3rem); }
+
   .about-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(245,242,237,0.06); }
   .about-left { padding: 6rem 3rem; border-right: 1px solid rgba(245,242,237,0.06); }
   .about-right { padding: 6rem 3rem; }
@@ -693,6 +725,13 @@
         <p class="project-desc">Identité visuelle complète d'une marque de livraison de nourriture pour chiens, système de logo, packaging, merch et univers de marque autour de l'énergie, la vitesse et la culture urbaine.</p>
         <div class="project-meta"><span class="project-year">2026</span><div class="project-arrow">→</div></div>
       </div>
+
+      <a href="#contact" class="project-cta fade-in" style="transition-delay:0.1s">
+        <span class="project-cta-ghost">06</span>
+        <p class="project-cta-label">Et la suite ?</p>
+        <h3 class="project-cta-title">Envie de<br>collaborer ?</h3>
+        <div class="project-cta-arrow">↓</div>
+      </a>
     </div>
   </section>
 
