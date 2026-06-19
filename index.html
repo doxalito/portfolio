@@ -69,6 +69,14 @@
   }
   .nav-logo span { color: var(--red); }
   .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  #navBurger {
+    display: none; flex-direction: column; justify-content: center; gap: 5px;
+    width: 2rem; height: 2rem; background: none; border: none; cursor: pointer; padding: 0;
+  }
+  #navBurger span { display: block; width: 100%; height: 1px; background: var(--white); transition: transform 0.3s ease, opacity 0.3s ease; }
+  #navBurger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  #navBurger.open span:nth-child(2) { opacity: 0; }
+  #navBurger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
   .nav-links a {
     font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em;
     text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s;
@@ -433,7 +441,21 @@
   .fade-in.visible { opacity: 1; transform: none; }
 
   @media (max-width: 768px) {
-    nav { padding: 1.5rem; }
+    nav { padding: 1.5rem; grid-template-columns: auto 1fr auto; }
+    #theme-wrapper { padding: 0.4rem 0.7rem; gap: 0.4rem; }
+    #theme-wrapper span:first-child { display: none; }
+    #navBurger { display: flex; }
+    .nav-links {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 2rem;
+      position: fixed; inset: 0; top: 0;
+      background: var(--black); z-index: 200;
+      padding: 7rem 2rem 3rem; margin: 0;
+      transform: translateY(-100%); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .nav-links a { font-size: 1.1rem; }
     .hero { padding: 0 1.5rem 4rem; }
     .projects { grid-template-columns: 1fr; }
     .project-item:nth-child(even) { border-right: 1px solid rgba(245,242,237,0.06); }
@@ -458,6 +480,19 @@
     .about-disc-layout .about-right { order: 1; }
     .about-disc-layout .disc-card { width: 100%; margin-left: 0; }
     .about-disc-layout .disc-inner { min-height: 0; }
+
+    /* Case study pages: reduce side padding & uncramp dense image grids */
+    .cs-hero { padding: 4rem 1.5rem 2.5rem; }
+    .cs-section-label { padding: 2rem 1.5rem 1.5rem; }
+    .cs-meta { gap: 1.5rem 2rem; }
+    .cs-visuals > div[style*="padding:0 3rem"] { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+    .cs-visuals > div[style*="repeat(4,1fr)"] { grid-template-columns: 1fr 1fr !important; }
+    .cs-visuals > div[style*="1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+    .cs-visuals img[style*="height:38vh"] { height: 24vh !important; }
+    .cs-visuals img[style*="height:60vh"] { height: 32vh !important; }
+    .cs-visuals > div[style*="height:85vh"] { grid-template-columns: 1fr !important; height: auto !important; gap: 1.5rem !important; }
+    .cs-visuals > div[style*="height:85vh"] > * { height: auto !important; }
+    .cs-visuals > div[style*="height:85vh"] img { height: 42vh !important; }
   }
 
   /* INTRO */
@@ -620,13 +655,18 @@
         <span id="theme-pip" style="font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);">Noir / Rouge</span>
       </div>
     </div>
-    <ul class="nav-links" style="justify-self:end;">
-      <li><a href="#work">Projets</a></li>
-      <li><a href="#about">À propos</a></li>
-      <li><a href="#disciplines">Disciplines</a></li>
-      <li><a href="#contact">Contact</a></li>
-      <li><a href="404.html">404</a></li>
-    </ul>
+    <div style="justify-self:end;display:flex;align-items:center;gap:1.5rem;">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#work" onclick="closeNav()">Projets</a></li>
+        <li><a href="#about" onclick="closeNav()">À propos</a></li>
+        <li><a href="#disciplines" onclick="closeNav()">Disciplines</a></li>
+        <li><a href="#contact" onclick="closeNav()">Contact</a></li>
+        <li><a href="404.html">404</a></li>
+      </ul>
+      <button id="navBurger" onclick="toggleNav()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </nav>
 
   <section class="hero">
@@ -1062,6 +1102,16 @@
     entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, {threshold: 0.1});
   document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // MOBILE NAV
+  function toggleNav() {
+    document.getElementById('navLinks').classList.toggle('open');
+    document.getElementById('navBurger').classList.toggle('open');
+  }
+  function closeNav() {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('navBurger').classList.remove('open');
+  }
 </script>
 
 
