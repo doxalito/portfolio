@@ -31,6 +31,13 @@
   body { background: var(--black); color: var(--white); font-family: var(--mono); overflow-x: hidden; }
   ::selection { background: color-mix(in srgb, var(--red) 40%, transparent); }
 
+  /* SCROLLBAR */
+  html { scrollbar-color: var(--red) var(--off-black); scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--off-black); }
+  ::-webkit-scrollbar-thumb { background: var(--red); border: 2px solid var(--off-black); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--white); }
+
   /* PAGE SYSTEM */
   .page { display: none; min-height: 100vh; }
   .page.active { display: block; }
