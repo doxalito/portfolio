@@ -1566,8 +1566,43 @@ function cycleTheme() {
   }
 
   function spawnObstacle() {
-    var h = 16 + Math.random() * 24;
-    obstacles.push({ x: W + 10, y: groundY - h, w: 10 + Math.random() * 12, h: h });
+    var count = Math.random() < 0.25 ? (Math.random() < 0.5 ? 2 : 3) : 1;
+    var stems = [];
+    var totalW = 0;
+    for (var i = 0; i < count; i++) {
+      var bw = 7 + Math.random() * 4;
+      var gap = i === 0 ? 0 : 3 + Math.random() * 2;
+      stems.push({ bw: bw, h: 16 + Math.random() * 22, gap: gap });
+      totalW += bw + gap;
+    }
+    var arms = Math.random() < 0.55;
+    var maxH = Math.max.apply(null, stems.map(function(s) { return s.h; }));
+    obstacles.push({
+      x: W + 10, w: totalW + (arms ? 5 : 0), h: maxH,
+      stems: stems, arms: arms, armSide: Math.random() < 0.5 ? 'l' : 'r'
+    });
+  }
+
+  function drawCactus(o) {
+    var green = '#3f7d44', dark = '#2c5a30';
+    var cx = o.x;
+    o.stems.forEach(function(s) {
+      cx += s.gap;
+      var sy = groundY - s.h;
+      ctx.fillStyle = green;
+      ctx.fillRect(cx, sy, s.bw, s.h);
+      ctx.fillStyle = dark;
+      ctx.fillRect(cx, sy, s.bw, 2);
+      ctx.fillRect(cx, sy + s.h * 0.45, s.bw, 1.5);
+      cx += s.bw;
+    });
+    if (o.arms) {
+      var armW = 5, armH = 4, first = o.stems[0];
+      var armY = groundY - first.h * 0.6;
+      ctx.fillStyle = green;
+      if (o.armSide === 'l') ctx.fillRect(o.x - armW, armY, armW, armH);
+      else ctx.fillRect(o.x + first.gap + first.bw, armY, armW, armH);
+    }
   }
 
   function draw() {
@@ -1580,8 +1615,7 @@ function cycleTheme() {
     ctx.stroke();
     ctx.fillStyle = c.red;
     ctx.fillRect(player.x, player.y, player.w, player.h);
-    ctx.fillStyle = 'rgba(245,242,237,0.7)';
-    obstacles.forEach(function(o) { ctx.fillRect(o.x, o.y, o.w, o.h); });
+    obstacles.forEach(drawCactus);
   }
 
   function loop() {
@@ -1607,7 +1641,8 @@ function cycleTheme() {
 
     for (var j = 0; j < obstacles.length; j++) {
       var o = obstacles[j];
-      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
+      var oy = groundY - o.h;
+      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < oy + o.h && player.y + player.h > oy) {
         state = 'over';
         msg.innerHTML = 'Perdu — score ' + Math.floor(score / 5) + '<br><span>Cliquez pour réessayer</span>';
         msg.style.display = 'flex';
