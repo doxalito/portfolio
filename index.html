@@ -1550,7 +1550,7 @@ function cycleTheme() {
   function reset() {
     player = { x: 26, y: groundY - 26, w: 20, h: 26, vy: 0, jumping: false };
     obstacles = [];
-    speed = 4.5;
+    speed = 6.5;
     score = 0;
     lastSpawn = 0;
     frame = 0;
@@ -1673,7 +1673,7 @@ function cycleTheme() {
     }
 
     score++;
-    speed += 0.0025;
+    speed += 0.004;
     scoreEl.textContent = String(Math.floor(score / 5)).padStart(5, '0');
     draw();
     requestAnimationFrame(loop);
