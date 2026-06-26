@@ -1576,7 +1576,7 @@ function cycleTheme() {
 
   function spawnObstacle() {
     var variant = cactusVariants[Math.floor(Math.random() * cactusVariants.length)];
-    var h = 26 + Math.random() * 22;
+    var h = 40 + Math.random() * 32;
     var ratio = (variant.img.naturalWidth && variant.img.naturalHeight) ? (variant.img.naturalWidth / variant.img.naturalHeight) : 0.33;
     var w = h * ratio;
     obstacles.push({ x: W + 10, w: w, h: h, variant: variant, flip: Math.random() < 0.5 });
@@ -1658,7 +1658,7 @@ function cycleTheme() {
       return;
     }
     if (state === 'running' && !player.jumping) {
-      player.vy = -9.5;
+      player.vy = -13;
       player.jumping = true;
     }
   }
