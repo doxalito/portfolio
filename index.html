@@ -1548,7 +1548,7 @@ function cycleTheme() {
   var player, obstacles, speed, score, lastSpawn, frame;
 
   function reset() {
-    player = { x: 26, y: groundY - 26, w: 20, h: 26, vy: 0, jumping: false };
+    player = { x: 26, y: groundY - 27, w: 28, h: 27, vy: 0, jumping: false };
     obstacles = [];
     speed = 6.5;
     score = 0;
@@ -1564,6 +1564,9 @@ function cycleTheme() {
       white: (cs.getPropertyValue('--white') || '#f5f2ed').trim()
     };
   }
+
+  var tacoImg = new Image();
+  tacoImg.src = 'taco.png';
 
   var cactusVariants = [
     'cactus-1.png', 'cactus-2.png', 'cactus-3.png', 'cactus-4.png', 'cactus-5.png',
@@ -1604,8 +1607,12 @@ function cycleTheme() {
     ctx.moveTo(0, groundY + 0.5);
     ctx.lineTo(W, groundY + 0.5);
     ctx.stroke();
-    ctx.fillStyle = c.red;
-    ctx.fillRect(player.x, player.y, player.w, player.h);
+    if (tacoImg.complete && tacoImg.naturalWidth) {
+      ctx.drawImage(tacoImg, player.x, player.y, player.w, player.h);
+    } else {
+      ctx.fillStyle = c.red;
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+    }
     obstacles.forEach(drawCactus);
   }
 
