@@ -566,6 +566,32 @@
   }
   #intro-bar.full { width: 40vw; }
 
+  /* OUTRO / EXIT-INTENT FAREWELL */
+  #outro {
+    position: fixed; inset: 0; background: var(--black);
+    z-index: 10001; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.5rem; text-align: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  #outro.visible { opacity: 1; pointer-events: auto; }
+  #outro-label {
+    font-family: var(--display); font-weight: 900; font-size: 0.85rem;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+  }
+  #outro-label span { color: var(--red); }
+  #outro-title {
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(2.5rem, 9vw, 7rem); line-height: 0.92;
+    letter-spacing: -0.04em; color: var(--white);
+    -webkit-text-stroke: 2px var(--white); paint-order: stroke fill;
+  }
+  #outro-dot { color: var(--red); -webkit-text-stroke: 0; }
+  #outro-sub {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+  }
+
   /* THEME SWITCHER */
   /* theme classes removed */
 
@@ -607,6 +633,12 @@
   </div>
   <div id=intro-bar></div>
   <div id=intro-sub>Design Graphique & Direction Artistique</div>
+</div>
+
+<div id="outro">
+  <p id="outro-label">DOXAL<span>.</span></p>
+  <h2 id="outro-title">À très<br>bientôt<span id="outro-dot">.</span></h2>
+  <p id="outro-sub">Merci d'être passé. Reviens quand tu veux.</p>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden;">
   <defs>
@@ -1141,6 +1173,18 @@
     document.getElementById('navLinks').classList.remove('open');
     document.getElementById('navBurger').classList.remove('open');
   }
+
+  // EXIT-INTENT FAREWELL
+  (function() {
+    var outro = document.getElementById('outro');
+    if (!outro) return;
+    document.addEventListener('mouseleave', function(e) {
+      if (e.clientY <= 0) outro.classList.add('visible');
+    });
+    document.addEventListener('mouseenter', function() {
+      outro.classList.remove('visible');
+    });
+  })();
 </script>
 
 
