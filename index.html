@@ -517,6 +517,32 @@
     .cs-visuals > div[style*="height:85vh"] { grid-template-columns: 1fr !important; height: auto !important; gap: 1.5rem !important; }
     .cs-visuals > div[style*="height:85vh"] > * { height: auto !important; }
     .cs-visuals > div[style*="height:85vh"] img { height: 42vh !important; }
+
+    /* Tighten oversized desktop spacing on narrow screens */
+    .project-item, .project-cta { padding: 1.75rem; }
+    .project-index { margin-bottom: 1.5rem; }
+    .project-visual { margin-bottom: 1.5rem; }
+    .project-meta { margin-top: 1.5rem; padding-top: 1.25rem; }
+    .project-cta-ghost { margin-bottom: 1rem; }
+    .project-cta-title { margin-bottom: 1rem; }
+
+    /* Touch feedback: hover never fires on tap, so mirror it on :active */
+    .project-item:active::before { transform: scaleY(1); }
+    .project-item:active .project-visual-inner { transform: scale(1.04); }
+    .project-item:active .pv-4 { background: var(--charcoal); }
+    .project-item:active .project-title { color: var(--cream); }
+    .project-item:active .project-arrow { background: var(--red); color: var(--white); border-color: var(--red); }
+    .project-cta:active::before { transform: scaleY(1); }
+    .project-cta:active .project-cta-ghost { color: rgba(245,242,237,0.1); }
+    .project-cta:active .project-cta-title { color: var(--cream); }
+    .project-cta:active .project-cta-arrow { background: var(--red); color: var(--white); border-color: var(--red); transform: translateX(0.3rem); }
+    .disc-card:active {
+      border-color: color-mix(in srgb, var(--white) 28%, transparent);
+      box-shadow: 0 -8px 64px rgba(0,0,0,0.72);
+      transform: rotate(calc(var(--rot) * 0.3)) translateY(var(--shifty)) scale(1.015);
+      z-index: 5;
+    }
+    .disc-card:active .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
   }
 
   /* INTRO */
