@@ -622,10 +622,11 @@
   #sound-prompt {
     position: fixed; inset: 0; z-index: 9500;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(10,10,10,0.72); backdrop-filter: blur(4px);
-    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    background: rgba(10,10,10,0.88);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.4s ease, visibility 0s linear 0.4s;
   }
-  #sound-prompt.visible { opacity: 1; pointer-events: auto; }
+  #sound-prompt.visible { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.4s ease, visibility 0s; }
   #sound-prompt-card {
     background: var(--off-black); border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
     border-top: 2px solid var(--red);
