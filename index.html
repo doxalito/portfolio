@@ -618,6 +618,66 @@
     letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
   }
 
+  /* SOUND PROMPT + TOGGLE */
+  #sound-prompt {
+    position: fixed; inset: 0; z-index: 9500;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,10,0.72); backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+  }
+  #sound-prompt.visible { opacity: 1; pointer-events: auto; }
+  #sound-prompt-card {
+    background: var(--off-black); border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    border-top: 2px solid var(--red);
+    padding: 2.5rem 2.5rem 2rem; max-width: 340px; width: calc(100% - 3rem);
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #sound-prompt-label {
+    font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.35em;
+    text-transform: uppercase; color: var(--red); margin-bottom: 1rem;
+  }
+  #sound-prompt-q {
+    font-family: var(--display); font-weight: 700; font-size: 1.6rem;
+    letter-spacing: -0.02em; color: var(--white); margin-bottom: 2rem;
+  }
+  #sound-prompt-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+  #sound-yes, #sound-no {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; padding: 0.85rem 1rem; cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--white) 18%, transparent);
+    background: none; color: var(--white); transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  #sound-yes { background: var(--red); border-color: var(--red); }
+  #sound-yes:hover { background: var(--white); color: var(--black); border-color: var(--white); }
+  #sound-no:hover { border-color: var(--white); }
+
+  #sound-toggle {
+    position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 90;
+    display: none; align-items: center; gap: 0.6rem;
+    padding: 0.55rem 0.9rem; cursor: pointer;
+    background: var(--charcoal); border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    transition: border-color 0.3s;
+  }
+  #sound-toggle.shown { display: flex; }
+  #sound-toggle:hover { border-color: var(--red); }
+  #sound-toggle-label {
+    font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .sound-bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .sound-bars i {
+    display: block; width: 2px; height: 30%; background: var(--red);
+    transform-origin: bottom;
+  }
+  #sound-toggle.playing .sound-bars i { animation: soundBar 0.9s ease-in-out infinite; }
+  #sound-toggle.playing .sound-bars i:nth-child(2) { animation-delay: 0.2s; }
+  #sound-toggle.playing .sound-bars i:nth-child(3) { animation-delay: 0.4s; }
+  #sound-toggle.playing .sound-bars i:nth-child(4) { animation-delay: 0.15s; }
+  @keyframes soundBar {
+    0%, 100% { height: 25%; }
+    50% { height: 100%; }
+  }
+
   /* THEME SWITCHER */
   /* theme classes removed */
 
@@ -666,6 +726,24 @@
   <h2 id="outro-title">À très<br>bientôt<span id="outro-dot">.</span></h2>
   <p id="outro-sub">Merci d'être passé. Reviens quand tu veux.</p>
 </div>
+
+<audio id="bg-audio" src="ambient-doxal.mp3" loop preload="auto"></audio>
+
+<div id="sound-prompt">
+  <div id="sound-prompt-card">
+    <p id="sound-prompt-label">Ambiance sonore</p>
+    <p id="sound-prompt-q">Activer le son ?</p>
+    <div id="sound-prompt-actions">
+      <button id="sound-yes" onclick="enableSound()">Activer</button>
+      <button id="sound-no" onclick="declineSound()">Continuer en silence</button>
+    </div>
+  </div>
+</div>
+
+<button id="sound-toggle" onclick="toggleSound()" aria-label="Activer ou couper le son">
+  <span class="sound-bars"><i></i><i></i><i></i><i></i></span>
+  <span id="sound-toggle-label">Son</span>
+</button>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden;">
   <defs>
     <filter id="letterWobble" x="-15%" y="-15%" width="130%" height="130%">
@@ -1211,6 +1289,58 @@
       outro.classList.remove('visible');
     });
   })();
+
+  // BACKGROUND SOUND
+  var bgAudio = document.getElementById('bg-audio');
+  var soundToggle = document.getElementById('sound-toggle');
+  var soundPrompt = document.getElementById('sound-prompt');
+
+  function showSoundToggle() {
+    if (soundToggle) soundToggle.classList.add('shown');
+  }
+  function playSound() {
+    if (!bgAudio) return;
+    bgAudio.volume = 0;
+    var p = bgAudio.play();
+    var fade = function() {
+      var target = 0.35;
+      var step = setInterval(function() {
+        if (bgAudio.volume < target - 0.02) {
+          bgAudio.volume = Math.min(target, bgAudio.volume + 0.02);
+        } else {
+          bgAudio.volume = target;
+          clearInterval(step);
+        }
+      }, 60);
+    };
+    if (p && p.then) { p.then(fade).catch(function(){}); } else { fade(); }
+    soundToggle.classList.add('playing');
+    document.getElementById('sound-toggle-label').textContent = 'Son';
+  }
+  function pauseSound() {
+    if (bgAudio) bgAudio.pause();
+    soundToggle.classList.remove('playing');
+    document.getElementById('sound-toggle-label').textContent = 'Muet';
+  }
+  function enableSound() {
+    soundPrompt.classList.remove('visible');
+    showSoundToggle();
+    playSound();
+  }
+  function declineSound() {
+    soundPrompt.classList.remove('visible');
+    showSoundToggle();
+    soundToggle.classList.remove('playing');
+    document.getElementById('sound-toggle-label').textContent = 'Muet';
+  }
+  function toggleSound() {
+    if (bgAudio && (bgAudio.paused)) { playSound(); } else { pauseSound(); }
+  }
+
+  // Show the sound prompt once the intro has cleared
+  setTimeout(function() {
+    if (soundPrompt) soundPrompt.classList.add('visible');
+  }, 3200);
 </script>
 
 
