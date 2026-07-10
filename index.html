@@ -512,21 +512,39 @@
       padding: 5rem 1.5rem 3.5rem;
       overflow: hidden; position: relative;
     }
-    .hero-content { display: flex; flex-direction: column; flex: 1; }
-    /* L'eyebrow pousse tout le reste vers le bas */
-    .hero-eyebrow { margin-bottom: auto; margin-top: 0; }
-    /* DOXAL empilé verticalement — chaque lettre sur sa propre ligne */
-    .hero-name {
-      flex-direction: column; align-items: flex-start;
-      font-size: clamp(4.5rem, 23vw, 10rem);
-      line-height: 0.88; letter-spacing: -0.03em;
-      -webkit-text-stroke-width: 2px;
-      margin-bottom: 0;
+    /* Grid 2 colonnes : DOXAL vertical à gauche | eyebrow+descriptor à droite */
+    .hero-content {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 0 2rem;
+      flex: 1;
     }
-    /* Descripteurs en colonne verticale, sans les puces */
+    /* Eyebrow : coin supérieur droit */
+    .hero-eyebrow { grid-column: 2; grid-row: 1; margin: 0; }
+    /* DOXAL en écriture verticale — D en haut, L en bas, centré dans la hauteur */
+    .hero-name {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      writing-mode: vertical-lr;
+      text-orientation: upright;
+      display: block;
+      font-size: clamp(3rem, 19vw, 8rem);
+      letter-spacing: -0.1em;
+      line-height: 1;
+      -webkit-text-stroke-width: 1px;
+      margin: 0;
+      text-align: center;
+      border-right: 1px solid rgba(245,242,237,0.08);
+      padding-right: 1.5rem;
+    }
+    /* Descriptor : coin inférieur droit, collé au bas du grid */
     .hero-descriptor {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: end;
       flex-direction: column; gap: 0.4rem;
-      margin-top: 2rem; padding-top: 1.5rem;
+      margin-top: 0; padding-top: 1.5rem;
       border-top: 1px solid rgba(245,242,237,0.08);
     }
     .hero-descriptor span { font-size: 0.55rem; letter-spacing: 0.28em; }
@@ -597,17 +615,14 @@
     /* ════════════════════════════════════════
        DISCIPLINES — rotation desktop conservée, contenue
     ════════════════════════════════════════ */
-    /* overflow-x: hidden contient le débord des cartes inclinées */
-    .disc-section { padding: 4rem 1.5rem 2rem; overflow-x: hidden; }
-    .about-disc-layout .about-left { overflow-x: hidden; }
+    /* overflow-x:clip coupe les bords des cartes inclinées SANS créer de scroll container
+       (contrairement à overflow-x:hidden qui casse position:sticky sur iOS Safari) */
+    .disc-section { padding: 4rem 1.5rem 2rem; overflow-x: clip; }
+    .about-disc-layout .about-left { overflow-x: clip; }
+    /* Re-affirmer sticky explicitement pour iOS Safari */
+    .disc-card { position: sticky; width: 88% !important; margin-left: auto !important; margin-right: auto !important; }
     .disc-head { margin-bottom: 2.5rem; }
     .disc-intro { max-width: none; }
-    /* Cartes centrées, plus larges — la rotation vient des variables inline --rot */
-    .disc-card {
-      width: 88% !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-    }
     .disc-inner { min-height: 0; padding: 2rem 1.5rem 2.5rem; }
     .disc-ghost { font-size: clamp(5rem, 27vw, 8rem); }
 
