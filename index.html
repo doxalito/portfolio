@@ -515,10 +515,11 @@
     .hero-content { display: flex; flex-direction: column; flex: 1; }
     /* L'eyebrow pousse tout le reste vers le bas */
     .hero-eyebrow { margin-bottom: auto; margin-top: 0; }
-    /* Nom grand, stroke allégé, légèrement plus serré */
+    /* DOXAL empilé verticalement — chaque lettre sur sa propre ligne */
     .hero-name {
-      font-size: clamp(5rem, 22vw, 18rem);
-      line-height: 0.82; letter-spacing: -0.05em;
+      flex-direction: column; align-items: flex-start;
+      font-size: clamp(4.5rem, 23vw, 10rem);
+      line-height: 0.88; letter-spacing: -0.03em;
       -webkit-text-stroke-width: 2px;
       margin-bottom: 0;
     }
@@ -594,19 +595,19 @@
     .about-disc-layout .disc-inner { min-height: 0; }
 
     /* ════════════════════════════════════════
-       DISCIPLINES — cartes sans rotation, centrées
+       DISCIPLINES — rotation desktop conservée, contenue
     ════════════════════════════════════════ */
-    .disc-section { padding: 4rem 1.5rem 2rem; }
+    /* overflow-x: hidden contient le débord des cartes inclinées */
+    .disc-section { padding: 4rem 1.5rem 2rem; overflow-x: hidden; }
+    .about-disc-layout .about-left { overflow-x: hidden; }
     .disc-head { margin-bottom: 2.5rem; }
     .disc-intro { max-width: none; }
-    /* Supprimer la rotation sur mobile: rotation + pleine largeur = bizarre */
+    /* Cartes centrées, plus larges — la rotation vient des variables inline --rot */
     .disc-card {
-      width: 95% !important;
+      width: 88% !important;
       margin-left: auto !important;
       margin-right: auto !important;
-      transform: none !important;
     }
-    .disc-card:hover { transform: scale(1.012) !important; }
     .disc-inner { min-height: 0; padding: 2rem 1.5rem 2.5rem; }
     .disc-ghost { font-size: clamp(5rem, 27vw, 8rem); }
 
@@ -657,10 +658,20 @@
     .disc-card:active {
       border-color: color-mix(in srgb, var(--white) 28%, transparent);
       box-shadow: 0 -8px 64px rgba(0,0,0,0.72);
-      transform: scale(1.015) !important;
+      transform: rotate(calc(var(--rot) * 0.3)) translateY(var(--shifty)) scale(1.015);
       z-index: 5;
     }
     .disc-card:active .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
+
+    /* ════════════════════════════════════════
+       PERFORMANCE — optimisations critiques mobile
+    ════════════════════════════════════════ */
+    /* Spirales SVG + feTurbulence numOctaves=5 : peintes à chaque repaint, très coûteux */
+    .bg-spirals { display: none; }
+    /* Libérer les layers GPU parasites sur les lettres du hero */
+    .letter { will-change: auto; cursor: auto; }
+    /* Scroll natif iOS/Android (inertie momentum) — smooth CSS bloque le thread */
+    html { scroll-behavior: auto; }
   }
 
   /* INTRO */
@@ -1344,42 +1355,75 @@
     document.body.style.overflow = '';
   }
 
-  // CURSOR
+  // CURSOR — spiral suit la souris (desktop) ou le doigt (mobile)
   const cursor = document.getElementById('cursor');
   let mx=0, my=0, cx=0, cy=0, angle=0;
-  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
-  function animCursor() {
-    cx += (mx-cx)*0.4; cy += (my-cy)*0.4; angle += 2;
-    cursor.style.left = cx+'px'; cursor.style.top = cy+'px';
-    cursor.style.transform = 'translate(-50%,-50%) rotate('+angle+'deg)';
-    requestAnimationFrame(animCursor);
+  const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+  if (!isMobile) {
+    // ── Desktop : curseur suit la souris ──
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+    (function animCursor() {
+      cx += (mx-cx)*0.4; cy += (my-cy)*0.4; angle += 2;
+      cursor.style.left = cx+'px'; cursor.style.top = cy+'px';
+      cursor.style.transform = 'translate(-50%,-50%) rotate('+angle+'deg)';
+      requestAnimationFrame(animCursor);
+    })();
+
+    // Wobble typographique sur les lettres (souris uniquement)
+    const lwTurb = document.getElementById('lw');
+    let lwSeed=0, lwActive=false;
+    (function animLW() {
+      if(lwActive) { lwSeed+=0.4; lwTurb.setAttribute('seed', Math.floor(lwSeed)); }
+      requestAnimationFrame(animLW);
+    })();
+    document.querySelectorAll('.letter').forEach(l => {
+      l.addEventListener('mouseenter', () => lwActive=true);
+      l.addEventListener('mouseleave', () => lwActive=false);
+    });
+
+    // Effet magnétique sur les lettres (souris uniquement)
+    document.querySelectorAll('.letter').forEach(letter => {
+      letter.addEventListener('mousemove', e => {
+        const rect = letter.getBoundingClientRect();
+        const dx = (e.clientX - rect.left - rect.width/2) / rect.width * 18;
+        const dy = (e.clientY - rect.top - rect.height/2) / rect.height * 10;
+        letter.style.transform = `translate(${dx}px, ${dy-10}px) skewX(-6deg)`;
+        letter.style.color = 'transparent';
+        letter.style.webkitTextStroke = '2px #e01a1a';
+      });
+      letter.addEventListener('mouseleave', () => {
+        letter.style.transform = ''; letter.style.color = ''; letter.style.webkitTextStroke = '';
+      });
+    });
+
+  } else {
+    // ── Mobile : spiral suit le doigt, disparaît au touchend ──
+    cursor.style.opacity = '0';
+    cursor.style.transition = 'opacity 0.15s ease';
+    let touching = false;
+    document.addEventListener('touchstart', e => {
+      touching = true;
+      const t = e.touches[0];
+      // Snap immédiat à la position du premier contact
+      mx = t.clientX; my = t.clientY; cx = mx; cy = my;
+      cursor.style.opacity = '1';
+    }, { passive: true });
+    document.addEventListener('touchmove', e => {
+      const t = e.touches[0];
+      mx = t.clientX; my = t.clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', () => {
+      touching = false;
+      cursor.style.opacity = '0';
+    }, { passive: true });
+    (function animCursor() {
+      cx += (mx-cx)*0.3; cy += (my-cy)*0.3; angle += 2;
+      cursor.style.left = cx+'px'; cursor.style.top = cy+'px';
+      cursor.style.transform = 'translate(-50%,-50%) rotate('+angle+'deg)';
+      requestAnimationFrame(animCursor);
+    })();
   }
-  animCursor();
-
-  // LETTER WOBBLE
-  const lwTurb = document.getElementById('lw');
-  let lwSeed=0, lwActive=false;
-  function animLW() { if(lwActive) { lwSeed+=0.4; lwTurb.setAttribute('seed', Math.floor(lwSeed)); } requestAnimationFrame(animLW); }
-  animLW();
-  document.querySelectorAll('.letter').forEach(l => {
-    l.addEventListener('mouseenter', () => lwActive=true);
-    l.addEventListener('mouseleave', () => lwActive=false);
-  });
-
-  // LETTER MAGNETIC
-  document.querySelectorAll('.letter').forEach((letter, i) => {
-    letter.addEventListener('mousemove', e => {
-      const rect = letter.getBoundingClientRect();
-      const dx = (e.clientX - rect.left - rect.width/2) / rect.width * 18;
-      const dy = (e.clientY - rect.top - rect.height/2) / rect.height * 10;
-      letter.style.transform = `translate(${dx}px, ${dy-10}px) skewX(-6deg)`;
-      letter.style.color = 'transparent';
-      letter.style.webkitTextStroke = '2px #e01a1a';
-    });
-    letter.addEventListener('mouseleave', () => {
-      letter.style.transform = ''; letter.style.color = ''; letter.style.webkitTextStroke = '';
-    });
-  });
 
   // FADE IN
   const obs = new IntersectionObserver(entries => {
