@@ -543,6 +543,36 @@
       z-index: 5;
     }
     .disc-card:active .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
+
+    /* ── improved mobile responsive ── */
+
+    /* Fixed logo: align with reduced mobile side padding */
+    a.nav-logo[style] { left: 1.5rem !important; }
+
+    /* Use small viewport height to account for mobile browser chrome */
+    .hero { min-height: 100svh; }
+    /* Hide vertical scroll indicator — takes space on narrow screens */
+    .hero-scroll { display: none; }
+
+    /* Section header: stack vertically, reduce padding */
+    .section-header { flex-direction: column; gap: 0.5rem; padding: 3.5rem 1.5rem 2rem; }
+
+    /* Disc cards: expand to near full-width */
+    .disc-card { width: 95%; }
+    .about-disc-layout .disc-card { width: 95%; }
+    /* Allow disc intro text to fill available width */
+    .disc-intro { max-width: none; }
+
+    /* Contact section: reduce side padding */
+    .contact-section { padding: 5rem 1.5rem; }
+    /* Email CTA: block-level full-width button */
+    .contact-email { display: block; width: 100%; max-width: 28rem; text-align: center; }
+
+    /* Footer links row: center within column-direction footer */
+    .footer-links { justify-content: center; flex-wrap: wrap; }
+
+    /* Case study nav: tighter horizontal padding */
+    .cs-nav { padding: 1rem 1.5rem; }
   }
 
   /* INTRO */
