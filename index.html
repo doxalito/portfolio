@@ -460,6 +460,47 @@
   .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .fade-in.visible { opacity: 1; transform: none; }
 
+  /* ==================== SAMPLER ==================== */
+  .sampler-section { scroll-margin-top: 2rem; }
+  .sampler-wrap { padding: 0 3rem 8rem; }
+  .sampler-unit {
+    max-width: 680px; margin: 0 auto;
+    background: var(--off-black);
+    border: 1px solid color-mix(in srgb, var(--white) 10%, transparent);
+    border-radius: 6px; padding: 2rem;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .sampler-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 1.5rem; padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(245,242,237,0.06);
+  }
+  .sampler-brand { font-family: var(--display); font-weight: 900; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white); }
+  .sampler-model { font-family: var(--mono); font-size: 0.45rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
+  .sampler-display { display: flex; align-items: center; gap: 0.6rem; }
+  .sampler-led { width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--white) 15%, transparent); transition: background 0.05s, box-shadow 0.05s; flex-shrink: 0; }
+  .sampler-led.on { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .sampler-display-text { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); min-width: 9ch; text-align: right; }
+  .sampler-pads { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.55rem; }
+  .sampler-pad {
+    aspect-ratio: 1; display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: flex-end;
+    padding: 0.6rem 0.65rem;
+    background: var(--charcoal);
+    border: 1px solid rgba(245,242,237,0.07);
+    border-bottom: 3px solid rgba(245,242,237,0.14);
+    border-radius: 3px; cursor: pointer;
+    user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    position: relative; overflow: hidden; outline: none;
+    transition: border-color 0.04s;
+  }
+  .sampler-pad::before { content: ''; position: absolute; inset: 0; background: var(--red); opacity: 0; pointer-events: none; transition: opacity 0.04s; }
+  .sampler-pad.active::before { opacity: 0.18; }
+  .sampler-pad.active { border-color: var(--red); border-bottom-color: var(--red); }
+  .sampler-pad-name { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white); position: relative; z-index: 1; line-height: 1.35; }
+  .sampler-pad-key { font-family: var(--mono); font-size: 0.42rem; color: var(--muted); position: relative; z-index: 1; margin-top: 0.15rem; }
+  .sampler-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(245,242,237,0.06); font-family: var(--mono); font-size: 0.42rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,242,237,0.2); }
+
   @media (max-width: 768px) {
 
     /* ════════════════════════════════════════
@@ -629,6 +670,13 @@
     /* ════════════════════════════════════════
        CONTACT — grand, impactant
     ════════════════════════════════════════ */
+    /* SAMPLER */
+    .sampler-wrap { padding: 0 1.5rem 6rem; }
+    .sampler-unit { padding: 1.25rem; }
+    .sampler-pads { gap: 0.4rem; }
+    .sampler-pad { padding: 0.45rem 0.5rem; }
+    .sampler-footer span:last-child { display: none; }
+
     .contact-section { padding: 6rem 1.5rem 4rem; }
     .contact-title { font-size: clamp(3.5rem, 15vw, 7rem); margin-bottom: 2.5rem; }
     .contact-email { display: block; width: 100%; max-width: 28rem; text-align: center; padding: 1.25rem 1.5rem; }
@@ -1166,6 +1214,36 @@
           Je suis Oscar Penverne, je travaille sous le nom <em>DOXAL</em>, designer graphique et directeur artistique basé à Bordeaux, étudiant à la LISAA. Mon travail se situe à l'intersection du <em>design graphique, de la culture musicale et de l'expérimentation visuelle</em>, façonné par une identité construite entre la France, la Chine et le Mexique.
         </p>
         <p class="about-aside">DOXAL<span>.</span><br>Oscar Penverne<br>Bordeaux — LISAA</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAMPLER -->
+  <section class="sampler-section" id="sampler">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Audio</span>
+        <h2 class="section-title fade-in">Sampler</h2>
+      </div>
+      <span class="section-count">SMP</span>
+    </div>
+    <div class="sampler-wrap">
+      <div class="sampler-unit">
+        <div class="sampler-top">
+          <div>
+            <div class="sampler-brand">DOXAL</div>
+            <div class="sampler-model">Audio Synthesis Engine / Web API</div>
+          </div>
+          <div class="sampler-display">
+            <div class="sampler-led" id="samplerLed"></div>
+            <span class="sampler-display-text" id="samplerDisplay">──────</span>
+          </div>
+        </div>
+        <div class="sampler-pads" id="samplerPads"></div>
+        <div class="sampler-footer">
+          <span>Clavier : Q W E R / A S D F / Z X C V / 1 2 3 4</span>
+          <span>MK — I</span>
+        </div>
       </div>
     </div>
   </section>
@@ -2062,6 +2140,211 @@ function cycleTheme() {
     }
   });
 })();
+
+  // SAMPLER — KORG-inspired, Web Audio API synthesis
+  (function() {
+    var sCtx = null;
+    function ac() {
+      if (!sCtx) sCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (sCtx.state === 'suspended') sCtx.resume();
+      return sCtx;
+    }
+    function mkNoise(dur) {
+      var c=ac(), n=Math.ceil(c.sampleRate*dur), b=c.createBuffer(1,n,c.sampleRate), d=b.getChannelData(0);
+      for (var i=0;i<n;i++) d[i]=Math.random()*2-1;
+      return b;
+    }
+    var S = {
+      kick: function() {
+        var c=ac(),o=c.createOscillator(),g=c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.frequency.setValueAtTime(160,c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(0.01,c.currentTime+0.5);
+        g.gain.setValueAtTime(1.5,c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5);
+        o.start(); o.stop(c.currentTime+0.5);
+      },
+      snare: function() {
+        var c=ac(),dur=0.22,src=c.createBufferSource(); src.buffer=mkNoise(dur);
+        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2200; f.Q.value=0.7;
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.9,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+        src.start(); src.stop(c.currentTime+dur);
+        var o=c.createOscillator(),og=c.createGain(); o.frequency.value=200;
+        o.connect(og); og.connect(c.destination);
+        og.gain.setValueAtTime(0.4,c.currentTime); og.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.06);
+        o.start(); o.stop(c.currentTime+0.07);
+      },
+      clap: function() {
+        var c=ac();
+        [0,0.012,0.025,0.038].forEach(function(t){
+          var d=t<0.038?0.02:0.12,src=c.createBufferSource(); src.buffer=mkNoise(d+0.05);
+          var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1600; f.Q.value=0.9;
+          var g=c.createGain();
+          src.connect(f); f.connect(g); g.connect(c.destination);
+          g.gain.setValueAtTime(0.7,c.currentTime+t); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+t+d);
+          src.start(c.currentTime+t); src.stop(c.currentTime+t+d+0.01);
+        });
+      },
+      hihat: function() {
+        var c=ac(),dur=0.06,src=c.createBufferSource(); src.buffer=mkNoise(dur);
+        var f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.35,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+        src.start(); src.stop(c.currentTime+dur);
+      },
+      openhat: function() {
+        var c=ac(),dur=0.45,src=c.createBufferSource(); src.buffer=mkNoise(dur);
+        var f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000;
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.28,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+        src.start(); src.stop(c.currentTime+dur);
+      },
+      ride: function() {
+        var c=ac(),dur=0.7,src=c.createBufferSource(); src.buffer=mkNoise(dur);
+        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=5500; f.Q.value=0.5;
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.18,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+        src.start(); src.stop(c.currentTime+dur);
+      },
+      tom: function() {
+        var c=ac(),o=c.createOscillator(),g=c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.frequency.setValueAtTime(130,c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(55,c.currentTime+0.3);
+        g.gain.setValueAtTime(1.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.3);
+        o.start(); o.stop(c.currentTime+0.35);
+      },
+      crash: function() {
+        var c=ac(),dur=1.5,src=c.createBufferSource(); src.buffer=mkNoise(dur);
+        var f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=4500;
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.22,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+        src.start(); src.stop(c.currentTime+dur);
+      },
+      sub: function() {
+        var c=ac(),o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.value=55;
+        o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0,c.currentTime);
+        g.gain.linearRampToValueAtTime(1.5,c.currentTime+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.2);
+        o.start(); o.stop(c.currentTime+1.25);
+      },
+      bass: function() {
+        var c=ac(),o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();
+        o.type='sawtooth'; o.frequency.value=110;
+        f.type='lowpass'; f.frequency.value=900; f.Q.value=2;
+        o.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.45);
+        o.start(); o.stop(c.currentTime+0.5);
+      },
+      pluck: function() {
+        var c=ac(),o=c.createOscillator(),g=c.createGain();
+        o.type='triangle'; o.frequency.value=147;
+        o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(1.2,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.38);
+        o.start(); o.stop(c.currentTime+0.4);
+      },
+      acid: function() {
+        var c=ac(),o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();
+        o.type='sawtooth'; o.frequency.value=110;
+        f.type='lowpass'; f.Q.value=14;
+        f.frequency.setValueAtTime(120,c.currentTime);
+        f.frequency.exponentialRampToValueAtTime(3500,c.currentTime+0.15);
+        f.frequency.exponentialRampToValueAtTime(120,c.currentTime+0.5);
+        o.connect(f); f.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.9,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5);
+        o.start(); o.stop(c.currentTime+0.55);
+      },
+      chord: function() {
+        var c=ac();
+        [130.81,155.56,196.00].forEach(function(fr){
+          var o=c.createOscillator(),g=c.createGain();
+          o.type='sine'; o.frequency.value=fr;
+          o.connect(g); g.connect(c.destination);
+          g.gain.setValueAtTime(0,c.currentTime);
+          g.gain.linearRampToValueAtTime(0.35,c.currentTime+0.12);
+          g.gain.setValueAtTime(0.35,c.currentTime+0.9);
+          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.6);
+          o.start(); o.stop(c.currentTime+1.65);
+        });
+      },
+      lead: function() {
+        var c=ac(),o=c.createOscillator(),g=c.createGain();
+        o.type='sawtooth'; o.frequency.value=440;
+        o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.55,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.4);
+        o.start(); o.stop(c.currentTime+0.45);
+      },
+      pad: function() {
+        var c=ac();
+        [196,247,294].forEach(function(fr){
+          var o=c.createOscillator(),g=c.createGain();
+          o.type='sine'; o.frequency.value=fr;
+          o.connect(g); g.connect(c.destination);
+          g.gain.setValueAtTime(0,c.currentTime);
+          g.gain.linearRampToValueAtTime(0.22,c.currentTime+0.5);
+          g.gain.setValueAtTime(0.22,c.currentTime+1.8);
+          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+2.8);
+          o.start(); o.stop(c.currentTime+2.85);
+        });
+      },
+      stab: function() {
+        var c=ac();
+        [220,277.18,329.63].forEach(function(fr){
+          var o=c.createOscillator(),g=c.createGain();
+          o.type='sawtooth'; o.frequency.value=fr;
+          o.connect(g); g.connect(c.destination);
+          g.gain.setValueAtTime(0.5,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.1);
+          o.start(); o.stop(c.currentTime+0.12);
+        });
+      }
+    };
+
+    var pads = [
+      {n:'KICK',k:'Q',s:'kick'},{n:'SNARE',k:'W',s:'snare'},{n:'CLAP',k:'E',s:'clap'},{n:'HI-HAT',k:'R',s:'hihat'},
+      {n:'OPEN HAT',k:'A',s:'openhat'},{n:'RIDE',k:'S',s:'ride'},{n:'TOM',k:'D',s:'tom'},{n:'CRASH',k:'F',s:'crash'},
+      {n:'SUB',k:'Z',s:'sub'},{n:'BASS',k:'X',s:'bass'},{n:'PLUCK',k:'C',s:'pluck'},{n:'ACID',k:'V',s:'acid'},
+      {n:'CHORD',k:'1',s:'chord'},{n:'LEAD',k:'2',s:'lead'},{n:'PAD',k:'3',s:'pad'},{n:'STAB',k:'4',s:'stab'}
+    ];
+
+    var grid=document.getElementById('samplerPads');
+    var disp=document.getElementById('samplerDisplay');
+    var led=document.getElementById('samplerLed');
+    if (!grid) return;
+
+    var km={};
+    pads.forEach(function(p) {
+      var btn=document.createElement('button');
+      btn.className='sampler-pad';
+      btn.innerHTML='<span class="sampler-pad-name">'+p.n+'</span><span class="sampler-pad-key">'+p.k+'</span>';
+      function fire() {
+        ac();
+        if (S[p.s]) S[p.s]();
+        btn.classList.add('active');
+        if (led) led.classList.add('on');
+        if (disp) disp.textContent=p.n;
+        clearTimeout(btn._t);
+        btn._t=setTimeout(function(){ btn.classList.remove('active'); if(led) led.classList.remove('on'); },130);
+      }
+      btn.addEventListener('mousedown',function(e){ e.preventDefault(); fire(); });
+      btn.addEventListener('touchstart',function(e){ e.preventDefault(); fire(); },{passive:false});
+      km[p.k.toLowerCase()]=fire;
+      grid.appendChild(btn);
+    });
+
+    document.addEventListener('keydown',function(e){
+      if (e.repeat||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+      var fn=km[e.key.toLowerCase()];
+      if (fn) fn();
+    });
+  })();
 </script>
 
 </body>
