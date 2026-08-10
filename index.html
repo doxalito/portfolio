@@ -584,8 +584,8 @@
       flex: 1;
       min-width: 0;
     }
-    .hero-eyebrow { margin: 0; padding: 0 1.5rem; }
-    /* DOX/AL — plein écran, bord à bord */
+    .hero-eyebrow { margin: 0; padding: 0 1.5rem; position: relative; z-index: 1; }
+    /* DOX/AL — plein écran, étiré verticalement pour remplir le hero */
     .hero-name {
       display: grid;
       grid-template-columns: repeat(3, min-content);
@@ -595,15 +595,18 @@
       letter-spacing: -0.02em;
       -webkit-text-stroke-width: 1px;
       margin: auto 0;
+      transform: scaleY(3.1) !important;
+      transform-origin: center center;
     }
     .hero-name .letter { display: block; }
     .hero-name .letter:nth-child(4) { grid-column: 1; grid-row: 2; }
     .hero-name .letter:nth-child(5) { grid-column: 3; grid-row: 2; }
-    /* Descriptor : bas */
+    /* Descriptor : bas, au-dessus des lettres */
     .hero-descriptor {
       flex-direction: column; gap: 0.4rem;
       margin-top: 0; padding: 1.5rem 1.5rem 0;
       border-top: 1px solid rgba(245,242,237,0.08);
+      position: relative; z-index: 1;
     }
     .hero-descriptor span { font-size: 0.55rem; letter-spacing: 0.28em; }
     .hero-descriptor span:nth-child(even) { display: none; }
