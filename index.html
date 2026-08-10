@@ -572,7 +572,8 @@
     .hero {
       min-height: 100svh;
       display: flex; flex-direction: column;
-      padding: 5rem 1.5rem 3.5rem;
+      align-items: stretch;
+      padding: 5rem 0 3.5rem;
       overflow: hidden; position: relative;
     }
     /* Flex colonne : eyebrow en haut, DOX/AL au milieu, descriptor en bas */
@@ -581,14 +582,15 @@
       flex-direction: column;
       justify-content: space-between;
       flex: 1;
+      min-width: 0;
     }
-    .hero-eyebrow { margin: 0; }
-    /* DOX/AL — bloc carré, font max pour remplir la largeur */
+    .hero-eyebrow { margin: 0; padding: 0 1.5rem; }
+    /* DOX/AL — plein écran, bord à bord */
     .hero-name {
       display: grid;
       grid-template-columns: repeat(3, min-content);
       writing-mode: horizontal-tb;
-      font-size: clamp(3.5rem, 26vw, 9rem);
+      font-size: clamp(5rem, 36.5vw, 16rem);
       line-height: 0.88;
       letter-spacing: -0.02em;
       -webkit-text-stroke-width: 1px;
@@ -596,11 +598,11 @@
     }
     .hero-name .letter { display: block; }
     .hero-name .letter:nth-child(4) { grid-column: 1; grid-row: 2; }
-    .hero-name .letter:nth-child(5) { grid-column: 2; grid-row: 2; }
+    .hero-name .letter:nth-child(5) { grid-column: 3; grid-row: 2; }
     /* Descriptor : bas */
     .hero-descriptor {
       flex-direction: column; gap: 0.4rem;
-      margin-top: 0; padding-top: 1.5rem;
+      margin-top: 0; padding: 1.5rem 1.5rem 0;
       border-top: 1px solid rgba(245,242,237,0.08);
     }
     .hero-descriptor span { font-size: 0.55rem; letter-spacing: 0.28em; }
