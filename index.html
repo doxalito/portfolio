@@ -2391,54 +2391,48 @@ function cycleTheme() {
         g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
         src.start(t); src.stop(t+0.76);
       },
-      spiral: function(t) { // Daft Punk vocoder — "SPI-RAL" parallel formants
+      spiral: function(t) { // Daft Punk vocoder — "SPI·RAL" with sweeping formants
         var c=ac(); t=t||c.currentTime;
-        // Carrier: 3 detuned sawtooths for thick robotic chord
-        var carrier=c.createGain(); carrier.gain.value=0.38;
-        [-10,0,10].forEach(function(ct){
+        // Carrier: 3 detuned sawtooths (±12 cents) for rich Daft Punk thickness
+        var carrier=c.createGain(); carrier.gain.value=0.4;
+        [-12,0,12].forEach(function(ct){
           var o=c.createOscillator(); o.type='sawtooth';
-          o.frequency.value=110*pm(); o.detune.value=ct;
-          o.start(t); o.stop(t+0.68); o.connect(carrier);
+          o.frequency.value=130*pm(); o.detune.value=ct;
+          o.start(t); o.stop(t+0.72); o.connect(carrier);
         });
-        // vowel: parallel BPFs all at once → syllable gain envelope
-        function vowel(dt,dur,formants,vol) {
+        // voiced: 2 parallel BPFs with optional frequency ramps
+        function voiced(dt,dur, f1s,f1e, f2s,f2e, vol) {
           var g=c.createGain(); g.connect(dst());
-          formants.forEach(function(f){
-            var bpf=c.createBiquadFilter(); bpf.type='bandpass';
-            bpf.frequency.value=f[0]; bpf.Q.value=f[1];
-            var fg=c.createGain(); fg.gain.value=f[2];
-            carrier.connect(bpf); bpf.connect(fg); fg.connect(g);
-          });
+          var b1=c.createBiquadFilter(), b2=c.createBiquadFilter();
+          b1.type='bandpass'; b1.Q.value=11;
+          b2.type='bandpass'; b2.Q.value=14;
+          b1.frequency.setValueAtTime(f1s,t+dt); b1.frequency.linearRampToValueAtTime(f1e,t+dt+dur);
+          b2.frequency.setValueAtTime(f2s,t+dt); b2.frequency.linearRampToValueAtTime(f2e,t+dt+dur);
+          var g1=c.createGain(); g1.gain.value=1.6;
+          var g2=c.createGain(); g2.gain.value=2.8; // F2 dominant
+          carrier.connect(b1); b1.connect(g1); g1.connect(g);
+          carrier.connect(b2); b2.connect(g2); g2.connect(g);
           g.gain.setValueAtTime(0,t+dt);
-          g.gain.linearRampToValueAtTime(vol,t+dt+0.018);
-          g.gain.setValueAtTime(vol,t+dt+dur-0.025);
+          g.gain.linearRampToValueAtTime(vol,t+dt+0.015);
+          g.gain.setValueAtTime(vol,t+dt+dur-0.03);
           g.gain.exponentialRampToValueAtTime(0.001,t+dt+dur);
         }
-        // S — sibilant noise
-        var sn=c.createBufferSource(); sn.buffer=mkNoise(0.07);
-        var shpf=c.createBiquadFilter(); shpf.type='highpass'; shpf.frequency.value=5500;
+        // /s/ — 0–55ms sibilant
+        var sn=c.createBufferSource(); sn.buffer=mkNoise(0.06);
+        var shpf=c.createBiquadFilter(); shpf.type='highpass'; shpf.frequency.value=6000;
         var sg=c.createGain(); sn.connect(shpf); shpf.connect(sg); sg.connect(dst());
-        sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(1.4,t+0.005);
-        sg.gain.exponentialRampToValueAtTime(0.001,t+0.065);
-        sn.start(t); sn.stop(t+0.08);
-        // "SPI" — /ɪ/ high front vowel: high F2 is key
-        vowel(0.068, 0.17, [
-          [320,  7,  1.0],
-          [2250, 15, 2.4],
-          [3000, 6,  0.7]
-        ], 3.2);
-        // gap ~60ms
-        // "RAL" — /a/ open vowel: high F1, low F2
-        vowel(0.30, 0.20, [
-          [780,  9,  2.0],
-          [1150, 10, 1.5],
-          [2600, 5,  0.5]
-        ], 3.2);
-        // L tail
-        vowel(0.48, 0.14, [
-          [380, 7,  1.4],
-          [980, 9,  1.1]
-        ], 2.2);
+        sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(2.0,t+0.004);
+        sg.gain.exponentialRampToValueAtTime(0.001,t+0.055);
+        sn.start(t); sn.stop(t+0.07);
+        // /aɪ/ diphthong 55–265ms — F1 sweeps 750→290, F2 sweeps 1100→2300
+        voiced(0.055, 0.21, 750,290, 1100,2300, 4.5);
+        // silent gap 265–310ms (the P closure)
+        // /r/ 310–400ms — low F3 approx via F2 ≈ 1000Hz, F1 ≈ 430Hz
+        voiced(0.31, 0.09, 480,430, 1050,950, 3.5);
+        // /a/ 400–520ms — F1 high again, F2 low
+        voiced(0.40, 0.12, 680,620, 1250,1200, 4.0);
+        // /l/ 520–640ms — F1 low, F2 mid
+        voiced(0.52, 0.12, 380,360, 1000,980, 2.8);
       },
       hardKick: function(t) { // Hard techno kick — fast pitch drop, heavy clip
         var c=ac(); t=t||c.currentTime;
