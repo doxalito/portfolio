@@ -1298,17 +1298,17 @@
         </div>
         <div class="drumbox-fx">
           <div class="fx-row">
-            <button class="drumbox-btn" id="fxDelay" title="Toggle delay [D]">DELAY</button>
+            <button class="drumbox-btn" id="fxDelay" title="Toggle reverb [D]">REVERB</button>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxTimeDn" title="Delay time − [←]">−</button>
-            <span class="fx-val" id="fxTimeVal">1/8</span>
-            <button class="drumbox-btn fx-adj" id="fxTimeUp" title="Delay time + [→]">+</button>
-            <span class="fx-lbl">T</span>
+            <button class="drumbox-btn fx-adj" id="fxTimeDn" title="Reverb size − [←]">−</button>
+            <span class="fx-val" id="fxTimeVal">MD</span>
+            <button class="drumbox-btn fx-adj" id="fxTimeUp" title="Reverb size + [→]">+</button>
+            <span class="fx-lbl">SZ</span>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxFbDn" title="Feedback − [[]">−</button>
-            <span class="fx-val" id="fxFbVal">40%</span>
-            <button class="drumbox-btn fx-adj" id="fxFbUp" title="Feedback + []]">+</button>
-            <span class="fx-lbl">FB</span>
+            <button class="drumbox-btn fx-adj" id="fxFbDn" title="Reverb mix − [[]">−</button>
+            <span class="fx-val" id="fxFbVal">30%</span>
+            <button class="drumbox-btn fx-adj" id="fxFbUp" title="Reverb mix + []]">+</button>
+            <span class="fx-lbl">MX</span>
           </div>
           <div class="fx-row">
             <button class="drumbox-btn" id="fxPitch" title="Reset pitch [P]">PITCH</button>
@@ -1321,10 +1321,10 @@
         </div>
         <div class="drumbox-keys">
           <div class="kbd-pair"><span class="kbd">SPACE</span><span class="kbd-lbl">PLAY</span></div>
-          <div class="kbd-pair"><span class="kbd">D</span><span class="kbd-lbl">DELAY</span></div>
+          <div class="kbd-pair"><span class="kbd">D</span><span class="kbd-lbl">VERB</span></div>
           <div class="kbd-pair"><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd-lbl">PITCH</span></div>
-          <div class="kbd-pair"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd-lbl">TIME</span></div>
-          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">FDBK</span></div>
+          <div class="kbd-pair"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd-lbl">SIZE</span></div>
+          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">MIX</span></div>
           <div class="kbd-pair"><span class="kbd">P</span><span class="kbd-lbl">RESET</span></div>
         </div>
         <div class="drumbox-body">
@@ -2248,67 +2248,81 @@ function cycleTheme() {
     }
 
     // Effects chain
-    var masterOut=null, delayNode=null, delayFbGain=null, delayWetGain=null;
-    var DELAY_ON=false, DELAY_TIME_IDX=1, DELAY_FB_IDX=2;
-    var DELAY_TIMES=[1/16,1/8,1/4,3/8,1/2];
-    var DELAY_TIME_LABELS=['1/16','1/8','1/4','3/8','1/2'];
-    var DELAY_FBS=[0.1,0.25,0.4,0.55,0.7,0.85];
-    var DELAY_FB_LABELS=['10%','25%','40%','55%','70%','85%'];
+    var masterOut=null, convolverNode=null, reverbWetGain=null;
+    var REVERB_ON=false, REVERB_SIZE_IDX=1, REVERB_MIX_IDX=1;
+    var REVERB_SIZES=[
+      {dur:0.4,dec:5.0,label:'SM'},
+      {dur:1.0,dec:3.5,label:'MD'},
+      {dur:2.5,dec:2.2,label:'LG'},
+      {dur:5.0,dec:1.6,label:'XL'},
+      {dur:9.0,dec:1.0,label:'XX'}
+    ];
+    var REVERB_MIXES=[0.15,0.3,0.5,0.7,0.9];
+    var REVERB_MIX_LABELS=['15%','30%','50%','70%','90%'];
     var PITCH=0; // semitones -12..+12
     var BPM=128, playing=false, currentStep=0, nextNoteTime=0, timerID=null;
 
     function pm() { return Math.pow(2, PITCH/12); }
 
+    function makeImpulse(dur, dec) {
+      var c=ac(), len=Math.round(c.sampleRate*dur), buf=c.createBuffer(2,len,c.sampleRate);
+      for(var ch=0;ch<2;ch++){
+        var d=buf.getChannelData(ch);
+        for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,dec);
+      }
+      return buf;
+    }
+
     function getMaster() {
       var c=ac();
       if (masterOut) return masterOut;
       masterOut=c.createGain(); masterOut.gain.value=0.8;
-      delayNode=c.createDelay(2.0); delayNode.delayTime.value=60/(BPM*2);
-      delayFbGain=c.createGain(); delayFbGain.gain.value=0.4;
-      var dlpf=c.createBiquadFilter(); dlpf.type='lowpass'; dlpf.frequency.value=5000;
-      delayWetGain=c.createGain(); delayWetGain.gain.value=0;
+      convolverNode=c.createConvolver();
+      convolverNode.buffer=makeImpulse(REVERB_SIZES[REVERB_SIZE_IDX].dur,REVERB_SIZES[REVERB_SIZE_IDX].dec);
+      reverbWetGain=c.createGain(); reverbWetGain.gain.value=0;
       masterOut.connect(c.destination);
-      masterOut.connect(delayNode);
-      delayNode.connect(dlpf);
-      dlpf.connect(delayFbGain); delayFbGain.connect(delayNode);
-      dlpf.connect(delayWetGain); delayWetGain.connect(c.destination);
+      masterOut.connect(convolverNode);
+      convolverNode.connect(reverbWetGain);
+      reverbWetGain.connect(c.destination);
       return masterOut;
     }
     function dst() { return getMaster(); }
 
-    function updateDelayTime() {
-      if (!delayNode) return;
-      delayNode.delayTime.setTargetAtTime(DELAY_TIMES[DELAY_TIME_IDX]*(240/BPM), ac().currentTime, 0.02);
+    function applyReverbSize() {
+      if (!convolverNode) return;
+      var s=REVERB_SIZES[REVERB_SIZE_IDX];
+      convolverNode.buffer=makeImpulse(s.dur,s.dec);
     }
 
     var S = {
-      bass808: function(t) { // Playboi Carti 808 — heavy saturated sub, long tail
+      bass808: function(t) { // Hard 808 — square sub + hard clip, no round sine
         var c=ac(); t=t||c.currentTime;
-        var n=1024, curve=new Float32Array(n);
-        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=Math.tanh(x*6)*0.6+Math.sign(x)*0.25*Math.min(1,Math.abs(x*4));}
-        // Sub body
-        var o=c.createOscillator(), ws=c.createWaveShaper(), g=c.createGain();
-        ws.curve=curve;
-        o.frequency.setValueAtTime(90*pm(),t); o.frequency.exponentialRampToValueAtTime(27,t+1.1);
-        o.connect(ws); ws.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(3.8,t+0.005);
+        var n=2048, curve=new Float32Array(n), c2=new Float32Array(n);
+        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=x>0.22?1:x<-0.22?-1:x*4.5;}
+        for(var i=0;i<n;i++){var x=i*2/n-1; c2[i]=x>0.18?1:x<-0.18?-1:x*5.5;}
+        // Sub — square wave, long drop
+        var o=c.createOscillator(), lpf=c.createBiquadFilter(), ws=c.createWaveShaper(), g=c.createGain();
+        o.type='square'; lpf.type='lowpass'; lpf.frequency.value=480; lpf.Q.value=0.6; ws.curve=curve;
+        o.frequency.setValueAtTime(80*pm(),t); o.frequency.exponentialRampToValueAtTime(22,t+1.1);
+        o.connect(lpf); lpf.connect(ws); ws.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.6,t+0.003);
         g.gain.exponentialRampToValueAtTime(0.001,t+1.2);
         o.start(t); o.stop(t+1.25);
-        // 2nd harmonic — adds grit and presence
-        var o2=c.createOscillator(), ws2=c.createWaveShaper(), g2=c.createGain();
-        var c2=new Float32Array(n); for(var i=0;i<n;i++){var x=i*2/n-1; c2[i]=Math.tanh(x*8)*0.5;}
-        ws2.curve=c2; o2.type='sawtooth'; o2.frequency.setValueAtTime(180*pm(),t);
-        o2.frequency.exponentialRampToValueAtTime(54,t+0.45);
-        o2.connect(ws2); ws2.connect(g2); g2.connect(dst());
-        g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(1.4,t+0.004);
-        g2.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+        // Sawtooth grit — hard clipped, short decay
+        var o2=c.createOscillator(), ws2=c.createWaveShaper(), lpf2=c.createBiquadFilter(), g2=c.createGain();
+        ws2.curve=c2; o2.type='sawtooth';
+        o2.frequency.setValueAtTime(160*pm(),t); o2.frequency.exponentialRampToValueAtTime(44,t+0.42);
+        lpf2.type='lowpass'; lpf2.frequency.value=900;
+        o2.connect(lpf2); lpf2.connect(ws2); ws2.connect(g2); g2.connect(dst());
+        g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(1.9,t+0.003);
+        g2.gain.exponentialRampToValueAtTime(0.001,t+0.46);
         o2.start(t); o2.stop(t+0.5);
-        // Punch click transient
-        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.018);
-        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=180; nf.Q.value=1.2;
+        // Hard click transient
+        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.012);
+        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=300; nf.Q.value=0.7;
         var ng=c.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(dst());
-        ng.gain.setValueAtTime(2.0,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.018);
-        ns.start(t); ns.stop(t+0.02);
+        ng.gain.setValueAtTime(5.0,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.012);
+        ns.start(t); ns.stop(t+0.015);
       },
       dnbSnare: function(t) { // DnB snare — sharp layered noise + body
         var c=ac(); t=t||c.currentTime;
@@ -2323,15 +2337,20 @@ function cycleTheme() {
         og.gain.setValueAtTime(0.9,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.025);
         o.start(t); o.stop(t+0.03);
       },
-      hihat: function(t) { // Tight hihat — inharmonic metallic partials
+      acid: function(t) { // TB-303 acid — resonant accent squeal
         var c=ac(); t=t||c.currentTime;
-        [1,1.414,1.732,2.236,2.646,3.141].forEach(function(r,i) {
-          var o=c.createOscillator(), g=c.createGain();
-          o.frequency.value=400*r*pm();
-          o.connect(g); g.connect(dst());
-          g.gain.setValueAtTime(0.04/(i*0.4+1),t); g.gain.exponentialRampToValueAtTime(0.001,t+0.035);
-          o.start(t); o.stop(t+0.04);
-        });
+        var n=1024, curve=new Float32Array(n);
+        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=Math.tanh(x*7);}
+        var osc=c.createOscillator(), lpf=c.createBiquadFilter(), ws=c.createWaveShaper(), g=c.createGain();
+        osc.type='sawtooth'; osc.frequency.value=110*pm();
+        lpf.type='lowpass'; lpf.Q.value=22;
+        lpf.frequency.setValueAtTime(280,t); lpf.frequency.exponentialRampToValueAtTime(4500,t+0.022);
+        lpf.frequency.exponentialRampToValueAtTime(280,t+0.24);
+        ws.curve=curve;
+        osc.connect(lpf); lpf.connect(ws); ws.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.8,t+0.004);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+        osc.start(t); osc.stop(t+0.32);
       },
       siren: function(t) { // Air raid siren — LFO-modulated oscillator
         var c=ac(); t=t||c.currentTime;
@@ -2386,32 +2405,32 @@ function cycleTheme() {
         g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
         src.start(t); src.stop(t+0.76);
       },
-      glitch: function(t) { // Glitch burst — chaotic stuttering pitched noise
+      reese: function(t) { // Reese bass — detuned sawtooth pair, DnB
         var c=ac(); t=t||c.currentTime;
-        var offsets=[0,0.018,0.036,0.054,0.076,0.098];
-        var pitches=[880,440,1320,220,660,1760];
-        var types=['square','sawtooth','triangle','square','sawtooth','triangle'];
-        offsets.forEach(function(dt,i) {
-          var osc=c.createOscillator(), g=c.createGain();
-          osc.type=types[i]; osc.frequency.value=pitches[i]*pm();
-          osc.connect(g); g.connect(dst());
-          var dur=0.012+i*0.002;
-          g.gain.setValueAtTime(0.55-i*0.07,t+dt);
-          g.gain.exponentialRampToValueAtTime(0.001,t+dt+dur);
-          osc.start(t+dt); osc.stop(t+dt+dur+0.002);
-        });
+        var n=1024, curve=new Float32Array(n);
+        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=Math.tanh(x*3.5);}
+        var o1=c.createOscillator(), o2=c.createOscillator();
+        var mix=c.createGain(), lpf=c.createBiquadFilter(), ws=c.createWaveShaper(), g=c.createGain();
+        o1.type='sawtooth'; o2.type='sawtooth';
+        o1.frequency.value=55*pm(); o2.frequency.value=55.9*pm();
+        mix.gain.value=1; lpf.type='lowpass'; lpf.Q.value=3; lpf.frequency.value=1400;
+        ws.curve=curve;
+        o1.connect(mix); o2.connect(mix); mix.connect(lpf); lpf.connect(ws); ws.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.2,t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.52);
+        o1.start(t); o1.stop(t+0.56); o2.start(t); o2.stop(t+0.56);
       }
     };
 
     var trackDefs = [
       {name:'808',    play:S.bass808,  pat:[1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0]},
       {name:'SNARE',  play:S.dnbSnare, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'HIHAT',  play:S.hihat,    pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
+      {name:'ACID',   play:S.acid,     pat:[0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1]},
       {name:'SIREN',  play:S.siren,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},
       {name:'WOBBLE', play:S.wobble,   pat:[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]},
       {name:'WOMP',   play:S.womp,     pat:[0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0]},
       {name:'RISE',   play:S.rise,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'GLITCH', play:S.glitch,   pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+      {name:'REESE',  play:S.reese,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
     ];
 
     var stepBtns = [], stepNums = [];
@@ -2536,7 +2555,7 @@ function cycleTheme() {
       });
     });
 
-    // FX — Delay
+    // FX — Reverb
     var fxDelayBtn = document.getElementById('fxDelay');
     var fxTimeVal  = document.getElementById('fxTimeVal');
     var fxFbVal    = document.getElementById('fxFbVal');
@@ -2545,31 +2564,31 @@ function cycleTheme() {
 
     if (fxDelayBtn) fxDelayBtn.addEventListener('click', function() {
       getMaster();
-      DELAY_ON = !DELAY_ON;
-      delayWetGain.gain.setTargetAtTime(DELAY_ON ? 0.5 : 0, ac().currentTime, 0.05);
-      fxDelayBtn.classList.toggle('fx-on', DELAY_ON);
+      REVERB_ON = !REVERB_ON;
+      reverbWetGain.gain.setTargetAtTime(REVERB_ON ? REVERB_MIXES[REVERB_MIX_IDX] : 0, ac().currentTime, 0.05);
+      fxDelayBtn.classList.toggle('fx-on', REVERB_ON);
     });
     var fxTimeDn = document.getElementById('fxTimeDn'), fxTimeUp = document.getElementById('fxTimeUp');
     if (fxTimeDn) fxTimeDn.addEventListener('click', function() {
-      DELAY_TIME_IDX = Math.max(0, DELAY_TIME_IDX-1);
-      if (fxTimeVal) fxTimeVal.textContent = DELAY_TIME_LABELS[DELAY_TIME_IDX];
-      updateDelayTime();
+      REVERB_SIZE_IDX = Math.max(0, REVERB_SIZE_IDX-1);
+      if (fxTimeVal) fxTimeVal.textContent = REVERB_SIZES[REVERB_SIZE_IDX].label;
+      applyReverbSize();
     });
     if (fxTimeUp) fxTimeUp.addEventListener('click', function() {
-      DELAY_TIME_IDX = Math.min(DELAY_TIMES.length-1, DELAY_TIME_IDX+1);
-      if (fxTimeVal) fxTimeVal.textContent = DELAY_TIME_LABELS[DELAY_TIME_IDX];
-      updateDelayTime();
+      REVERB_SIZE_IDX = Math.min(REVERB_SIZES.length-1, REVERB_SIZE_IDX+1);
+      if (fxTimeVal) fxTimeVal.textContent = REVERB_SIZES[REVERB_SIZE_IDX].label;
+      applyReverbSize();
     });
     var fxFbDn = document.getElementById('fxFbDn'), fxFbUp = document.getElementById('fxFbUp');
     if (fxFbDn) fxFbDn.addEventListener('click', function() {
-      DELAY_FB_IDX = Math.max(0, DELAY_FB_IDX-1);
-      if (fxFbVal) fxFbVal.textContent = DELAY_FB_LABELS[DELAY_FB_IDX];
-      if (delayFbGain) delayFbGain.gain.setTargetAtTime(DELAY_FBS[DELAY_FB_IDX], ac().currentTime, 0.02);
+      REVERB_MIX_IDX = Math.max(0, REVERB_MIX_IDX-1);
+      if (fxFbVal) fxFbVal.textContent = REVERB_MIX_LABELS[REVERB_MIX_IDX];
+      if (reverbWetGain && REVERB_ON) reverbWetGain.gain.setTargetAtTime(REVERB_MIXES[REVERB_MIX_IDX], ac().currentTime, 0.02);
     });
     if (fxFbUp) fxFbUp.addEventListener('click', function() {
-      DELAY_FB_IDX = Math.min(DELAY_FBS.length-1, DELAY_FB_IDX+1);
-      if (fxFbVal) fxFbVal.textContent = DELAY_FB_LABELS[DELAY_FB_IDX];
-      if (delayFbGain) delayFbGain.gain.setTargetAtTime(DELAY_FBS[DELAY_FB_IDX], ac().currentTime, 0.02);
+      REVERB_MIX_IDX = Math.min(REVERB_MIXES.length-1, REVERB_MIX_IDX+1);
+      if (fxFbVal) fxFbVal.textContent = REVERB_MIX_LABELS[REVERB_MIX_IDX];
+      if (reverbWetGain && REVERB_ON) reverbWetGain.gain.setTargetAtTime(REVERB_MIXES[REVERB_MIX_IDX], ac().currentTime, 0.02);
     });
 
     // FX — Pitch (clicking the label resets to 0)
