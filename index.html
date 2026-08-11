@@ -1318,7 +1318,7 @@
           <div class="kbd-pair"><span class="kbd">SPACE</span><span class="kbd-lbl">PLAY</span></div>
           <div class="kbd-pair"><span class="kbd">D</span><span class="kbd-lbl">FILT</span></div>
           <div class="kbd-pair"><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd-lbl">PITCH</span></div>
-          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">SWEEP</span></div>
+          <div class="kbd-pair"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd-lbl">SWEEP</span></div>
           <div class="kbd-pair"><span class="kbd">P</span><span class="kbd-lbl">RESET</span></div>
         </div>
         <div class="drumbox-body">
@@ -2655,7 +2655,7 @@ function cycleTheme() {
       var sr = document.getElementById('sampler').getBoundingClientRect();
       var vis = sr.top < window.innerHeight && sr.bottom > 0;
       if (!vis) return;
-      if (e.code==='ArrowUp'||e.code==='ArrowDown'||e.code==='Space') e.preventDefault();
+      if (e.code==='ArrowUp'||e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='ArrowRight'||e.code==='Space') e.preventDefault();
       if (e.repeat) return;
       switch(e.code) {
         case 'Space':        togglePlay(); break;
@@ -2663,14 +2663,14 @@ function cycleTheme() {
         case 'KeyP':         e.preventDefault(); pitchHeld = 0; startAnim(); break;
         case 'ArrowUp':      startPitchHold(1); break;
         case 'ArrowDown':    startPitchHold(-1); break;
-        case 'BracketLeft':  e.preventDefault(); startFilterHold(-1); break;
-        case 'BracketRight': e.preventDefault(); startFilterHold(1); break;
+        case 'ArrowLeft':  e.preventDefault(); startFilterHold(-1); break;
+        case 'ArrowRight': e.preventDefault(); startFilterHold(1); break;
       }
     });
     document.addEventListener('keyup', function(e) {
       switch(e.code) {
-        case 'ArrowUp':   case 'ArrowDown':    stopPitchHold();  break;
-        case 'BracketLeft': case 'BracketRight': stopFilterHold(); break;
+        case 'ArrowUp':    case 'ArrowDown':  stopPitchHold();  break;
+        case 'ArrowLeft':  case 'ArrowRight': stopFilterHold(); break;
       }
     });
   })();
