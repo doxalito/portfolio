@@ -2405,20 +2405,36 @@ function cycleTheme() {
         g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
         src.start(t); src.stop(t+0.76);
       },
-      reese: function(t) { // Reese bass — detuned sawtooth pair, DnB
+      hardKick: function(t) { // Hard techno kick — fast pitch drop, heavy clip
         var c=ac(); t=t||c.currentTime;
-        var n=1024, curve=new Float32Array(n);
-        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=Math.tanh(x*3.5);}
-        var o1=c.createOscillator(), o2=c.createOscillator();
-        var mix=c.createGain(), lpf=c.createBiquadFilter(), ws=c.createWaveShaper(), g=c.createGain();
-        o1.type='sawtooth'; o2.type='sawtooth';
-        o1.frequency.value=55*pm(); o2.frequency.value=55.9*pm();
-        mix.gain.value=1; lpf.type='lowpass'; lpf.Q.value=3; lpf.frequency.value=1400;
+        var n=2048, curve=new Float32Array(n), c2=new Float32Array(n);
+        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=x>0.12?1:x<-0.12?-1:x*8;}
+        for(var i=0;i<n;i++){var x=i*2/n-1; c2[i]=x>0.08?1:x<-0.08?-1:x*11;}
+        // Sub body — sine clipped to near-square, fast pitch plunge
+        var o=c.createOscillator(), ws=c.createWaveShaper(), g=c.createGain();
         ws.curve=curve;
-        o1.connect(mix); o2.connect(mix); mix.connect(lpf); lpf.connect(ws); ws.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.2,t+0.01);
-        g.gain.exponentialRampToValueAtTime(0.001,t+0.52);
-        o1.start(t); o1.stop(t+0.56); o2.start(t); o2.stop(t+0.56);
+        o.frequency.setValueAtTime(260*pm(),t);
+        o.frequency.exponentialRampToValueAtTime(42,t+0.055); // hard techno: very fast drop
+        o.frequency.exponentialRampToValueAtTime(36,t+0.42);
+        o.connect(ws); ws.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(4.5,t+0.002);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.44);
+        o.start(t); o.stop(t+0.48);
+        // Square grit layer — drops with sub, short
+        var o2=c.createOscillator(), ws2=c.createWaveShaper(), lpf=c.createBiquadFilter(), g2=c.createGain();
+        ws2.curve=c2; o2.type='square';
+        lpf.type='lowpass'; lpf.frequency.value=700;
+        o2.frequency.setValueAtTime(260*pm(),t); o2.frequency.exponentialRampToValueAtTime(55,t+0.05);
+        o2.connect(lpf); lpf.connect(ws2); ws2.connect(g2); g2.connect(dst());
+        g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(2.2,t+0.002);
+        g2.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+        o2.start(t); o2.stop(t+0.1);
+        // Punch transient — sharp crack on impact
+        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.007);
+        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=3000; nf.Q.value=0.4;
+        var ng=c.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(dst());
+        ng.gain.setValueAtTime(7.0,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.007);
+        ns.start(t); ns.stop(t+0.01);
       }
     };
 
@@ -2430,7 +2446,7 @@ function cycleTheme() {
       {name:'WOBBLE', play:S.wobble,   pat:[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]},
       {name:'WOMP',   play:S.womp,     pat:[0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0]},
       {name:'RISE',   play:S.rise,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'REESE',  play:S.reese,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+      {name:'KICK',   play:S.hardKick, pat:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]}
     ];
 
     var stepBtns = [], stepNums = [];
