@@ -1300,15 +1300,10 @@
           <div class="fx-row">
             <button class="drumbox-btn" id="fxDelay" title="Toggle reverb [D]">REVERB</button>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxTimeDn" title="Reverb size − [←]">−</button>
-            <span class="fx-val" id="fxTimeVal">MD</span>
-            <button class="drumbox-btn fx-adj" id="fxTimeUp" title="Reverb size + [→]">+</button>
-            <span class="fx-lbl">SZ</span>
-            <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxFbDn" title="Reverb mix − [[]">−</button>
-            <span class="fx-val" id="fxFbVal">30%</span>
-            <button class="drumbox-btn fx-adj" id="fxFbUp" title="Reverb mix + []]">+</button>
-            <span class="fx-lbl">MX</span>
+            <button class="drumbox-btn fx-adj" id="fxFbDn" title="Reverb wet − [[]">−</button>
+            <span class="fx-val" id="fxFbVal">50%</span>
+            <button class="drumbox-btn fx-adj" id="fxFbUp" title="Reverb wet + []]">+</button>
+            <span class="fx-lbl">WET</span>
           </div>
           <div class="fx-row">
             <button class="drumbox-btn" id="fxPitch" title="Reset pitch [P]">PITCH</button>
@@ -1323,8 +1318,7 @@
           <div class="kbd-pair"><span class="kbd">SPACE</span><span class="kbd-lbl">PLAY</span></div>
           <div class="kbd-pair"><span class="kbd">D</span><span class="kbd-lbl">VERB</span></div>
           <div class="kbd-pair"><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd-lbl">PITCH</span></div>
-          <div class="kbd-pair"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd-lbl">SIZE</span></div>
-          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">MIX</span></div>
+          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">WET</span></div>
           <div class="kbd-pair"><span class="kbd">P</span><span class="kbd-lbl">RESET</span></div>
         </div>
         <div class="drumbox-body">
@@ -2250,14 +2244,7 @@ function cycleTheme() {
     // Effects chain
     var masterOut=null, convolverNode=null, reverbWetGain=null;
     var REVERB_ON=false, REVERB_SIZE_IDX=1, REVERB_MIX_IDX=1;
-    var REVERB_SIZES=[
-      {dur:0.4,dec:5.0,label:'SM'},
-      {dur:1.0,dec:3.5,label:'MD'},
-      {dur:2.5,dec:2.2,label:'LG'},
-      {dur:5.0,dec:1.6,label:'XL'},
-      {dur:9.0,dec:1.0,label:'XX'}
-    ];
-    var REVERB_MIX_VAL=0.3; // continuous 0..0.95
+    var REVERB_MIX_VAL=0.5; // continuous 0..0.95
     var PITCH=0; // float semitones, -12..+12
     var BPM=128, playing=false, currentStep=0, nextNoteTime=0, timerID=null;
 
@@ -2277,7 +2264,7 @@ function cycleTheme() {
       if (masterOut) return masterOut;
       masterOut=c.createGain(); masterOut.gain.value=0.8;
       convolverNode=c.createConvolver();
-      convolverNode.buffer=makeImpulse(REVERB_SIZES[REVERB_SIZE_IDX].dur,REVERB_SIZES[REVERB_SIZE_IDX].dec);
+      convolverNode.buffer=makeImpulse(2.5, 2.2); // fixed LG room
       reverbWetGain=c.createGain(); reverbWetGain.gain.value=0;
       masterOut.connect(c.destination);
       masterOut.connect(convolverNode);
@@ -2287,11 +2274,6 @@ function cycleTheme() {
     }
     function dst() { return getMaster(); }
 
-    function applyReverbSize() {
-      if (!convolverNode) return;
-      var s=REVERB_SIZES[REVERB_SIZE_IDX];
-      convolverNode.buffer=makeImpulse(s.dur,s.dec);
-    }
 
     var S = {
       bass808: function(t) { // Hard 808 — square sub + hard clip, no round sine
@@ -2572,12 +2554,9 @@ function cycleTheme() {
 
     // FX — shared animation loop (joystick feel)
     var fxDelayBtn = document.getElementById('fxDelay');
-    var fxTimeVal  = document.getElementById('fxTimeVal');
     var fxFbVal    = document.getElementById('fxFbVal');
     var fxPitchBtn = document.getElementById('fxPitch');
     var fxPitchVal = document.getElementById('fxPitchVal');
-    var fxTimeDn   = document.getElementById('fxTimeDn');
-    var fxTimeUp   = document.getElementById('fxTimeUp');
     var fxFbDn     = document.getElementById('fxFbDn');
     var fxFbUp     = document.getElementById('fxFbUp');
     var fxPitchDn  = document.getElementById('fxPitchDn');
@@ -2638,19 +2617,7 @@ function cycleTheme() {
       fxDelayBtn.classList.toggle('fx-on', REVERB_ON);
     });
 
-    // Reverb size — discrete (buffer must regenerate)
-    if (fxTimeDn) fxTimeDn.addEventListener('click', function() {
-      REVERB_SIZE_IDX = Math.max(0, REVERB_SIZE_IDX-1);
-      if (fxTimeVal) fxTimeVal.textContent = REVERB_SIZES[REVERB_SIZE_IDX].label;
-      applyReverbSize();
-    });
-    if (fxTimeUp) fxTimeUp.addEventListener('click', function() {
-      REVERB_SIZE_IDX = Math.min(REVERB_SIZES.length-1, REVERB_SIZE_IDX+1);
-      if (fxTimeVal) fxTimeVal.textContent = REVERB_SIZES[REVERB_SIZE_IDX].label;
-      applyReverbSize();
-    });
-
-    // Reverb mix — hold to sweep continuously
+    // Reverb wet — hold to sweep continuously
     ['mousedown','touchstart'].forEach(function(ev) {
       if (fxFbDn) fxFbDn.addEventListener(ev, function(e){ e.preventDefault(); startMixHold(-1); });
       if (fxFbUp) fxFbUp.addEventListener(ev, function(e){ e.preventDefault(); startMixHold(1); });
@@ -2673,21 +2640,21 @@ function cycleTheme() {
       if (fxPitchUp) fxPitchUp.addEventListener(ev, stopPitchHold);
     });
 
-    // Keyboard — hold ↑↓ to bend pitch, release → spring to 0. Hold [/] to sweep mix.
+    // Keyboard — hold ↑↓ to bend pitch (springs back on release), hold [/] to sweep wet.
     document.addEventListener('keydown', function(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.repeat) return;
       var sr = document.getElementById('sampler').getBoundingClientRect();
       var vis = sr.top < window.innerHeight && sr.bottom > 0;
       if (!vis) return;
+      // Prevent scroll on arrow/space regardless of repeat
+      if (e.code==='ArrowUp'||e.code==='ArrowDown'||e.code==='Space') e.preventDefault();
+      if (e.repeat) return;
       switch(e.code) {
-        case 'Space':      e.preventDefault(); togglePlay(); break;
-        case 'KeyD':       e.preventDefault(); if (fxDelayBtn) fxDelayBtn.click(); break;
-        case 'KeyP':       e.preventDefault(); pitchHeld = 0; startAnim(); break;
-        case 'ArrowUp':    e.preventDefault(); startPitchHold(1); break;
-        case 'ArrowDown':  e.preventDefault(); startPitchHold(-1); break;
-        case 'ArrowLeft':  e.preventDefault(); if (fxTimeDn) fxTimeDn.click(); break;
-        case 'ArrowRight': e.preventDefault(); if (fxTimeUp) fxTimeUp.click(); break;
+        case 'Space':        togglePlay(); break;
+        case 'KeyD':         e.preventDefault(); if (fxDelayBtn) fxDelayBtn.click(); break;
+        case 'KeyP':         e.preventDefault(); pitchHeld = 0; startAnim(); break;
+        case 'ArrowUp':      startPitchHold(1); break;
+        case 'ArrowDown':    startPitchHold(-1); break;
         case 'BracketLeft':  e.preventDefault(); startMixHold(-1); break;
         case 'BracketRight': e.preventDefault(); startMixHold(1); break;
       }
