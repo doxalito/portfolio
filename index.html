@@ -1283,24 +1283,24 @@
         </div>
         <div class="drumbox-fx">
           <div class="fx-row">
-            <button class="drumbox-btn" id="fxDelay">DELAY</button>
+            <button class="drumbox-btn" id="fxDelay" title="Toggle delay [D]">DELAY</button>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxTimeDn">−</button>
+            <button class="drumbox-btn fx-adj" id="fxTimeDn" title="Delay time − [←]">−</button>
             <span class="fx-val" id="fxTimeVal">1/8</span>
-            <button class="drumbox-btn fx-adj" id="fxTimeUp">+</button>
+            <button class="drumbox-btn fx-adj" id="fxTimeUp" title="Delay time + [→]">+</button>
             <span class="fx-lbl">T</span>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxFbDn">−</button>
+            <button class="drumbox-btn fx-adj" id="fxFbDn" title="Feedback − [[]">−</button>
             <span class="fx-val" id="fxFbVal">40%</span>
-            <button class="drumbox-btn fx-adj" id="fxFbUp">+</button>
+            <button class="drumbox-btn fx-adj" id="fxFbUp" title="Feedback + []]">+</button>
             <span class="fx-lbl">FB</span>
           </div>
           <div class="fx-row">
-            <button class="drumbox-btn" id="fxPitch">PITCH</button>
+            <button class="drumbox-btn" id="fxPitch" title="Reset pitch [P]">PITCH</button>
             <div class="fx-sep"></div>
-            <button class="drumbox-btn fx-adj" id="fxPitchDn">−</button>
+            <button class="drumbox-btn fx-adj" id="fxPitchDn" title="Pitch − [↓]">−</button>
             <span class="fx-val" id="fxPitchVal">0</span>
-            <button class="drumbox-btn fx-adj" id="fxPitchUp">+</button>
+            <button class="drumbox-btn fx-adj" id="fxPitchUp" title="Pitch + [↑]">+</button>
             <span class="fx-lbl">SEMI</span>
           </div>
         </div>
@@ -1310,7 +1310,7 @@
             <div class="drumbox-tracks" id="dbTracks"></div>
           </div>
         </div>
-        <div class="drumbox-footer">DOXAL TR-01 — Audio Synthesis Engine / Web API</div>
+        <div class="drumbox-footer">SPACE play · D delay · ↑↓ pitch · ← → time · [ ] feedback · P reset</div>
       </div>
     </div>
   </section>
@@ -2259,111 +2259,116 @@ function cycleTheme() {
     }
 
     var S = {
-      sub: function(t) { // Ultra-low sine sweep — industrial sub
+      bass808: function(t) { // Deep 808 kick — sine + soft saturation
         var c=ac(); t=t||c.currentTime;
-        var o=c.createOscillator(), g=c.createGain();
-        o.frequency.setValueAtTime(60*pm(), t);
-        o.frequency.exponentialRampToValueAtTime(18, t+0.9);
-        g.gain.setValueAtTime(2.2, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.9);
-        o.connect(g); g.connect(dst()); o.start(t); o.stop(t+0.95);
-        var o2=c.createOscillator(), g2=c.createGain();
-        o2.frequency.value=120*pm(); o2.connect(g2); g2.connect(dst());
-        g2.gain.setValueAtTime(1.0,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.04);
-        o2.start(t); o2.stop(t+0.05);
+        var o=c.createOscillator(), ws=c.createWaveShaper(), g=c.createGain();
+        var curve=new Float32Array(256);
+        for(var i=0;i<256;i++){var x=i*2/256-1; curve[i]=Math.tanh(x*2)*0.85;}
+        ws.curve=curve;
+        o.frequency.setValueAtTime(80*pm(),t);
+        o.frequency.exponentialRampToValueAtTime(35,t+0.65);
+        o.connect(ws); ws.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.8,t+0.008);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
+        o.start(t); o.stop(t+0.8);
       },
-      crack: function(t) { // Hard noise transient — sharper than a snare
+      dnbSnare: function(t) { // DnB snare — sharp layered noise + body
         var c=ac(); t=t||c.currentTime;
-        var src=c.createBufferSource(); src.buffer=mkNoise(0.07);
-        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2800*pm(); f.Q.value=0.4;
+        var src=c.createBufferSource(); src.buffer=mkNoise(0.12);
+        var hpf=c.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=3500;
         var g=c.createGain();
-        src.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(2.0,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
-        src.start(t); src.stop(t+0.08);
+        src.connect(hpf); hpf.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(2.2,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+        src.start(t); src.stop(t+0.13);
         var o=c.createOscillator(), og=c.createGain(); o.type='triangle';
-        o.frequency.value=400*pm(); o.connect(og); og.connect(dst());
-        og.gain.setValueAtTime(0.6,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.03);
-        o.start(t); o.stop(t+0.04);
+        o.frequency.value=280*pm(); o.connect(og); og.connect(dst());
+        og.gain.setValueAtTime(0.9,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.025);
+        o.start(t); o.stop(t+0.03);
       },
-      tick: function(t) { // FM metallic click — inharmonic partials
+      hihat: function(t) { // Tight hihat — inharmonic metallic partials
         var c=ac(); t=t||c.currentTime;
-        [1,1.414,1.732,2.236,2.646].forEach(function(r,i) {
+        [1,1.414,1.732,2.236,2.646,3.141].forEach(function(r,i) {
           var o=c.createOscillator(), g=c.createGain();
-          o.frequency.value=600*r*pm();
+          o.frequency.value=400*r*pm();
           o.connect(g); g.connect(dst());
-          g.gain.setValueAtTime(0.07/(i+1),t); g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
-          o.start(t); o.stop(t+0.06);
+          g.gain.setValueAtTime(0.04/(i*0.4+1),t); g.gain.exponentialRampToValueAtTime(0.001,t+0.035);
+          o.start(t); o.stop(t+0.04);
         });
       },
-      sweep: function(t) { // Noise sweep — rising highpass filter
+      siren: function(t) { // Air raid siren — LFO-modulated oscillator
         var c=ac(); t=t||c.currentTime;
-        var src=c.createBufferSource(); src.buffer=mkNoise(0.5);
-        var f=c.createBiquadFilter(); f.type='highpass';
-        f.frequency.setValueAtTime(1500*pm(),t); f.frequency.exponentialRampToValueAtTime(14000,t+0.4);
-        var g=c.createGain();
-        src.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
-        src.start(t); src.stop(t+0.51);
+        var osc=c.createOscillator(), lfo=c.createOscillator(), lfog=c.createGain(), g=c.createGain();
+        osc.type='sawtooth'; osc.frequency.value=600*pm();
+        lfo.frequency.value=3.5; lfog.gain.value=350*pm();
+        lfo.connect(lfog); lfog.connect(osc.frequency);
+        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=700; f.Q.value=1.5;
+        osc.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.9,t+0.05);
+        g.gain.setValueAtTime(0.9,t+0.72); g.gain.exponentialRampToValueAtTime(0.001,t+0.88);
+        lfo.start(t); lfo.stop(t+0.92); osc.start(t); osc.stop(t+0.92);
       },
-      body: function(t) { // Layered noise bursts — textural body hit
+      wobble: function(t) { // Dubstep wobble — sawtooth + resonant LPF + LFO
         var c=ac(); t=t||c.currentTime;
-        [0,0.009,0.02].forEach(function(dt,i) {
-          var src=c.createBufferSource(); src.buffer=mkNoise(0.12);
-          var f=c.createBiquadFilter(); f.type='bandpass';
-          f.frequency.value=[900,1300,700][i]*pm(); f.Q.value=1.5;
-          var g=c.createGain();
-          src.connect(f); f.connect(g); g.connect(dst());
-          g.gain.setValueAtTime(0.65,t+dt); g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.1);
-          src.start(t+dt); src.stop(t+dt+0.13);
+        var osc=c.createOscillator(), lpf=c.createBiquadFilter(), g=c.createGain();
+        osc.type='sawtooth'; osc.frequency.value=55*pm();
+        lpf.type='lowpass'; lpf.Q.value=12; lpf.frequency.value=200;
+        var lfo=c.createOscillator(), lfog=c.createGain();
+        lfo.frequency.value=5.5; lfog.gain.value=1800;
+        lfo.connect(lfog); lfog.connect(lpf.frequency);
+        osc.connect(lpf); lpf.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.0,t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+        lfo.start(t); lfo.stop(t+0.6); osc.start(t); osc.stop(t+0.6);
+      },
+      reese: function(t) { // Reese bass — detuned saws, dark and heavy
+        var c=ac(); t=t||c.currentTime;
+        var g=c.createGain(), f=c.createBiquadFilter();
+        f.type='lowpass'; f.frequency.value=450; f.Q.value=5;
+        var o1=c.createOscillator(), o2=c.createOscillator(), o3=c.createOscillator();
+        o1.type='sawtooth'; o1.frequency.value=55*pm(); o1.detune.value=0;
+        o2.type='sawtooth'; o2.frequency.value=55*pm(); o2.detune.value=16;
+        o3.type='square';   o3.frequency.value=55*pm()*2;
+        o1.connect(f); o2.connect(f); o3.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.3,t+0.015);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.42);
+        o1.start(t); o1.stop(t+0.45); o2.start(t); o2.stop(t+0.45); o3.start(t); o3.stop(t+0.45);
+      },
+      airhorn: function(t) { // Airhorn blast — sawtooth + bandpass compression
+        var c=ac(); t=t||c.currentTime;
+        var base=660*pm();
+        [1, 1.5].forEach(function(ratio, i) {
+          var osc=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
+          osc.type='sawtooth'; osc.frequency.setValueAtTime(base*ratio*0.97,t);
+          osc.frequency.linearRampToValueAtTime(base*ratio,t+0.04);
+          f.type='bandpass'; f.frequency.value=base*ratio; f.Q.value=2+i;
+          osc.connect(f); f.connect(g); g.connect(dst());
+          g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(i?0.8:1.8,t+0.02);
+          g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+          osc.start(t); osc.stop(t+0.5);
         });
       },
-      plop: function(t) { // Resonant membrane — Karplus-Strong inspired
+      stab: function(t) { // DnB stab — square with upward portamento
         var c=ac(); t=t||c.currentTime;
-        var o=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-        o.type='triangle'; f.type='lowpass'; f.frequency.value=700; f.Q.value=8;
-        o.frequency.setValueAtTime(220*pm(),t); o.frequency.exponentialRampToValueAtTime(60*pm(),t+0.18);
-        o.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(1.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35);
-        o.start(t); o.stop(t+0.4);
-        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.03);
-        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=500; nf.Q.value=3;
-        var ng=c.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(dst());
-        ng.gain.setValueAtTime(0.4,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.03);
-        ns.start(t); ns.stop(t+0.04);
-      },
-      growl: function(t) { // Distorted sawtooth bass — waveshaper drive
-        var c=ac(); t=t||c.currentTime;
-        var o=c.createOscillator(), ws=c.createWaveShaper(), f=c.createBiquadFilter(), g=c.createGain();
-        o.type='sawtooth'; o.frequency.value=55*pm();
-        var curve=new Float32Array(512);
-        for(var i=0;i<512;i++){var x=i*2/512-1; curve[i]=Math.tanh(x*5)*0.65;}
-        ws.curve=curve; f.type='lowpass'; f.frequency.value=900; f.Q.value=4;
-        o.connect(ws); ws.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.6,t+0.01);
-        g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
-        o.start(t); o.stop(t+0.42);
-      },
-      zap: function(t) { // Electronic laser — descending sawtooth sweep
-        var c=ac(); t=t||c.currentTime;
-        var o=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-        o.type='sawtooth'; var base=800*pm();
-        o.frequency.setValueAtTime(base*3.5,t); o.frequency.exponentialRampToValueAtTime(base*0.5,t+0.28);
-        f.type='bandpass'; f.frequency.setValueAtTime(base*3.5,t); f.Q.value=4;
-        f.frequency.exponentialRampToValueAtTime(base*0.5,t+0.28);
-        o.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(1.1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
-        o.start(t); o.stop(t+0.32);
+        var osc=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
+        osc.type='square'; f.type='bandpass'; f.frequency.value=1400; f.Q.value=2;
+        osc.frequency.setValueAtTime(440*pm(),t);
+        osc.frequency.exponentialRampToValueAtTime(880*pm(),t+0.06);
+        osc.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.4,t+0.005);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+        osc.start(t); osc.stop(t+0.22);
       }
     };
 
     var trackDefs = [
-      {name:'SUB',   play:S.sub,   pat:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
-      {name:'CRACK', play:S.crack, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'TICK',  play:S.tick,  pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {name:'SWEEP', play:S.sweep, pat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1]},
-      {name:'BODY',  play:S.body,  pat:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,1,0]},
-      {name:'PLOP',  play:S.plop,  pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]},
-      {name:'GROWL', play:S.growl, pat:[1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0]},
-      {name:'ZAP',   play:S.zap,   pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+      {name:'808',     play:S.bass808,  pat:[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0]},
+      {name:'SNARE',   play:S.dnbSnare, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
+      {name:'HIHAT',   play:S.hihat,    pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
+      {name:'SIREN',   play:S.siren,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},
+      {name:'WOBBLE',  play:S.wobble,   pat:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0]},
+      {name:'REESE',   play:S.reese,    pat:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
+      {name:'AIRHORN', play:S.airhorn,  pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+      {name:'STAB',    play:S.stab,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]}
     ];
 
     var stepBtns = [], stepNums = [];
@@ -2542,10 +2547,38 @@ function cycleTheme() {
       if (fxPitchBtn) fxPitchBtn.classList.toggle('fx-on', PITCH !== 0);
     });
 
+    function updatePitchUI() {
+      if (fxPitchVal) fxPitchVal.textContent = (PITCH>0?'+':'')+PITCH;
+      if (fxPitchBtn) fxPitchBtn.classList.toggle('fx-on', PITCH !== 0);
+    }
+
     document.addEventListener('keydown', function(e) {
-      if (e.code !== 'Space' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      var r = tracksEl.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) { e.preventDefault(); togglePlay(); }
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      var sr = document.getElementById('sampler').getBoundingClientRect();
+      var vis = sr.top < window.innerHeight && sr.bottom > 0;
+      if (!vis) return;
+      switch(e.code) {
+        case 'Space':
+          e.preventDefault(); togglePlay(); break;
+        case 'KeyD': // D → toggle delay
+          e.preventDefault(); if (fxDelayBtn) fxDelayBtn.click(); break;
+        case 'KeyP': // P → reset pitch
+          e.preventDefault(); if (fxPitchBtn) fxPitchBtn.click(); break;
+        case 'ArrowUp': // ↑ → pitch +1 (Shift +12)
+          e.preventDefault();
+          PITCH = Math.min(12, e.shiftKey ? PITCH+12 : PITCH+1); updatePitchUI(); break;
+        case 'ArrowDown': // ↓ → pitch −1 (Shift −12)
+          e.preventDefault();
+          PITCH = Math.max(-12, e.shiftKey ? PITCH-12 : PITCH-1); updatePitchUI(); break;
+        case 'ArrowLeft': // ← → delay time −
+          e.preventDefault(); if (fxTimeDn) fxTimeDn.click(); break;
+        case 'ArrowRight': // → → delay time +
+          e.preventDefault(); if (fxTimeUp) fxTimeUp.click(); break;
+        case 'BracketLeft': // [ → feedback −
+          e.preventDefault(); if (fxFbDn) fxFbDn.click(); break;
+        case 'BracketRight': // ] → feedback +
+          e.preventDefault(); if (fxFbUp) fxFbUp.click(); break;
+      }
     });
   })();
 </script>
