@@ -534,6 +534,21 @@
   .fx-lbl { font-family: var(--mono); font-size: 0.38rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
   .fx-val { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; color: var(--red); min-width: 3.5ch; text-align: center; }
   .drumbox-btn.fx-on { background: color-mix(in srgb, var(--red) 18%, var(--charcoal)); border-color: var(--red); color: var(--red); box-shadow: 0 0 8px rgba(224,26,26,0.25); }
+  .drumbox-keys {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center;
+    padding: 0.75rem 0; margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(245,242,237,0.06);
+  }
+  .kbd-pair { display: flex; align-items: center; gap: 0.25rem; }
+  .kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 0.38rem; letter-spacing: 0; font-weight: 600;
+    background: rgba(245,242,237,0.07); border: 1px solid rgba(245,242,237,0.18);
+    border-radius: 3px; padding: 0.2rem 0.38rem; min-width: 1.5rem;
+    color: rgba(245,242,237,0.75); box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    white-space: nowrap; user-select: none; -webkit-user-select: none;
+  }
+  .kbd-lbl { font-family: var(--mono); font-size: 0.34rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 
   @media (max-width: 768px) {
 
@@ -1304,13 +1319,21 @@
             <span class="fx-lbl">SEMI</span>
           </div>
         </div>
+        <div class="drumbox-keys">
+          <div class="kbd-pair"><span class="kbd">SPACE</span><span class="kbd-lbl">PLAY</span></div>
+          <div class="kbd-pair"><span class="kbd">D</span><span class="kbd-lbl">DELAY</span></div>
+          <div class="kbd-pair"><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd-lbl">PITCH</span></div>
+          <div class="kbd-pair"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd-lbl">TIME</span></div>
+          <div class="kbd-pair"><span class="kbd">[</span><span class="kbd">]</span><span class="kbd-lbl">FDBK</span></div>
+          <div class="kbd-pair"><span class="kbd">P</span><span class="kbd-lbl">RESET</span></div>
+        </div>
         <div class="drumbox-body">
           <div class="drumbox-inner">
             <div class="drumbox-step-nums" id="dbStepNums"></div>
             <div class="drumbox-tracks" id="dbTracks"></div>
           </div>
         </div>
-        <div class="drumbox-footer">SPACE play · D delay · ↑↓ pitch · ← → time · [ ] feedback · P reset</div>
+        <div class="drumbox-footer">DOXAL TR-01 — Audio Synthesis Engine / Web API</div>
       </div>
     </div>
   </section>
@@ -2259,18 +2282,33 @@ function cycleTheme() {
     }
 
     var S = {
-      bass808: function(t) { // Deep 808 kick — sine + soft saturation
+      bass808: function(t) { // Playboi Carti 808 — heavy saturated sub, long tail
         var c=ac(); t=t||c.currentTime;
+        var n=1024, curve=new Float32Array(n);
+        for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=Math.tanh(x*6)*0.6+Math.sign(x)*0.25*Math.min(1,Math.abs(x*4));}
+        // Sub body
         var o=c.createOscillator(), ws=c.createWaveShaper(), g=c.createGain();
-        var curve=new Float32Array(256);
-        for(var i=0;i<256;i++){var x=i*2/256-1; curve[i]=Math.tanh(x*2)*0.85;}
         ws.curve=curve;
-        o.frequency.setValueAtTime(80*pm(),t);
-        o.frequency.exponentialRampToValueAtTime(35,t+0.65);
+        o.frequency.setValueAtTime(90*pm(),t); o.frequency.exponentialRampToValueAtTime(27,t+1.1);
         o.connect(ws); ws.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.8,t+0.008);
-        g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
-        o.start(t); o.stop(t+0.8);
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(3.8,t+0.005);
+        g.gain.exponentialRampToValueAtTime(0.001,t+1.2);
+        o.start(t); o.stop(t+1.25);
+        // 2nd harmonic — adds grit and presence
+        var o2=c.createOscillator(), ws2=c.createWaveShaper(), g2=c.createGain();
+        var c2=new Float32Array(n); for(var i=0;i<n;i++){var x=i*2/n-1; c2[i]=Math.tanh(x*8)*0.5;}
+        ws2.curve=c2; o2.type='sawtooth'; o2.frequency.setValueAtTime(180*pm(),t);
+        o2.frequency.exponentialRampToValueAtTime(54,t+0.45);
+        o2.connect(ws2); ws2.connect(g2); g2.connect(dst());
+        g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(1.4,t+0.004);
+        g2.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+        o2.start(t); o2.stop(t+0.5);
+        // Punch click transient
+        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.018);
+        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=180; nf.Q.value=1.2;
+        var ng=c.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(dst());
+        ng.gain.setValueAtTime(2.0,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.018);
+        ns.start(t); ns.stop(t+0.02);
       },
       dnbSnare: function(t) { // DnB snare — sharp layered noise + body
         var c=ac(); t=t||c.currentTime;
@@ -2320,55 +2358,60 @@ function cycleTheme() {
         g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
         lfo.start(t); lfo.stop(t+0.6); osc.start(t); osc.stop(t+0.6);
       },
-      reese: function(t) { // Reese bass — detuned saws, dark and heavy
+      womp: function(t) { // Dubstep WOMP — filter sweep down, heavy drop
         var c=ac(); t=t||c.currentTime;
-        var g=c.createGain(), f=c.createBiquadFilter();
-        f.type='lowpass'; f.frequency.value=450; f.Q.value=5;
-        var o1=c.createOscillator(), o2=c.createOscillator(), o3=c.createOscillator();
-        o1.type='sawtooth'; o1.frequency.value=55*pm(); o1.detune.value=0;
-        o2.type='sawtooth'; o2.frequency.value=55*pm(); o2.detune.value=16;
-        o3.type='square';   o3.frequency.value=55*pm()*2;
-        o1.connect(f); o2.connect(f); o3.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.3,t+0.015);
+        var osc=c.createOscillator(), lpf=c.createBiquadFilter(), g=c.createGain();
+        osc.type='sawtooth'; osc.frequency.value=55*pm();
+        lpf.type='lowpass'; lpf.Q.value=14;
+        lpf.frequency.setValueAtTime(5000,t); lpf.frequency.exponentialRampToValueAtTime(70,t+0.38);
+        osc.connect(lpf); lpf.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(2.5,t+0.006);
         g.gain.exponentialRampToValueAtTime(0.001,t+0.42);
-        o1.start(t); o1.stop(t+0.45); o2.start(t); o2.stop(t+0.45); o3.start(t); o3.stop(t+0.45);
+        osc.start(t); osc.stop(t+0.45);
+        // Sub layer
+        var o2=c.createOscillator(), g2=c.createGain();
+        o2.frequency.value=55*pm(); o2.connect(g2); g2.connect(dst());
+        g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(1.2,t+0.01);
+        g2.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+        o2.start(t); o2.stop(t+0.45);
       },
-      airhorn: function(t) { // Airhorn blast — sawtooth + bandpass compression
+      rise: function(t) { // DJ rise — resonant noise sweep from sub to top
         var c=ac(); t=t||c.currentTime;
-        var base=660*pm();
-        [1, 1.5].forEach(function(ratio, i) {
-          var osc=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-          osc.type='sawtooth'; osc.frequency.setValueAtTime(base*ratio*0.97,t);
-          osc.frequency.linearRampToValueAtTime(base*ratio,t+0.04);
-          f.type='bandpass'; f.frequency.value=base*ratio; f.Q.value=2+i;
-          osc.connect(f); f.connect(g); g.connect(dst());
-          g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(i?0.8:1.8,t+0.02);
-          g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
-          osc.start(t); osc.stop(t+0.5);
+        var src=c.createBufferSource(); src.buffer=mkNoise(0.7);
+        var bpf=c.createBiquadFilter(); bpf.type='bandpass'; bpf.Q.value=10;
+        bpf.frequency.setValueAtTime(80*pm(),t); bpf.frequency.exponentialRampToValueAtTime(9000,t+0.68);
+        var g=c.createGain();
+        src.connect(bpf); bpf.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0.15,t); g.gain.linearRampToValueAtTime(1.0,t+0.62);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
+        src.start(t); src.stop(t+0.76);
+      },
+      glitch: function(t) { // Glitch burst — chaotic stuttering pitched noise
+        var c=ac(); t=t||c.currentTime;
+        var offsets=[0,0.018,0.036,0.054,0.076,0.098];
+        var pitches=[880,440,1320,220,660,1760];
+        var types=['square','sawtooth','triangle','square','sawtooth','triangle'];
+        offsets.forEach(function(dt,i) {
+          var osc=c.createOscillator(), g=c.createGain();
+          osc.type=types[i]; osc.frequency.value=pitches[i]*pm();
+          osc.connect(g); g.connect(dst());
+          var dur=0.012+i*0.002;
+          g.gain.setValueAtTime(0.55-i*0.07,t+dt);
+          g.gain.exponentialRampToValueAtTime(0.001,t+dt+dur);
+          osc.start(t+dt); osc.stop(t+dt+dur+0.002);
         });
-      },
-      stab: function(t) { // DnB stab — square with upward portamento
-        var c=ac(); t=t||c.currentTime;
-        var osc=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-        osc.type='square'; f.type='bandpass'; f.frequency.value=1400; f.Q.value=2;
-        osc.frequency.setValueAtTime(440*pm(),t);
-        osc.frequency.exponentialRampToValueAtTime(880*pm(),t+0.06);
-        osc.connect(f); f.connect(g); g.connect(dst());
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.4,t+0.005);
-        g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
-        osc.start(t); osc.stop(t+0.22);
       }
     };
 
     var trackDefs = [
-      {name:'808',     play:S.bass808,  pat:[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0]},
-      {name:'SNARE',   play:S.dnbSnare, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'HIHAT',   play:S.hihat,    pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {name:'SIREN',   play:S.siren,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},
-      {name:'WOBBLE',  play:S.wobble,   pat:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0]},
-      {name:'REESE',   play:S.reese,    pat:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
-      {name:'AIRHORN', play:S.airhorn,  pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
-      {name:'STAB',    play:S.stab,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]}
+      {name:'808',    play:S.bass808,  pat:[1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0]},
+      {name:'SNARE',  play:S.dnbSnare, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
+      {name:'HIHAT',  play:S.hihat,    pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
+      {name:'SIREN',  play:S.siren,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},
+      {name:'WOBBLE', play:S.wobble,   pat:[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]},
+      {name:'WOMP',   play:S.womp,     pat:[0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0]},
+      {name:'RISE',   play:S.rise,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]},
+      {name:'GLITCH', play:S.glitch,   pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
     ];
 
     var stepBtns = [], stepNums = [];
