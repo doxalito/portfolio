@@ -522,6 +522,18 @@
   .drumbox-step-btn.playing { box-shadow: inset 0 0 0 1px rgba(245,242,237,0.55); }
   .drumbox-step-btn.on.playing { box-shadow: inset 0 0 0 1px var(--white), 0 0 8px rgba(224,26,26,0.5); }
   .drumbox-footer { display: flex; justify-content: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(245,242,237,0.06); font-family: var(--mono); font-size: 0.4rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,242,237,0.18); }
+  .drumbox-fx {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    margin-bottom: 1.25rem; padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(245,242,237,0.06);
+  }
+  .fx-row { display: flex; align-items: center; gap: 0.35rem; flex-wrap: nowrap; }
+  .fx-module { display: flex; align-items: center; gap: 0.35rem; }
+  .fx-sep { width: 1px; height: 1.4rem; background: rgba(245,242,237,0.08); flex-shrink: 0; margin: 0 0.1rem; }
+  .fx-adj { padding: 0.35rem 0.45rem !important; font-size: 0.75rem !important; line-height: 1; }
+  .fx-lbl { font-family: var(--mono); font-size: 0.38rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .fx-val { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; color: var(--red); min-width: 3.5ch; text-align: center; }
+  .drumbox-btn.fx-on { background: color-mix(in srgb, var(--red) 18%, var(--charcoal)); border-color: var(--red); color: var(--red); box-shadow: 0 0 8px rgba(224,26,26,0.25); }
 
   @media (max-width: 768px) {
 
@@ -1256,7 +1268,7 @@
         <div class="drumbox-header">
           <div>
             <span class="drumbox-brand">DOXAL</span>
-            <span class="drumbox-model">TR-01 / Drum Machine</span>
+            <span class="drumbox-model">TR-01 / Experimental</span>
           </div>
           <div class="drumbox-controls">
             <button class="drumbox-btn drumbox-play" id="dbPlay">▶</button>
@@ -1267,6 +1279,29 @@
               <button class="drumbox-btn drumbox-bpm-btn" id="dbBpmUp">+</button>
             </div>
             <button class="drumbox-btn" id="dbClear">CLR</button>
+          </div>
+        </div>
+        <div class="drumbox-fx">
+          <div class="fx-row">
+            <button class="drumbox-btn" id="fxDelay">DELAY</button>
+            <div class="fx-sep"></div>
+            <button class="drumbox-btn fx-adj" id="fxTimeDn">−</button>
+            <span class="fx-val" id="fxTimeVal">1/8</span>
+            <button class="drumbox-btn fx-adj" id="fxTimeUp">+</button>
+            <span class="fx-lbl">T</span>
+            <div class="fx-sep"></div>
+            <button class="drumbox-btn fx-adj" id="fxFbDn">−</button>
+            <span class="fx-val" id="fxFbVal">40%</span>
+            <button class="drumbox-btn fx-adj" id="fxFbUp">+</button>
+            <span class="fx-lbl">FB</span>
+          </div>
+          <div class="fx-row">
+            <button class="drumbox-btn" id="fxPitch">PITCH</button>
+            <div class="fx-sep"></div>
+            <button class="drumbox-btn fx-adj" id="fxPitchDn">−</button>
+            <span class="fx-val" id="fxPitchVal">0</span>
+            <button class="drumbox-btn fx-adj" id="fxPitchUp">+</button>
+            <span class="fx-lbl">SEMI</span>
           </div>
         </div>
         <div class="drumbox-body">
@@ -2189,106 +2224,149 @@ function cycleTheme() {
       return (noiseBufs[k] = b);
     }
 
+    // Effects chain
+    var masterOut=null, delayNode=null, delayFbGain=null, delayWetGain=null;
+    var DELAY_ON=false, DELAY_TIME_IDX=1, DELAY_FB_IDX=2;
+    var DELAY_TIMES=[1/16,1/8,1/4,3/8,1/2];
+    var DELAY_TIME_LABELS=['1/16','1/8','1/4','3/8','1/2'];
+    var DELAY_FBS=[0.1,0.25,0.4,0.55,0.7,0.85];
+    var DELAY_FB_LABELS=['10%','25%','40%','55%','70%','85%'];
+    var PITCH=0; // semitones -12..+12
+    var BPM=128, playing=false, currentStep=0, nextNoteTime=0, timerID=null;
+
+    function pm() { return Math.pow(2, PITCH/12); }
+
+    function getMaster() {
+      var c=ac();
+      if (masterOut) return masterOut;
+      masterOut=c.createGain(); masterOut.gain.value=0.8;
+      delayNode=c.createDelay(2.0); delayNode.delayTime.value=60/(BPM*2);
+      delayFbGain=c.createGain(); delayFbGain.gain.value=0.4;
+      var dlpf=c.createBiquadFilter(); dlpf.type='lowpass'; dlpf.frequency.value=5000;
+      delayWetGain=c.createGain(); delayWetGain.gain.value=0;
+      masterOut.connect(c.destination);
+      masterOut.connect(delayNode);
+      delayNode.connect(dlpf);
+      dlpf.connect(delayFbGain); delayFbGain.connect(delayNode);
+      dlpf.connect(delayWetGain); delayWetGain.connect(c.destination);
+      return masterOut;
+    }
+    function dst() { return getMaster(); }
+
+    function updateDelayTime() {
+      if (!delayNode) return;
+      delayNode.delayTime.setTargetAtTime(DELAY_TIMES[DELAY_TIME_IDX]*(240/BPM), ac().currentTime, 0.02);
+    }
+
     var S = {
-      kick: function(t) {
+      sub: function(t) { // Ultra-low sine sweep — industrial sub
         var c=ac(); t=t||c.currentTime;
         var o=c.createOscillator(), g=c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.frequency.setValueAtTime(160, t);
-        o.frequency.exponentialRampToValueAtTime(0.01, t+0.5);
-        g.gain.setValueAtTime(1.5, t);
-        g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
-        o.start(t); o.stop(t+0.5);
+        o.frequency.setValueAtTime(60*pm(), t);
+        o.frequency.exponentialRampToValueAtTime(18, t+0.9);
+        g.gain.setValueAtTime(2.2, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.9);
+        o.connect(g); g.connect(dst()); o.start(t); o.stop(t+0.95);
+        var o2=c.createOscillator(), g2=c.createGain();
+        o2.frequency.value=120*pm(); o2.connect(g2); g2.connect(dst());
+        g2.gain.setValueAtTime(1.0,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+        o2.start(t); o2.stop(t+0.05);
       },
-      snare: function(t) {
+      crack: function(t) { // Hard noise transient — sharper than a snare
         var c=ac(); t=t||c.currentTime;
-        var src=c.createBufferSource(); src.buffer=mkNoise(0.22);
-        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2200; f.Q.value=0.7;
+        var src=c.createBufferSource(); src.buffer=mkNoise(0.07);
+        var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2800*pm(); f.Q.value=0.4;
         var g=c.createGain();
-        src.connect(f); f.connect(g); g.connect(c.destination);
-        g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.22);
-        src.start(t); src.stop(t+0.23);
-        var o=c.createOscillator(), og=c.createGain(); o.frequency.value=200;
-        o.connect(og); og.connect(c.destination);
-        og.gain.setValueAtTime(0.4, t); og.gain.exponentialRampToValueAtTime(0.001, t+0.06);
-        o.start(t); o.stop(t+0.07);
+        src.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(2.0,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+        src.start(t); src.stop(t+0.08);
+        var o=c.createOscillator(), og=c.createGain(); o.type='triangle';
+        o.frequency.value=400*pm(); o.connect(og); og.connect(dst());
+        og.gain.setValueAtTime(0.6,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.03);
+        o.start(t); o.stop(t+0.04);
       },
-      hihat: function(t) {
+      tick: function(t) { // FM metallic click — inharmonic partials
         var c=ac(); t=t||c.currentTime;
-        var src=c.createBufferSource(); src.buffer=mkNoise(0.06);
-        var f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
-        var g=c.createGain();
-        src.connect(f); f.connect(g); g.connect(c.destination);
-        g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.06);
-        src.start(t); src.stop(t+0.07);
-      },
-      openhat: function(t) {
-        var c=ac(); t=t||c.currentTime;
-        var src=c.createBufferSource(); src.buffer=mkNoise(0.45);
-        var f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000;
-        var g=c.createGain();
-        src.connect(f); f.connect(g); g.connect(c.destination);
-        g.gain.setValueAtTime(0.28, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.45);
-        src.start(t); src.stop(t+0.46);
-      },
-      clap: function(t) {
-        var c=ac(); t=t||c.currentTime;
-        [0, 0.012, 0.025, 0.038].forEach(function(dt) {
-          var d=dt<0.038?0.02:0.12, src=c.createBufferSource(); src.buffer=mkNoise(d+0.05);
-          var f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1600; f.Q.value=0.9;
-          var g=c.createGain();
-          src.connect(f); f.connect(g); g.connect(c.destination);
-          g.gain.setValueAtTime(0.7, t+dt); g.gain.exponentialRampToValueAtTime(0.001, t+dt+d);
-          src.start(t+dt); src.stop(t+dt+d+0.01);
+        [1,1.414,1.732,2.236,2.646].forEach(function(r,i) {
+          var o=c.createOscillator(), g=c.createGain();
+          o.frequency.value=600*r*pm();
+          o.connect(g); g.connect(dst());
+          g.gain.setValueAtTime(0.07/(i+1),t); g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+          o.start(t); o.stop(t+0.06);
         });
       },
-      tom: function(t) {
+      sweep: function(t) { // Noise sweep — rising highpass filter
         var c=ac(); t=t||c.currentTime;
-        var o=c.createOscillator(), g=c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.frequency.setValueAtTime(130, t);
-        o.frequency.exponentialRampToValueAtTime(55, t+0.3);
-        g.gain.setValueAtTime(1.1, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.3);
-        o.start(t); o.stop(t+0.35);
+        var src=c.createBufferSource(); src.buffer=mkNoise(0.5);
+        var f=c.createBiquadFilter(); f.type='highpass';
+        f.frequency.setValueAtTime(1500*pm(),t); f.frequency.exponentialRampToValueAtTime(14000,t+0.4);
+        var g=c.createGain();
+        src.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+        src.start(t); src.stop(t+0.51);
       },
-      bass: function(t) {
+      body: function(t) { // Layered noise bursts — textural body hit
+        var c=ac(); t=t||c.currentTime;
+        [0,0.009,0.02].forEach(function(dt,i) {
+          var src=c.createBufferSource(); src.buffer=mkNoise(0.12);
+          var f=c.createBiquadFilter(); f.type='bandpass';
+          f.frequency.value=[900,1300,700][i]*pm(); f.Q.value=1.5;
+          var g=c.createGain();
+          src.connect(f); f.connect(g); g.connect(dst());
+          g.gain.setValueAtTime(0.65,t+dt); g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.1);
+          src.start(t+dt); src.stop(t+dt+0.13);
+        });
+      },
+      plop: function(t) { // Resonant membrane — Karplus-Strong inspired
         var c=ac(); t=t||c.currentTime;
         var o=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-        o.type='sawtooth'; o.frequency.value=55;
-        f.type='lowpass'; f.frequency.value=700; f.Q.value=2;
-        o.connect(f); f.connect(g); g.connect(c.destination);
-        g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(1.3, t+0.02);
-        g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
-        o.start(t); o.stop(t+0.55);
+        o.type='triangle'; f.type='lowpass'; f.frequency.value=700; f.Q.value=8;
+        o.frequency.setValueAtTime(220*pm(),t); o.frequency.exponentialRampToValueAtTime(60*pm(),t+0.18);
+        o.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(1.6,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+        o.start(t); o.stop(t+0.4);
+        var ns=c.createBufferSource(); ns.buffer=mkNoise(0.03);
+        var nf=c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=500; nf.Q.value=3;
+        var ng=c.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(dst());
+        ng.gain.setValueAtTime(0.4,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.03);
+        ns.start(t); ns.stop(t+0.04);
       },
-      acid: function(t) {
+      growl: function(t) { // Distorted sawtooth bass — waveshaper drive
+        var c=ac(); t=t||c.currentTime;
+        var o=c.createOscillator(), ws=c.createWaveShaper(), f=c.createBiquadFilter(), g=c.createGain();
+        o.type='sawtooth'; o.frequency.value=55*pm();
+        var curve=new Float32Array(512);
+        for(var i=0;i<512;i++){var x=i*2/512-1; curve[i]=Math.tanh(x*5)*0.65;}
+        ws.curve=curve; f.type='lowpass'; f.frequency.value=900; f.Q.value=4;
+        o.connect(ws); ws.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.6,t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+        o.start(t); o.stop(t+0.42);
+      },
+      zap: function(t) { // Electronic laser — descending sawtooth sweep
         var c=ac(); t=t||c.currentTime;
         var o=c.createOscillator(), f=c.createBiquadFilter(), g=c.createGain();
-        o.type='sawtooth'; o.frequency.value=110;
-        f.type='lowpass'; f.Q.value=14;
-        f.frequency.setValueAtTime(120, t);
-        f.frequency.exponentialRampToValueAtTime(3500, t+0.15);
-        f.frequency.exponentialRampToValueAtTime(120, t+0.5);
-        o.connect(f); f.connect(g); g.connect(c.destination);
-        g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
-        o.start(t); o.stop(t+0.55);
+        o.type='sawtooth'; var base=800*pm();
+        o.frequency.setValueAtTime(base*3.5,t); o.frequency.exponentialRampToValueAtTime(base*0.5,t+0.28);
+        f.type='bandpass'; f.frequency.setValueAtTime(base*3.5,t); f.Q.value=4;
+        f.frequency.exponentialRampToValueAtTime(base*0.5,t+0.28);
+        o.connect(f); f.connect(g); g.connect(dst());
+        g.gain.setValueAtTime(1.1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
+        o.start(t); o.stop(t+0.32);
       }
     };
 
     var trackDefs = [
-      {name:'KICK',     play:S.kick,    pat:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
-      {name:'SNARE',    play:S.snare,   pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
-      {name:'HI-HAT',   play:S.hihat,   pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
-      {name:'OPEN HAT', play:S.openhat, pat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1]},
-      {name:'CLAP',     play:S.clap,    pat:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,1,0]},
-      {name:'TOM',      play:S.tom,     pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]},
-      {name:'BASS',     play:S.bass,    pat:[1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0]},
-      {name:'ACID',     play:S.acid,    pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+      {name:'SUB',   play:S.sub,   pat:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
+      {name:'CRACK', play:S.crack, pat:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
+      {name:'TICK',  play:S.tick,  pat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
+      {name:'SWEEP', play:S.sweep, pat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1]},
+      {name:'BODY',  play:S.body,  pat:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,1,0]},
+      {name:'PLOP',  play:S.plop,  pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]},
+      {name:'GROWL', play:S.growl, pat:[1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0]},
+      {name:'ZAP',   play:S.zap,   pat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
     ];
 
     var stepBtns = [], stepNums = [];
-    var BPM = 128, playing = false, currentStep = 0, nextNoteTime = 0, timerID = null;
 
     var tracksEl = document.getElementById('dbTracks');
     var stepNumsEl = document.getElementById('dbStepNums');
@@ -2393,7 +2471,11 @@ function cycleTheme() {
     if (playBtn) playBtn.addEventListener('click', togglePlay);
 
     var bpmValEl = document.getElementById('dbBpmVal');
-    function setBPM(v) { BPM = Math.max(60, Math.min(200, v)); if (bpmValEl) bpmValEl.textContent = BPM; }
+    function setBPM(v) {
+      BPM = Math.max(60, Math.min(200, v));
+      if (bpmValEl) bpmValEl.textContent = BPM;
+      updateDelayTime();
+    }
     var bdn = document.getElementById('dbBpmDn'), bup = document.getElementById('dbBpmUp');
     if (bdn) bdn.addEventListener('click', function(){ setBPM(BPM-2); });
     if (bup) bup.addEventListener('click', function(){ setBPM(BPM+2); });
@@ -2404,6 +2486,60 @@ function cycleTheme() {
         for (var i=0;i<16;i++) td.pat[i]=0;
         if (stepBtns[ti]) stepBtns[ti].forEach(function(b){ b.classList.remove('on'); });
       });
+    });
+
+    // FX — Delay
+    var fxDelayBtn = document.getElementById('fxDelay');
+    var fxTimeVal  = document.getElementById('fxTimeVal');
+    var fxFbVal    = document.getElementById('fxFbVal');
+    var fxPitchBtn = document.getElementById('fxPitch');
+    var fxPitchVal = document.getElementById('fxPitchVal');
+
+    if (fxDelayBtn) fxDelayBtn.addEventListener('click', function() {
+      getMaster();
+      DELAY_ON = !DELAY_ON;
+      delayWetGain.gain.setTargetAtTime(DELAY_ON ? 0.5 : 0, ac().currentTime, 0.05);
+      fxDelayBtn.classList.toggle('fx-on', DELAY_ON);
+    });
+    var fxTimeDn = document.getElementById('fxTimeDn'), fxTimeUp = document.getElementById('fxTimeUp');
+    if (fxTimeDn) fxTimeDn.addEventListener('click', function() {
+      DELAY_TIME_IDX = Math.max(0, DELAY_TIME_IDX-1);
+      if (fxTimeVal) fxTimeVal.textContent = DELAY_TIME_LABELS[DELAY_TIME_IDX];
+      updateDelayTime();
+    });
+    if (fxTimeUp) fxTimeUp.addEventListener('click', function() {
+      DELAY_TIME_IDX = Math.min(DELAY_TIMES.length-1, DELAY_TIME_IDX+1);
+      if (fxTimeVal) fxTimeVal.textContent = DELAY_TIME_LABELS[DELAY_TIME_IDX];
+      updateDelayTime();
+    });
+    var fxFbDn = document.getElementById('fxFbDn'), fxFbUp = document.getElementById('fxFbUp');
+    if (fxFbDn) fxFbDn.addEventListener('click', function() {
+      DELAY_FB_IDX = Math.max(0, DELAY_FB_IDX-1);
+      if (fxFbVal) fxFbVal.textContent = DELAY_FB_LABELS[DELAY_FB_IDX];
+      if (delayFbGain) delayFbGain.gain.setTargetAtTime(DELAY_FBS[DELAY_FB_IDX], ac().currentTime, 0.02);
+    });
+    if (fxFbUp) fxFbUp.addEventListener('click', function() {
+      DELAY_FB_IDX = Math.min(DELAY_FBS.length-1, DELAY_FB_IDX+1);
+      if (fxFbVal) fxFbVal.textContent = DELAY_FB_LABELS[DELAY_FB_IDX];
+      if (delayFbGain) delayFbGain.gain.setTargetAtTime(DELAY_FBS[DELAY_FB_IDX], ac().currentTime, 0.02);
+    });
+
+    // FX — Pitch (clicking the label resets to 0)
+    if (fxPitchBtn) fxPitchBtn.addEventListener('click', function() {
+      PITCH = 0;
+      if (fxPitchVal) fxPitchVal.textContent = '0';
+      fxPitchBtn.classList.remove('fx-on');
+    });
+    var fxPitchDn = document.getElementById('fxPitchDn'), fxPitchUp = document.getElementById('fxPitchUp');
+    if (fxPitchDn) fxPitchDn.addEventListener('click', function() {
+      PITCH = Math.max(-12, PITCH-1);
+      if (fxPitchVal) fxPitchVal.textContent = (PITCH>0?'+':'')+PITCH;
+      if (fxPitchBtn) fxPitchBtn.classList.toggle('fx-on', PITCH !== 0);
+    });
+    if (fxPitchUp) fxPitchUp.addEventListener('click', function() {
+      PITCH = Math.min(12, PITCH+1);
+      if (fxPitchVal) fxPitchVal.textContent = (PITCH>0?'+':'')+PITCH;
+      if (fxPitchBtn) fxPitchBtn.classList.toggle('fx-on', PITCH !== 0);
     });
 
     document.addEventListener('keydown', function(e) {
