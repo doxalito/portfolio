@@ -2391,38 +2391,54 @@ function cycleTheme() {
         g.gain.exponentialRampToValueAtTime(0.001,t+0.75);
         src.start(t); src.stop(t+0.76);
       },
-      spiral: function(t) { // Robotic voice — sawtooth buzz through formant BPFs
+      spiral: function(t) { // Daft Punk vocoder — "SPI-RAL" parallel formants
         var c=ac(); t=t||c.currentTime;
-        var buzz=c.createOscillator(), buzzG=c.createGain();
-        buzz.type='sawtooth'; buzz.frequency.value=130*pm();
-        buzzG.gain.value=1; buzz.connect(buzzG);
-        // Phoneme sequence: [dt, dur, isNoise, filtType, freq, Q, gain]
-        var seq=[
-          [0,     0.075, 1, 'highpass', 5500, 1.5, 1.1], // S — sibilant
-          [0.075, 0.025, 1, 'bandpass',  900, 2.0, 0.6], // P — burst
-          [0.10,  0.12,  0, 'bandpass', 2100, 13,  1.9], // I — high vowel
-          [0.22,  0.09,  0, 'bandpass', 1100, 8,   1.5], // R — approximant
-          [0.31,  0.13,  0, 'bandpass',  720, 7,   1.7], // A — open vowel
-          [0.44,  0.12,  0, 'bandpass',  950, 10,  1.4], // L — lateral
-        ];
-        seq.forEach(function(s) {
-          var bpf=c.createBiquadFilter(), g=c.createGain();
-          bpf.type=s[3]; bpf.frequency.value=s[4]; bpf.Q.value=s[5];
-          if(s[2]) {
-            var ns=c.createBufferSource(); ns.buffer=mkNoise(s[1]+0.015);
-            ns.connect(bpf); bpf.connect(g); g.connect(dst());
-            g.gain.setValueAtTime(0,t+s[0]);
-            g.gain.linearRampToValueAtTime(s[6],t+s[0]+0.006);
-            g.gain.exponentialRampToValueAtTime(0.001,t+s[0]+s[1]);
-            ns.start(t+s[0]); ns.stop(t+s[0]+s[1]+0.02);
-          } else {
-            buzzG.connect(bpf); bpf.connect(g); g.connect(dst());
-            g.gain.setValueAtTime(0,t+s[0]);
-            g.gain.linearRampToValueAtTime(s[6],t+s[0]+0.012);
-            g.gain.exponentialRampToValueAtTime(0.001,t+s[0]+s[1]);
-          }
+        // Carrier: 3 detuned sawtooths for thick robotic chord
+        var carrier=c.createGain(); carrier.gain.value=0.38;
+        [-10,0,10].forEach(function(ct){
+          var o=c.createOscillator(); o.type='sawtooth';
+          o.frequency.value=110*pm(); o.detune.value=ct;
+          o.start(t); o.stop(t+0.68); o.connect(carrier);
         });
-        buzz.start(t); buzz.stop(t+0.6);
+        // vowel: parallel BPFs all at once → syllable gain envelope
+        function vowel(dt,dur,formants,vol) {
+          var g=c.createGain(); g.connect(dst());
+          formants.forEach(function(f){
+            var bpf=c.createBiquadFilter(); bpf.type='bandpass';
+            bpf.frequency.value=f[0]; bpf.Q.value=f[1];
+            var fg=c.createGain(); fg.gain.value=f[2];
+            carrier.connect(bpf); bpf.connect(fg); fg.connect(g);
+          });
+          g.gain.setValueAtTime(0,t+dt);
+          g.gain.linearRampToValueAtTime(vol,t+dt+0.018);
+          g.gain.setValueAtTime(vol,t+dt+dur-0.025);
+          g.gain.exponentialRampToValueAtTime(0.001,t+dt+dur);
+        }
+        // S — sibilant noise
+        var sn=c.createBufferSource(); sn.buffer=mkNoise(0.07);
+        var shpf=c.createBiquadFilter(); shpf.type='highpass'; shpf.frequency.value=5500;
+        var sg=c.createGain(); sn.connect(shpf); shpf.connect(sg); sg.connect(dst());
+        sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(1.4,t+0.005);
+        sg.gain.exponentialRampToValueAtTime(0.001,t+0.065);
+        sn.start(t); sn.stop(t+0.08);
+        // "SPI" — /ɪ/ high front vowel: high F2 is key
+        vowel(0.068, 0.17, [
+          [320,  7,  1.0],
+          [2250, 15, 2.4],
+          [3000, 6,  0.7]
+        ], 3.2);
+        // gap ~60ms
+        // "RAL" — /a/ open vowel: high F1, low F2
+        vowel(0.30, 0.20, [
+          [780,  9,  2.0],
+          [1150, 10, 1.5],
+          [2600, 5,  0.5]
+        ], 3.2);
+        // L tail
+        vowel(0.48, 0.14, [
+          [380, 7,  1.4],
+          [980, 9,  1.1]
+        ], 2.2);
       },
       hardKick: function(t) { // Hard techno kick — fast pitch drop, heavy clip
         var c=ac(); t=t||c.currentTime;
