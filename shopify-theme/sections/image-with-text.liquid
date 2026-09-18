@@ -1,0 +1,35 @@
+<section class="section">
+  <div class="page-width">
+    <div class="image-with-text {% if section.settings.reverse %}image-with-text--reverse{% endif %}">
+      <div class="image-with-text__media">
+        {%- if section.settings.image != blank -%}
+          <img src="{{ section.settings.image | image_url: width: 1000 }}" alt="{{ section.settings.image.alt | escape }}" loading="lazy">
+        {%- else -%}
+          {{ 'image' | placeholder_svg_tag }}
+        {%- endif -%}
+      </div>
+      <div class="image-with-text__content">
+        {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading | escape }}</h2>{%- endif -%}
+        {%- if section.settings.text != blank -%}<div class="rte">{{ section.settings.text }}</div>{%- endif -%}
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ section.settings.button_link }}" class="btn btn--outline">{{ section.settings.button_label | escape }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with text",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "checkbox", "id": "reverse", "label": "Reverse layout", "default": false },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Made to last" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Heavyweight cotton, water-based inks, and a print that won't crack after a wash.</p>" },
+    { "type": "text", "id": "button_label", "label": "Button label" },
+    { "type": "url", "id": "button_link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Image with text" }]
+}
+{% endschema %}

@@ -1,0 +1,173 @@
+{%- liquid
+  assign product = product
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+
+<section class="product-section">
+  <div class="page-width">
+    <div class="product">
+      {%- comment -%} ---------- Media ---------- {%- endcomment -%}
+      <div class="product__media" data-product-gallery>
+        <div class="product__media-main">
+          {%- if current_variant.featured_media != blank -%}
+            {%- assign main_media = current_variant.featured_media -%}
+          {%- else -%}
+            {%- assign main_media = product.featured_media -%}
+          {%- endif -%}
+
+          {%- if main_media != blank -%}
+            <img
+              data-gallery-main
+              src="{{ main_media | image_url: width: 1200 }}"
+              alt="{{ main_media.alt | escape }}"
+              width="{{ main_media.width }}"
+              height="{{ main_media.height }}"
+              loading="eager">
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'product__placeholder' }}
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 -%}
+          <div class="product__thumbs">
+            {%- for media in product.media -%}
+              <button
+                type="button"
+                class="product__thumb"
+                data-gallery-thumb
+                data-full="{{ media | image_url: width: 1200 }}"
+                data-alt="{{ media.alt | escape }}"
+                aria-current="{% if media.id == main_media.id %}true{% else %}false{% endif %}">
+                <img src="{{ media | image_url: width: 160 }}" alt="{{ media.alt | escape }}" loading="lazy">
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ---------- Info ---------- {%- endcomment -%}
+      <div class="product__info">
+        {%- if section.settings.show_vendor and product.vendor != blank -%}
+          <div class="product__vendor">{{ product.vendor }}</div>
+        {%- endif -%}
+
+        <h1 class="product__title">{{ product.title }}</h1>
+
+        <div class="price {% if current_variant.compare_at_price > current_variant.price %}price--on-sale{% endif %}">
+          <span
+            class="price__compare"
+            data-price-compare
+            {% unless current_variant.compare_at_price > current_variant.price %}hidden{% endunless %}>
+            {{ current_variant.compare_at_price | money }}
+          </span>
+          <span class="price__current" data-price-current>{{ current_variant.price | money }}</span>
+        </div>
+
+        {%- form 'product', product, data-product-form: true, class: 'product-form' -%}
+          <script type="application/json" data-product-json>
+            {
+              "variants": [
+                {%- for variant in product.variants -%}
+                  {
+                    "id": {{ variant.id }},
+                    "options": {{ variant.options | json }},
+                    "price": {{ variant.price }},
+                    "compare_at_price": {{ variant.compare_at_price | default: 0 | json }},
+                    "available": {{ variant.available }}
+                  }{%- unless forloop.last -%},{%- endunless -%}
+                {%- endfor -%}
+              ]
+            }
+          </script>
+
+          {%- unless product.has_only_default_variant -%}
+            {%- for option in product.options_with_values -%}
+              <fieldset class="variant-fieldset">
+                <legend>{{ option.name }}</legend>
+                <div class="variant-options">
+                  {%- for value in option.values -%}
+                    {%- assign input_id = 'opt-' | append: option.position | append: '-' | append: forloop.index -%}
+                    <input
+                      type="radio"
+                      id="{{ input_id }}"
+                      name="option-{{ option.position }}"
+                      value="{{ value | escape }}"
+                      data-option-input
+                      {% if option.selected_value == value %}checked{% endif %}>
+                    <label for="{{ input_id }}">{{ value }}</label>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endfor -%}
+          {%- endunless -%}
+
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+
+          <div class="quantity" data-quantity>
+            <button type="button" data-action="decrease" aria-label="Decrease quantity">&minus;</button>
+            <input type="number" name="quantity" value="1" min="1" aria-label="Quantity">
+            <button type="button" data-action="increase" aria-label="Increase quantity">+</button>
+          </div>
+
+          <button
+            type="submit"
+            name="add"
+            class="btn btn--full"
+            data-add-to-cart
+            data-add-text="{{ 'products.add_to_cart' | t }}"
+            data-sold-out-text="{{ 'products.sold_out' | t }}"
+            data-unavailable-text="{{ 'products.unavailable' | t }}"
+            {% unless current_variant.available %}disabled{% endunless %}>
+            {%- if current_variant.available -%}
+              {{ 'products.add_to_cart' | t }}
+            {%- else -%}
+              {{ 'products.sold_out' | t }}
+            {%- endif -%}
+          </button>
+        {%- endform -%}
+
+        {%- if product.description != blank -%}
+          <div class="product__description rte">{{ product.description }}</div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="product__trust">
+            <ul>
+              {%- for block in section.blocks -%}
+                <li {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    { "type": "checkbox", "id": "show_vendor", "label": "Show vendor", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "trust",
+      "name": "Trust line",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "✓ Hand screen-printed in limited quantity" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product",
+      "blocks": [
+        { "type": "trust", "settings": { "text": "✓ Hand screen-printed, limited run" } },
+        { "type": "trust", "settings": { "text": "✓ 100% organic cotton" } },
+        { "type": "trust", "settings": { "text": "✓ Shipped within 3 business days" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

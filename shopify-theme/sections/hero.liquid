@@ -1,0 +1,42 @@
+<section class="hero {% if section.settings.image != blank %}hero--light{% endif %}" style="--hero-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};">
+  {%- if section.settings.image != blank -%}
+    <div class="hero__media">
+      <img
+        src="{{ section.settings.image | image_url: width: 2200 }}"
+        alt="{{ section.settings.image.alt | escape }}"
+        loading="eager">
+    </div>
+    <div class="hero__overlay"></div>
+  {%- endif -%}
+
+  <div class="hero__content">
+    {%- if section.settings.subtitle != blank -%}
+      <p class="hero__subtitle">{{ section.settings.subtitle | escape }}</p>
+    {%- endif -%}
+    {%- if section.settings.title != blank -%}
+      <h1 class="hero__title">{{ section.settings.title | escape }}</h1>
+    {%- endif -%}
+    {%- if section.settings.text != blank -%}
+      <p class="hero__text">{{ section.settings.text | escape }}</p>
+    {%- endif -%}
+    {%- if section.settings.button_label != blank -%}
+      <a href="{{ section.settings.button_link }}" class="btn">{{ section.settings.button_label | escape }}</a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    { "type": "range", "id": "overlay_opacity", "min": 0, "max": 80, "step": 5, "unit": "%", "label": "Image overlay", "default": 30 },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Screen-printed by hand" },
+    { "type": "text", "id": "title", "label": "Title", "default": "SPIRAL" },
+    { "type": "textarea", "id": "text", "label": "Text", "default": "A limited run of hand-pulled t-shirts. No reprints." },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop the tee" },
+    { "type": "url", "id": "button_link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Hero" }]
+}
+{% endschema %}

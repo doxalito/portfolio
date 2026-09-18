@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ 'gift_cards.issued.title' | t: value: gift_card.balance | money }} | {{ shop.name }}</title>
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+  </head>
+  <body>
+    <section class="section">
+      <div class="page-width" style="max-width:520px;text-align:center;">
+        <h1>{{ shop.name }}</h1>
+        <p>{{ 'gift_cards.issued.subtext' | t }}</p>
+        <div class="price">{{ gift_card.balance | money }}</div>
+        {{ gift_card.qr_identifier }}
+        <p><strong>{{ gift_card.code | format_code }}</strong></p>
+      </div>
+    </section>
+  </body>
+</html>

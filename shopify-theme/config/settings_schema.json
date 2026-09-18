@@ -1,0 +1,105 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Spiral",
+    "theme_version": "1.0.0",
+    "theme_author": "Oscar Penverne",
+    "theme_documentation_url": "https://shopify.dev/themes",
+    "theme_support_url": "https://help.shopify.com/"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background",
+        "default": "#f5f3ee"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Text",
+        "default": "#141414"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent / buttons",
+        "default": "#141414"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_text",
+        "label": "Text on accent",
+        "default": "#ffffff"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "label": "Headings",
+        "default": "assistant_n7"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body",
+        "default": "assistant_n4"
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "min": 1000,
+        "max": 1600,
+        "step": 20,
+        "default": 1280,
+        "unit": "px",
+        "label": "Page width"
+      }
+    ]
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon"
+      },
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image",
+        "info": "Optional. If empty, the shop name is used."
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 60,
+        "max": 220,
+        "step": 10,
+        "default": 120,
+        "unit": "px",
+        "label": "Logo width"
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      { "type": "text", "id": "social_instagram_link", "label": "Instagram URL", "info": "https://instagram.com/shop" },
+      { "type": "text", "id": "social_tiktok_link", "label": "TikTok URL" },
+      { "type": "text", "id": "social_facebook_link", "label": "Facebook URL" }
+    ]
+  }
+]

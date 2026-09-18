@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {
+        "show_vendor": false
+      },
+      "blocks": {
+        "t1": { "type": "trust", "settings": { "text": "✓ Hand screen-printed, limited run" } },
+        "t2": { "type": "trust", "settings": { "text": "✓ 100% organic cotton" } },
+        "t3": { "type": "trust", "settings": { "text": "✓ Shipped within 3 business days" } }
+      },
+      "block_order": ["t1", "t2", "t3"]
+    },
+    "features": {
+      "type": "features",
+      "blocks": {
+        "f1": { "type": "feature", "settings": { "icon": "✺", "title": "Hand-printed", "text": "Each tee pulled by hand in studio." } },
+        "f2": { "type": "feature", "settings": { "icon": "❖", "title": "Organic cotton", "text": "Heavyweight, soft, built to last." } },
+        "f3": { "type": "feature", "settings": { "icon": "✦", "title": "Limited run", "text": "No reprints. Once it's gone, it's gone." } }
+      },
+      "block_order": ["f1", "f2", "f3"]
+    }
+  },
+  "order": ["main", "features"]
+}

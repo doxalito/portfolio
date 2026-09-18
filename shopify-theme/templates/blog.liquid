@@ -1,0 +1,16 @@
+<section class="section">
+  <div class="page-width">
+    <h1 class="section__title">{{ blog.title }}</h1>
+    <div class="features">
+      {%- for article in blog.articles -%}
+        <a href="{{ article.url }}" class="feature">
+          {%- if article.image -%}
+            <img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.title | escape }}" loading="lazy">
+          {%- endif -%}
+          <h3>{{ article.title }}</h3>
+          <p>{{ article.excerpt_or_content | strip_html | truncatewords: 20 }}</p>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

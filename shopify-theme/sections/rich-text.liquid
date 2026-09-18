@@ -1,0 +1,23 @@
+<section class="section">
+  <div class="page-width">
+    <div class="rich-text">
+      {%- if section.settings.heading != blank -%}
+        <h2>{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <div class="rte">{{ section.settings.text }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Rich text",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "About the print" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Each tee is pulled by hand in a small studio. Slight variations are part of the process — every piece is one of a kind.</p>" }
+  ],
+  "presets": [{ "name": "Rich text" }]
+}
+{% endschema %}

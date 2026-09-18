@@ -1,0 +1,15 @@
+{
+  "current": {
+    "color_background": "#f5f3ee",
+    "color_text": "#141414",
+    "color_accent": "#141414",
+    "color_accent_text": "#ffffff",
+    "type_header_font": "assistant_n7",
+    "type_body_font": "assistant_n4",
+    "page_width": 1280,
+    "logo_width": 120
+  },
+  "presets": {
+    "Spiral": {}
+  }
+}

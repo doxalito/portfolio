@@ -1,0 +1,15 @@
+<section class="section">
+  <div class="page-width">
+    <h1 class="section__title">{{ 'collections.all_title' | t }}</h1>
+    <div class="features">
+      {%- for collection in collections -%}
+        <a href="{{ collection.url }}" class="feature">
+          {%- if collection.featured_image -%}
+            <img src="{{ collection.featured_image | image_url: width: 600 }}" alt="{{ collection.title | escape }}" loading="lazy">
+          {%- endif -%}
+          <h3>{{ collection.title }}</h3>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

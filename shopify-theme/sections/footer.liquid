@@ -1,0 +1,47 @@
+<footer class="footer">
+  <div class="page-width">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="header__logo">{{ shop.name }}</div>
+        {%- if section.settings.tagline != blank -%}
+          <p>{{ section.settings.tagline | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.menu != blank -%}
+        <nav class="footer__menu" role="navigation">
+          {%- for link in section.settings.menu.links -%}
+            <a href="{{ link.url }}">{{ link.title | escape }}</a><br>
+          {%- endfor -%}
+        </nav>
+      {%- endif -%}
+
+      <div class="footer__social">
+        {%- if settings.social_instagram_link != blank -%}
+          <a href="{{ settings.social_instagram_link }}" target="_blank" rel="noopener">Instagram</a>
+        {%- endif -%}
+        {%- if settings.social_tiktok_link != blank -%}
+          <a href="{{ settings.social_tiktok_link }}" target="_blank" rel="noopener">TikTok</a>
+        {%- endif -%}
+        {%- if settings.social_facebook_link != blank -%}
+          <a href="{{ settings.social_facebook_link }}" target="_blank" rel="noopener">Facebook</a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ section.settings.copyright | escape }}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Hand screen-printed t-shirts." },
+    { "type": "link_list", "id": "menu", "label": "Footer menu", "default": "footer" },
+    { "type": "text", "id": "copyright", "label": "Copyright note", "default": "All rights reserved." }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,48 @@
+<section class="section section--tight">
+  <div class="page-width">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="section__title">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+    <div class="features">
+      {%- for block in section.blocks -%}
+        <div class="feature" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            <div class="feature__icon">{{ block.settings.icon | escape }}</div>
+          {%- endif -%}
+          {%- if block.settings.title != blank -%}<h3>{{ block.settings.title | escape }}</h3>{%- endif -%}
+          {%- if block.settings.text != blank -%}<p>{{ block.settings.text | escape }}</p>{%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Features",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading" }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "✺" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Limited run" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "No reprints. Once sold out, it's gone." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Features",
+      "blocks": [
+        { "type": "feature", "settings": { "icon": "✺", "title": "Hand-printed", "text": "Each tee pulled by hand in studio." } },
+        { "type": "feature", "settings": { "icon": "❖", "title": "Organic cotton", "text": "Heavyweight, soft, built to last." } },
+        { "type": "feature", "settings": { "icon": "✦", "title": "Limited run", "text": "No reprints. Once it's gone, it's gone." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

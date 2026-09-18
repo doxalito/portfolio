@@ -1,0 +1,38 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "subtitle": "Screen-printed by hand",
+        "title": "SPIRAL",
+        "text": "A limited run of hand-pulled t-shirts. No reprints.",
+        "button_label": "Shop the tee"
+      }
+    },
+    "featured": {
+      "type": "featured-product",
+      "settings": {
+        "heading": "The Spiral Tee",
+        "text": "Hand screen-printed on heavyweight organic cotton. Limited quantities — once it's gone, it's gone.",
+        "button_label": "Shop now"
+      }
+    },
+    "features": {
+      "type": "features",
+      "blocks": {
+        "f1": { "type": "feature", "settings": { "icon": "✺", "title": "Hand-printed", "text": "Each tee pulled by hand in studio." } },
+        "f2": { "type": "feature", "settings": { "icon": "❖", "title": "Organic cotton", "text": "Heavyweight, soft, built to last." } },
+        "f3": { "type": "feature", "settings": { "icon": "✦", "title": "Limited run", "text": "No reprints. Once it's gone, it's gone." } }
+      },
+      "block_order": ["f1", "f2", "f3"]
+    },
+    "story": {
+      "type": "rich-text",
+      "settings": {
+        "heading": "About the print",
+        "text": "<p>Each tee is pulled by hand in a small studio. Slight variations are part of the process — every piece is one of a kind.</p>"
+      }
+    }
+  },
+  "order": ["hero", "featured", "features", "story"]
+}

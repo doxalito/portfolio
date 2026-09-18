@@ -1,0 +1,25 @@
+<section class="section">
+  <div class="page-width">
+    <h1 class="section__title">{{ collection.title }}</h1>
+
+    {%- paginate collection.products by 24 -%}
+      <div class="features">
+        {%- for product in collection.products -%}
+          <a href="{{ product.url }}" class="feature">
+            {%- if product.featured_media -%}
+              <img src="{{ product.featured_media | image_url: width: 600 }}" alt="{{ product.featured_media.alt | escape }}" loading="lazy">
+            {%- endif -%}
+            <h3>{{ product.title }}</h3>
+            <div class="price">{{ product.price | money }}</div>
+          </a>
+        {%- else -%}
+          <p>{{ 'collections.empty' | t }}</p>
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="pagination" style="text-align:center;margin-top:2rem;">{{ paginate | default_pagination }}</nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>

@@ -1,0 +1,40 @@
+<header class="header">
+  <div class="page-width header__inner">
+    <a href="{{ routes.root_url }}" class="header__logo">
+      {%- if settings.logo != blank -%}
+        <img
+          src="{{ settings.logo | image_url: width: 400 }}"
+          alt="{{ shop.name | escape }}"
+          width="{{ settings.logo_width }}"
+          style="width: {{ settings.logo_width }}px;">
+      {%- else -%}
+        {{ shop.name }}
+      {%- endif -%}
+    </a>
+
+    <nav class="header__nav" role="navigation">
+      {%- for link in section.settings.menu.links -%}
+        <a href="{{ link.url }}">{{ link.title | escape }}</a>
+      {%- endfor -%}
+    </nav>
+
+    <a href="{{ routes.cart_url }}" class="header__cart">
+      {% render 'icon-cart' %}
+      <span class="header__cart-count">({{ cart.item_count }})</span>
+    </a>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}
