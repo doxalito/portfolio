@@ -1526,8 +1526,8 @@
     lbImages = []; lbIndex = 0;
   }
 
-  document.getElementById('lb-stage').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'lb-stage') closeLightbox();
   });
 
   document.addEventListener('click', function(e) {
