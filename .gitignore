@@ -1,3 +1,9 @@
-# Morceaux de la radio : jamais publiés (droits)
+# Morceaux de la radio : jamais publiés, sauf ceux des artistes de l'entourage
 radio/*.m4a
 radio/*.mp3
+!radio/3.m4a
+!radio/4.m4a
+!radio/8.m4a
+!radio/10.m4a
+!radio/13.m4a
+!radio/15.m4a

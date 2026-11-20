@@ -1287,10 +1287,11 @@ let radioIdx = -1, radioEl = null, radioGain = null, radioAn = null, radioData =
 let radioQueue = [], radioPlayed = 0;
 function randomTrack() {
   if (!radioQueue.length) {
-    radioQueue = TRACKS.map((_, i) => i).sort(() => Math.random() - 0.5);
-    if (radioQueue[0] === radioIdx) radioQueue.push(radioQueue.shift());
+    radioQueue = TRACKS.map((_, i) => i).filter((i) => !TRACKS[i].missing).sort(() => Math.random() - 0.5);
+    if (radioQueue.length > 1 && radioQueue[0] === radioIdx) radioQueue.push(radioQueue.shift());
   }
-  return radioQueue.shift();
+  while (radioQueue.length && TRACKS[radioQueue[0]].missing) radioQueue.shift();
+  return radioQueue.length ? radioQueue.shift() : -1;
 }
 function radioChain() {
   if (radioEl || !audio()) return;
@@ -1302,6 +1303,8 @@ function radioChain() {
   radioAn = ac.createAnalyser(); radioAn.fftSize = 256; radioData = new Uint8Array(radioAn.frequencyBinCount);
   srcNode.connect(shelf); shelf.connect(bump); bump.connect(radioGain); radioGain.connect(radioAn); radioAn.connect(ac.destination);
   radioEl.addEventListener('ended', () => playTrack(randomTrack()));
+  /* morceau absent (en ligne, seuls ceux de l'entourage sont publiés) : on passe au suivant sans silence */
+  radioEl.addEventListener('error', () => { if (radioIdx < 0) return; TRACKS[radioIdx].missing = true; playTrack(randomTrack()); });
 }
 function playTrack(i) {
   radioChain(); if (!radioEl) return;
@@ -1315,7 +1318,7 @@ function playTrack(i) {
 }
 $('radioOff').addEventListener('click', () => { radioPlayed = 0; playTrack(-1); });   // éteindre : l'ambiance revient
 function radioNext() {                                 // clic : morceau au hasard ; après un tour complet, la radio s'éteint
-  if (radioIdx >= 0 && radioPlayed >= TRACKS.length) { radioPlayed = 0; playTrack(-1); return; }
+  if (radioIdx >= 0 && radioPlayed >= TRACKS.filter((t) => !t.missing).length) { radioPlayed = 0; playTrack(-1); return; }
   radioPlayed++; playTrack(randomTrack());
 }
 function radioDuck(on) { if (radioGain) radioGain.gain.setTargetAtTime(on ? 0.3 : 0.85, ac.currentTime, 0.25); }
