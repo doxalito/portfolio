@@ -1197,8 +1197,19 @@
         <div class="project-meta"><span class="project-year">2026</span><div class="project-arrow">→</div></div>
       </div>
 
-      <div class="project-cta game-card fade-in" id="gameCard" style="transition-delay:0.1s">
+      <div class="project-item fade-in" style="transition-delay:0.1s" onclick="openProject('kickboxing')">
         <p class="project-index">06</p>
+        <div class="project-visual" style="aspect-ratio:1/1;">
+          <div class="project-visual-inner" style="padding:0;background:#ee5d63;"><img src="kickboxing-1.jpg" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Kickboxing"/></div>
+        </div>
+        <p class="project-category">Illustration & Collage</p>
+        <h3 class="project-title">Kickboxing</h3>
+        <p class="project-desc">Une série dédiée à la boxe anglaise : deux boxeurs en papier découpé et dentelle, déclinés en quatre ambiances.</p>
+        <div class="project-meta"><span class="project-year">2026</span><div class="project-arrow">→</div></div>
+      </div>
+
+      <div class="project-cta game-card fade-in" id="gameCard" style="transition-delay:0.1s">
+        <p class="project-index">07</p>
         <div class="game-wrap" id="gameWrap">
           <canvas id="dinoCanvas"></canvas>
           <div class="game-score" id="gameScore">00000</div>
@@ -1957,6 +1968,20 @@ function cycleTheme() {
     </div>
   </section>
 
+  <!-- Nouvelles affiches, en tête de page -->
+  <div class="cs-visuals" style="padding-top:3rem;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 3rem 2px;">
+      <img loading="lazy" src="affiche-oeil-etoile.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="Œil étoilé"/>
+      <img loading="lazy" src="affiche-doxal-degrade.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="DOXAL dégradé"/>
+      <img loading="lazy" src="affiche-oeil-glitch.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="Œil glitch"/>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 3rem 2px;margin-top:2px;">
+      <img loading="lazy" src="affiche-sol-1.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="Who The Fuck Is DOXAL"/>
+      <img loading="lazy" src="affiche-sol-2.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="Silhouettes"/>
+      <img loading="lazy" src="affiche-sol-4.jpg" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" alt="Spiral néon"/>
+    </div>
+  </div>
+
   <div class="cs-statement">
     <p class="cs-quote">"Expérimentation visuelle, sans brief, sans contraintes."</p>
     <p class="cs-body">
@@ -2035,6 +2060,11 @@ function cycleTheme() {
       <div><p class="cs-meta-label">Discipline</p><p class="cs-meta-value">Illustration</p></div>
     </div>
   </section>
+
+  <!-- Vidéo, en tête de page -->
+  <div style="padding:3rem 3rem 0;">
+    <video src="mixedmedia-video.mp4" autoplay muted loop playsinline controls preload="metadata" style="width:100%;height:auto;display:block;background:#000;"></video>
+  </div>
 
   <div class="cs-statement">
     <p class="cs-quote">&ldquo;Un seul personnage, des univers infinis, chaque apparition est un nouveau monde.&rdquo;</p>
@@ -2151,6 +2181,53 @@ function cycleTheme() {
       </div>
     </div>
     <div style="height:20rem;"></div>
+  </div>
+
+  <div class="cs-next">
+    <div><p class="next-label">Projet suivant</p><p class="next-title">Kickboxing</p></div>
+    <button class="next-arrow">→</button>
+  </div>
+</div>
+
+<!-- ==================== PAGE: KICKBOXING ==================== -->
+<div id="page-kickboxing" style="position:fixed;inset:0;z-index:300;background:var(--black);overflow-y:auto;display:none;">
+  <div class="cs-nav">
+    <button class="cs-back-btn" onclick="closeProject()">← Retour</button>
+    <span class="cs-nav-logo">DOXAL<span style="color:var(--red)">.</span> &nbsp;06 / 06</span>
+  </div>
+
+  <section class="cs-hero">
+    <p class="cs-eyebrow">Illustration & Collage</p>
+    <h1 class="cs-title">KICK<br><em>BOXING</em></h1>
+    <div class="cs-meta">
+      <div><p class="cs-meta-label">Type</p><p class="cs-meta-value">Travail Personnel</p></div>
+      <div><p class="cs-meta-label">Année</p><p class="cs-meta-value">2026</p></div>
+      <div><p class="cs-meta-label">Outils</p><p class="cs-meta-value">Photoshop</p></div>
+      <div><p class="cs-meta-label">Discipline</p><p class="cs-meta-value">Illustration</p></div>
+    </div>
+  </section>
+
+  <!-- TEXTES PROVISOIRES : à réécrire par Oscar -->
+  <div class="cs-statement">
+    <p class="cs-quote">&ldquo;Deux boxeurs, un seul coup, quatre atmosphères.&rdquo;</p>
+    <p class="cs-body">
+      Une série dédiée à la boxe anglaise. Deux boxeurs découpés comme du papier, habillés de motifs de dentelle, s'échangent un coup au centre d'une explosion de matière.<br><br>
+      La même composition est déclinée en quatre ambiances : rose, nuit violette, lavande monochrome et rouge sur crème.
+    </p>
+  </div>
+
+  <div class="cs-visuals">
+    <p class="cs-section-label">La série</p>
+    <div class="img-full">
+      <img src="kickboxing-1.jpg" style="width:100%;height:auto;display:block;" alt="Kickboxing, version rose"/>
+    </div>
+    <div class="img-gap"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 3rem;">
+      <img loading="lazy" src="kickboxing-2.jpg" style="width:100%;height:auto;display:block;" alt="Kickboxing, version nuit violette"/>
+      <img loading="lazy" src="kickboxing-3.jpg" style="width:100%;height:auto;display:block;" alt="Kickboxing, version lavande"/>
+      <img loading="lazy" src="kickboxing-4.jpg" style="width:100%;height:auto;display:block;" alt="Kickboxing, version rouge sur crème"/>
+    </div>
+    <div style="height:12rem;"></div>
   </div>
 
   <div class="cs-next">
@@ -2689,7 +2766,7 @@ function cycleTheme() {
     function setBPM(v) {
       BPM = Math.max(60, Math.min(200, v));
       if (bpmValEl) bpmValEl.textContent = BPM;
-      updateDelayTime();
+      if (typeof updateDelayTime === "function") updateDelayTime();
     }
     var bdn = document.getElementById('dbBpmDn'), bup = document.getElementById('dbBpmUp');
     if (bdn) bdn.addEventListener('click', function(){ setBPM(BPM-2); });
@@ -2825,5 +2902,48 @@ function cycleTheme() {
   })();
 </script>
 
+
+<!-- MODE INTÉGRÉ : actif seulement quand une autre page (ex. vinyles.html) ouvre ce site avec ?embed -->
+<script>
+(function () {
+  if (!/[?&]embed\b/.test(location.search)) return;
+  var css = document.createElement('style');
+  css.textContent = '#intro, #outro, #sound-prompt, #sound-toggle, .nav-logo, #page-home > nav { display: none !important; } html { scroll-behavior: auto; }';
+  document.head.appendChild(css);
+  var home = document.getElementById('page-home');
+  var openOriginal = window.openProject;
+  function tell(type) { try { parent.postMessage({ fm: 1, type: type }, '*'); } catch (e) {} }
+  window.closeProject = function () { tell('close'); };
+  function reset() {
+    document.querySelectorAll('[data-fm-hidden]').forEach(function (n) { n.style.display = ''; n.removeAttribute('data-fm-hidden'); });
+    document.querySelectorAll('[id^="page-"]').forEach(function (p) { if (p.id !== 'page-home') p.style.display = 'none'; });
+    document.body.style.overflow = '';
+  }
+  /* projet : sa page ; sinon n'affiche que la section demandée (ex. la boîte à rythme) */
+  function reveal(target) {
+    reset();
+    if (document.getElementById('page-' + target)) { openOriginal(target); return; }
+    var el = document.getElementById(target);
+    if (!el) return;
+    for (var n = el; n && n !== home; n = n.parentElement) {
+      Array.prototype.forEach.call(n.parentElement.children, function (sib) {
+        if (sib === n || sib.style.display === 'none') return;
+        sib.setAttribute('data-fm-hidden', ''); sib.style.display = 'none';
+      });
+    }
+    el.querySelectorAll('.fade-in').forEach(function (f) { f.classList.add('visible'); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.fm && e.data.type === 'show') reveal(e.data.target);
+  });
+  document.addEventListener('keydown', function (e) {
+    var lb = document.getElementById('lightbox');
+    if (e.key === 'Escape' && !(lb && lb.classList.contains('active'))) tell('close');
+  });
+  reveal('sampler'); // par défaut : rien d'autre que la boîte à rythme, prête à être pilotée
+  tell('ready');
+})();
+</script>
 </body>
 </html>

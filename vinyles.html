@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="DOXAL — Design Graphique & Direction Artistique par Oscar Penverne. Fouille le bac, choisis un vinyle.">
+<title>DOXAL — Bac à vinyles</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: 'Sequel100Wide'; src: url('sequel100wide.ttf') format('truetype'); font-display: block; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0a0a0a; --white: #f5f2ed; --red: #e01a1a; --dim: rgba(245,242,237,0.55); --faint: rgba(245,242,237,0.12);
+    --mono: 'Space Mono', ui-monospace, monospace;
+    --display: 'Sequel100Wide', 'Arial Black', sans-serif;
+    --off-black: #111111; --charcoal: #1a1a1a; --muted: #555; --cream: #e8e3db;
+  }
+  html { scroll-snap-type: y mandatory; scrollbar-color: var(--red) #111; scrollbar-width: thin; }
+  body { background: var(--black); color: var(--white); font-family: var(--mono); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  body.locked { overflow: hidden; }
+
+  /* ───── ACCUEIL (repris de la version classique) ───── */
+  #intro { position: fixed; inset: 0; background: var(--black); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
+  #intro.hide { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+  #intro-text { font-family: var(--display); font-size: clamp(3rem, 12vw, 10rem); letter-spacing: -0.05em; display: flex; overflow: hidden; }
+  #intro-text span { display: inline-block; transform: translateY(110%); transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1); }
+  #intro-text span.visible { transform: translateY(0); }
+  #intro-bar { width: 0; height: 1px; background: var(--red); transition: width 1.2s cubic-bezier(0.76, 0, 0.24, 1); }
+  #intro-bar.full { width: 40vw; }
+  #intro-sub { font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase; color: #555; opacity: 0; transition: opacity 0.4s ease; }
+  #intro-sub.visible { opacity: 1; }
+  .bg-spirals { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; opacity: 0.07; }
+  .bg-spirals svg { position: absolute; }
+  #cursor { position: fixed; pointer-events: none; z-index: 9999; overflow: visible; left: -999px; top: -999px; }
+  body.project-open #cursor { display: none; }   /* la page projet a déjà son propre curseur spirale */
+
+  #home { position: relative; z-index: 1; min-height: 100svh; display: grid; align-items: end; padding: 5rem 3rem 5rem; overflow: hidden; scroll-snap-align: start; }
+  .home-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 3rem; }
+  .hero-eyebrow { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--red); margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; }
+  .hero-eyebrow::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--red); }
+  .hero-name { font-family: var(--display); font-weight: 900; font-size: clamp(5rem, 20vw, 18rem); line-height: 0.85; letter-spacing: -0.05em; margin-bottom: 1.5rem; display: flex; align-items: baseline; -webkit-text-stroke: 8px var(--white); paint-order: stroke fill; user-select: none; }
+  .letter { display: inline-block; cursor: none; will-change: transform; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, -webkit-text-stroke 0.2s ease; }
+  .letter:hover { transform: translateY(-0.12em) skewX(-6deg); color: var(--black); -webkit-text-stroke: 2px var(--red); filter: url(#letterWobble); }
+  .letter:hover + .letter { transform: translateY(-0.05em); color: #e8e3db; }
+  .hero-descriptor { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(245,242,237,0.08); }
+  .hero-descriptor span { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: #555; }
+  .hero-scroll { position: absolute; bottom: 3rem; right: 3rem; writing-mode: vertical-lr; font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: #555; display: flex; align-items: center; gap: 1rem; cursor: pointer; }
+  .hero-scroll::after { content: ''; display: block; width: 1px; height: 4rem; background: rgba(245,242,237,0.15); animation: scrollLine 2s ease-in-out infinite; }
+  .hero-scroll:hover { color: var(--white); }
+  @keyframes scrollLine { 0%, 100% { opacity: 0.15; transform: scaleY(1); } 50% { opacity: 0.6; transform: scaleY(0.6); } }
+
+  /* ───── SCÈNE 3D ───── */
+  #sceneFade { position: absolute; inset: 0; z-index: 20; background: var(--black); pointer-events: none; }
+  #scene { position: relative; z-index: 1; height: 100svh; overflow: hidden; scroll-snap-align: start; background: var(--black); }
+  #sceneFade { position: absolute; inset: 0; z-index: 20; pointer-events: none; background: var(--black); }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  a { color: inherit; }
+
+  #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; outline: none; image-rendering: pixelated; }
+  #gl.pointer { cursor: pointer; }
+
+  /* grain, comme sur la version classique */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 40;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  }
+  /* vignette */
+  #scene::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(to right, rgba(0,0,0,0.72), rgba(0,0,0,0.35) 32%, transparent 48%), linear-gradient(to top, rgba(0,0,0,0.78), transparent 42%), radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,0.65)); }
+
+  .hud { position: absolute; z-index: 10; pointer-events: none; }
+  #np { top: 4.6rem; left: 50%; transform: translate(-50%, -6px); opacity: 0; transition: opacity .4s, transform .4s; font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase; text-align: center; white-space: nowrap; }
+  #np.on { opacity: 1; transform: translate(-50%, 0); }
+  #np b { color: var(--red); font-weight: 400; }
+  #np button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--white); border-bottom: 1px solid var(--faint); padding-bottom: 1px; }
+  #np:not(.on) button { pointer-events: none; }
+  #np button:hover { color: var(--red); border-color: var(--red); }
+  #np small { display: block; margin-top: 0.4rem; color: rgba(245,242,237,0.4); font-size: 0.52rem; }
+  .hud a, .hud button { pointer-events: auto; }
+  .top { top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 3rem; }
+  .logo { font-family: var(--display); font-size: 1.05rem; letter-spacing: 0.15em; text-decoration: none; }
+  .logo span { color: var(--red); }
+  .top-right { display: flex; gap: 1.6rem; align-items: center; font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--dim); }
+  .top-right a { text-decoration: none; border-bottom: 1px solid var(--faint); padding-bottom: 2px; }
+  .top-right a:hover { color: var(--white); border-color: var(--white); }
+
+  .label, .trhud { text-shadow: 0 2px 14px rgba(0,0,0,0.85); }
+  .label { left: 3rem; bottom: 4.4rem; max-width: min(430px, 36vw); transition: opacity .4s, transform .4s; }
+  .label .idx { font-size: 0.62rem; letter-spacing: 0.3em; color: var(--dim); }
+  .label .idx b { color: var(--white); font-weight: 400; }
+  .label .cat { margin-top: 1rem; font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--red); display: flex; align-items: center; gap: 1rem; }
+  .label .cat::before { content: ''; width: 2rem; height: 1px; background: var(--red); }
+  .label h1 { margin-top: 0.7rem; font-family: var(--display); font-size: clamp(1.8rem, 4.2vw, 3.6rem); line-height: 0.95; letter-spacing: -0.02em; }
+  .label h1 em { font-style: normal; display: block; font-size: 0.55em; margin-top: 0.25em; color: rgba(245,242,237,0.75); }
+  .label .quote { margin-top: 1rem; font-family: var(--display); font-size: clamp(0.85rem, 1.2vw, 1.05rem); line-height: 1.25; max-width: 32ch; }
+  .label .body { margin-top: 0.8rem; font-size: 0.68rem; line-height: 1.7; color: rgba(245,242,237,0.7); max-width: 52ch; }
+  .label .body em { font-style: normal; color: var(--white); }
+  .label .year { margin-top: 1rem; font-size: 0.6rem; letter-spacing: 0.25em; color: var(--dim); }
+  body.busy .label { opacity: 0; transform: translateY(10px); }
+
+  .hint { right: 3rem; bottom: 2.6rem; text-align: right; font-size: 0.58rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,242,237,0.4); line-height: 2; transition: opacity .4s; }
+  .hint b { color: var(--white); font-weight: 400; }
+  body.busy .hint { opacity: 0; }
+
+  .dshud { left: 3rem; top: 5.5rem; opacity: 0; transform: translateY(10px); transition: opacity .4s, transform .4s; text-shadow: 0 2px 14px rgba(0,0,0,0.85); }
+  body.ds-mode .dshud { opacity: 1; transform: none; }
+  body:not(.ds-mode) .dshud button { pointer-events: none; }
+  .trhud { left: 3rem; bottom: 2.6rem; opacity: 0; transform: translateY(10px); transition: opacity .4s, transform .4s; }
+  body.tr-mode .trhud { opacity: 1; transform: none; }
+  body:not(.tr-mode) .trhud button { pointer-events: none; }
+  .tr-title { font-family: var(--display); font-size: clamp(1.6rem, 3.4vw, 2.8rem); letter-spacing: -0.02em; }
+  .tr-help { margin-top: 0.8rem; font-size: 0.66rem; line-height: 1.9; letter-spacing: 0.08em; color: rgba(245,242,237,0.7); }
+  .tr-help b { color: var(--white); }
+  .tr-actions { margin-top: 1rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .tr-actions button { font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase; padding: 0.7rem 1rem 0.65rem; border: 1px solid var(--faint); background: rgba(10,10,10,0.7); }
+  .tr-actions button:first-child { background: var(--white); color: var(--black); border-color: var(--white); }
+  .tr-actions button:hover { border-color: var(--red); }
+  .tr-actions button:first-child:hover { background: var(--red); }
+  #poster-view { position: fixed; inset: 0; z-index: 9000; background: rgba(10,10,10,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; opacity: 0; visibility: hidden; transition: opacity .35s, visibility 0s .35s; cursor: zoom-out; }
+  #poster-view.open { opacity: 1; visibility: visible; transition: opacity .35s; }
+  #poster-view img { max-width: min(86vw, 900px); max-height: 82vh; box-shadow: 0 30px 80px rgba(0,0,0,0.7); transform: scale(0.94) rotate(-1.5deg); transition: transform .45s cubic-bezier(.2,1,.3,1); }
+  #poster-view.open img { transform: none; }
+  #poster-view p { font-size: 0.56rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,242,237,0.4); }
+  #fade { position: fixed; inset: 0; z-index: 30; background: var(--black); opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+  #fade.on { opacity: 1; }
+
+
+  /* SOUND PROMPT + TOGGLE */
+  #sound-prompt {
+    position: fixed; inset: 0; z-index: 9500;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,10,0.88);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+  }
+  #sound-prompt.visible { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.4s ease, visibility 0s; }
+  #sound-prompt-card {
+    background: var(--off-black); border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    border-top: 2px solid var(--red);
+    padding: 2.5rem 2.5rem 2rem; max-width: 340px; width: calc(100% - 3rem);
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #sound-prompt-label {
+    font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.35em;
+    text-transform: uppercase; color: var(--red); margin-bottom: 1rem;
+  }
+  #sound-prompt-q {
+    font-family: var(--display); font-weight: 700; font-size: 1.6rem;
+    letter-spacing: -0.02em; color: var(--white); margin-bottom: 2rem;
+  }
+  #sound-prompt-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+  #sound-yes, #sound-no {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; padding: 0.85rem 1rem; cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--white) 18%, transparent);
+    background: none; color: var(--white); transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  #sound-yes { background: var(--red); border-color: var(--red); }
+  #sound-yes:hover { background: var(--white); color: var(--black); border-color: var(--white); }
+  #sound-no:hover { border-color: var(--white); }
+
+  #sound-toggle {
+    position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 90;
+    display: none; align-items: center; gap: 0.6rem;
+    padding: 0.55rem 0.9rem; cursor: pointer;
+    background: var(--charcoal); border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    transition: border-color 0.3s;
+  }
+  #sound-toggle.shown { display: flex; }
+  #sound-toggle:hover { border-color: var(--red); }
+  #sound-toggle-label {
+    font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .sound-bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .sound-bars i {
+    display: block; width: 2px; height: 30%; background: var(--red);
+    transform-origin: bottom;
+  }
+  #sound-toggle.playing .sound-bars i { animation: soundBar 0.9s ease-in-out infinite; }
+  #sound-toggle.playing .sound-bars i:nth-child(2) { animation-delay: 0.2s; }
+  #sound-toggle.playing .sound-bars i:nth-child(3) { animation-delay: 0.4s; }
+  #sound-toggle.playing .sound-bars i:nth-child(4) { animation-delay: 0.15s; }
+  @keyframes soundBar {
+    0%, 100% { height: 25%; }
+    50% { height: 100%; }
+  }
+
+
+  /* ───── 3e partie : présentation + contact (reprise de la version classique) ───── */
+  #infos { position: relative; z-index: 1; background: var(--black); scroll-snap-align: start; }
+  .section-label { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--red); }
+  .about-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(245,242,237,0.06); }
+  .about-left { padding: 6rem 3rem; border-right: 1px solid rgba(245,242,237,0.06); }
+  .about-right { padding: 6rem 3rem; }
+  .about-statement { font-family: var(--display); font-style: normal; font-size: clamp(1.5rem, 3vw, 2.8rem); line-height: 1.25; color: var(--cream); margin-top: 3rem; margin-bottom: 3rem; }
+  .about-body { font-size: 0.75rem; line-height: 1.9; color: rgba(245,242,237,0.55); max-width: 45ch; }
+  .about-body em { color: var(--white); font-style: normal; }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 3rem; }
+  .skill-item { padding: 1.5rem; border: 1px solid rgba(245,242,237,0.06); margin: -1px 0 0 -1px; }
+  .skill-label { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--red); margin-bottom: 0.5rem; }
+  .skill-list { font-size: 0.65rem; line-height: 1.7; color: rgba(245,242,237,0.5); }
+  .about-aside { margin-top: 2.5rem; font-family: var(--mono); font-size: 0.65rem; line-height: 2.1; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--white) 45%, transparent); }
+  .about-aside span { color: var(--red); }
+
+  /* ===================== DISCIPLINES (STICKY STACK) ===================== */
+  .disc-section { padding: 7rem 3rem 4rem; border-top: 1px solid color-mix(in srgb, var(--white) 6%, transparent); scroll-margin-top: 2rem; }
+  .disc-head { margin-bottom: 4.5rem; }
+  .disc-heading {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(2rem, 5.5vw, 4.5rem); line-height: 0.95;
+    letter-spacing: -0.03em; margin: 1.4rem 0 1.6rem;
+    -webkit-text-stroke: 2px var(--white); paint-order: stroke fill;
+  }
+  .disc-heading em { font-style: normal; font-weight: 400; color: var(--cream); -webkit-text-stroke: 0; }
+  .disc-intro { font-size: 0.75rem; line-height: 1.85; color: color-mix(in srgb, var(--white) 50%, transparent); max-width: 42ch; }
+
+  .disc-stack { position: relative; padding-bottom: 28vh; }
+  .disc-card {
+    --peek: 3.4rem;
+    --rot: 0deg; --shiftx: 0%; --shifty: 0px; --topjit: 0px;
+    position: sticky;
+    top: calc(50px + var(--i) * var(--peek) + var(--topjit));
+    width: 72%;
+    margin-left: var(--shiftx);
+    margin-top: 2.5rem;
+    background: var(--off-black);
+    border: 1px solid color-mix(in srgb, var(--white) 12%, transparent);
+    border-top: 2px solid var(--red);
+    box-shadow: 0 -8px 50px rgba(0,0,0,0.55);
+    overflow: hidden;
+    transform: rotate(var(--rot)) translateY(var(--shifty));
+    transform-origin: top center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .disc-card:first-child { margin-top: 0; }
+  .disc-card:hover {
+    border-color: color-mix(in srgb, var(--white) 28%, transparent);
+    box-shadow: 0 -8px 64px rgba(0,0,0,0.72);
+    transform: rotate(calc(var(--rot) * 0.3)) translateY(var(--shifty)) scale(1.015);
+    z-index: 5;
+  }
+  .disc-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.05rem 1.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--white) 8%, transparent);
+    background: color-mix(in srgb, var(--charcoal) 55%, transparent);
+  }
+  .disc-bar-left { display: flex; align-items: baseline; gap: 1.1rem; }
+  .disc-num { font-family: var(--mono); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; color: var(--red); }
+  .disc-tag { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--white); }
+  .disc-count { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: color-mix(in srgb, var(--white) 35%, transparent); }
+  .disc-inner { position: relative; padding: 3rem 1.75rem 3.25rem; min-height: 46vh; display: flex; flex-direction: column; }
+  .disc-ghost {
+    position: absolute; right: 1.2rem; bottom: 0.2rem;
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(7rem, 18vw, 14rem); line-height: 0.78;
+    color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--white) 7%, transparent);
+    pointer-events: none; user-select: none;
+  }
+  .disc-title {
+    position: relative; font-family: var(--display); font-weight: 700;
+    font-size: clamp(1.6rem, 3.5vw, 3rem); line-height: 1; letter-spacing: -0.02em;
+    color: var(--white); margin-bottom: 1.4rem; max-width: 18ch;
+  }
+  .disc-desc { position: relative; font-size: 0.74rem; line-height: 1.85; color: color-mix(in srgb, var(--white) 55%, transparent); max-width: 40ch; margin-bottom: auto; }
+  .disc-list { position: relative; display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.5rem; }
+  .disc-list li {
+    list-style: none; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--white) 65%, transparent);
+    border: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    padding: 0.5rem 0.85rem; transition: color 0.2s, border-color 0.2s;
+  }
+  .disc-card:hover .disc-list li { border-color: color-mix(in srgb, var(--white) 24%, transparent); }
+
+  /* DISCIPLINES EMBEDDED AS ABOUT LEFT COLUMN */
+  .about-disc-layout { align-items: stretch; }
+  .about-disc-layout .about-left { padding-top: 5rem; }
+  .about-sticky { position: sticky; top: 6rem; }
+  .about-disc-layout .disc-stack { padding-bottom: 10vh; }
+  .about-disc-layout .disc-card {
+    width: 88%;
+    --peek: 2.6rem; box-shadow: 0 -6px 36px rgba(0,0,0,0.5);
+  }
+  .about-disc-layout .disc-card:not(:first-child) { margin-top: 2rem; }
+  .about-disc-layout .disc-bar { padding: 0.85rem 1.4rem; }
+  .about-disc-layout .disc-inner { min-height: 30vh; padding: 1.8rem 1.4rem 2.1rem; }
+  .about-disc-layout .disc-title { font-size: clamp(1.25rem, 2.2vw, 1.9rem); margin-bottom: 1rem; }
+  .about-disc-layout .disc-desc { font-size: 0.7rem; }
+  .about-disc-layout .disc-list { margin-top: 1.5rem; }
+  .about-disc-layout .disc-ghost { font-size: 7.5rem; right: 0.6rem; bottom: 0; }
+
+  .contact-section { padding: 8rem 3rem; border-top: 1px solid rgba(245,242,237,0.06); display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .contact-overline { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--red); margin-bottom: 2rem; }
+  .contact-title { font-family: var(--display); font-weight: 900; font-size: clamp(3rem, 8vw, 7rem); letter-spacing: -0.04em; line-height: 0.9; margin-bottom: 3rem; -webkit-text-stroke: 3px var(--white); paint-order: stroke fill; }
+  .contact-title em { font-family: var(--display); font-style: normal; font-weight: 400; display: block; }
+  .contact-email {
+    display: inline-block; font-family: var(--mono); font-size: 0.75rem;
+    letter-spacing: 0.15em; color: var(--muted); text-decoration: none;
+    padding: 1rem 2.5rem; border: 1px solid rgba(245,242,237,0.12);
+    transition: all 0.3s ease; text-transform: lowercase;
+  }
+  .contact-email:hover { background: var(--red); color: var(--white); border-color: var(--red); }
+  footer {
+    padding: 2rem 3rem; border-top: 1px solid rgba(245,242,237,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--off-black);
+  }
+  .footer-copy { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--muted); }
+  .footer-links { display: flex; gap: 1rem; }
+  .footer-links a { display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); text-decoration: none; border: 1px solid rgba(245,242,237,0.2); padding: 0.5rem 1rem; transition: border-color 0.2s, color 0.2s; }
+  .footer-links a:hover { border-color: var(--white); color: var(--white); }
+  .footer-links a svg { flex-shrink: 0; }
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: none; }
+  @media (max-width: 768px) {
+    .contact-title { -webkit-text-stroke-width: 1.5px; }
+    .about-section { grid-template-columns: 1fr; }
+    .about-left { border-right: none; border-bottom: 1px solid rgba(245,242,237,0.06); padding: 3.5rem 1.5rem; }
+    .about-right { padding: 3.5rem 1.5rem; }
+    .about-statement { margin-top: 1.5rem; margin-bottom: 2rem; }
+    .about-aside { margin-top: 1.5rem; }
+    .about-sticky { position: static; top: auto; }
+    .about-disc-layout .about-left { order: 2; padding-top: 3.5rem; }
+    .about-disc-layout .about-right { order: 1; }
+    .about-disc-layout .disc-inner { min-height: 0; }
+
+    /* ════════════════════════════════════════
+       DISCIPLINES — rotation desktop conservée, contenue
+    ════════════════════════════════════════ */
+    /* overflow-x:clip coupe les bords des cartes inclinées SANS créer de scroll container
+       (contrairement à overflow-x:hidden qui casse position:sticky sur iOS Safari) */
+    .disc-section { padding: 4rem 1.5rem 2rem; overflow-x: clip; }
+    .about-disc-layout .about-left { overflow-x: clip; }
+    /* Re-affirmer sticky explicitement pour iOS Safari */
+    .disc-card { position: sticky; width: 88% !important; margin-left: auto !important; margin-right: auto !important; }
+    .disc-head { margin-bottom: 2.5rem; }
+    .disc-intro { max-width: none; }
+    .disc-inner { min-height: 0; padding: 2rem 1.5rem 2.5rem; }
+    .disc-ghost { font-size: clamp(5rem, 27vw, 8rem); }
+    .contact-section { padding: 6rem 1.5rem 4rem; }
+    .contact-title { font-size: clamp(3.5rem, 15vw, 7rem); margin-bottom: 2.5rem; }
+    .contact-email { display: block; width: 100%; max-width: 28rem; text-align: center; padding: 1.25rem 1.5rem; }
+
+    /* ════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════ */
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem 1.5rem; }
+    .footer-links { justify-content: center; flex-wrap: wrap; }
+  }
+
+  #project { position: fixed; inset: 0; z-index: 35; background: var(--black); display: none; }
+  #project.open { display: block; animation: projIn .45s ease both; }
+  @keyframes projIn { from { opacity: 0; } to { opacity: 1; } }
+  #project iframe { width: 100%; height: 100%; border: 0; display: block; }
+  #project-back { position: fixed; z-index: 36; right: 3rem; top: 1.35rem; font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; padding: 0.5rem 0.85rem 0.45rem; border: 1px solid var(--faint); background: rgba(10,10,10,0.85); display: none; }
+  /* la page classique a déjà son « ← Retour » : ce bouton ne sert que si elle ne répond pas */
+  #project.open + #project-back.fallback { display: block; }
+  #project-back:hover { border-color: var(--white); }
+
+  @media (max-width: 760px) {
+    #home { padding: 5rem 0 3.5rem; display: flex; flex-direction: column; }
+    .home-top { padding: 1.2rem 16px; }
+    .hero-content { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    .hero-eyebrow, .hero-descriptor, .hero-scroll { display: none; }
+    .hero-name { display: grid; grid-template-columns: repeat(3, min-content); justify-content: center; font-size: clamp(5rem, 36.5vw, 16rem); line-height: 0.88; letter-spacing: -0.02em; -webkit-text-stroke-width: 1px; margin: auto 0; transform: scaleY(2.6); }
+    .hero-name .letter { display: block; will-change: auto; cursor: auto; }
+    .hero-name .letter:nth-child(4) { grid-column: 1; grid-row: 2; transform: scaleX(1.51); transform-origin: left center; }
+    .hero-name .letter:nth-child(5) { grid-column: 3; grid-row: 2; transform: scaleX(1.57); transform-origin: right center; }
+    .bg-spirals { display: none; }
+    #np { top: 4rem; }
+    .top { padding: 1.2rem 16px; }
+    .top-right .count { display: none; }
+    .label { left: 16px; right: 16px; bottom: 1.6rem; max-width: none; }
+    .label .body { display: none; }
+    .hint { display: none; }
+    #project-back { right: 16px; top: auto; bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SON D'AMBIANCE (repris de la version classique) -->
+<audio id="bg-audio" src="ambient-doxal.mp3" loop preload="auto"></audio>
+
+<div id="sound-prompt">
+  <div id="sound-prompt-card">
+    <p id="sound-prompt-label">Ambiance sonore</p>
+    <p id="sound-prompt-q">Activer le son ?</p>
+    <div id="sound-prompt-actions">
+      <button id="sound-yes">Activer</button>
+      <button id="sound-no">Continuer en silence</button>
+    </div>
+  </div>
+</div>
+
+<button id="sound-toggle" aria-label="Activer ou couper le son">
+  <span class="sound-bars"><i></i><i></i><i></i><i></i></span>
+  <span id="sound-toggle-label">Son</span>
+</button>
+
+<!-- INTRO -->
+<div id="intro" aria-hidden="true">
+  <div id="intro-text"><span>D</span><span>O</span><span>X</span><span>A</span><span>L</span></div>
+  <div id="intro-bar"></div>
+  <div id="intro-sub">Design Graphique & Direction Artistique</div>
+</div>
+
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+  <defs>
+    <filter id="letterWobble" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence id="lw" type="fractalNoise" baseFrequency="0.03 0.06" numOctaves="4" seed="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="bgWobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="5" seed="42" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="bg-spirals">
+  <svg style="top:-10vh;left:-10vw;" width="70vw" height="70vw" viewBox="-300 -300 600 600">
+    <path id="sp1" fill="none" stroke="#f5f2ed" stroke-width="1.8" stroke-linecap="round" filter="url(#bgWobble)"
+      d="M2,-3 C4,-9 11,-10 13,-4 C16,5 9,14 1,16 C-10,19 -21,11 -23,-1 C-27,-16 -17,-30 -3,-33 C14,-37 30,-25 33,-8 C38,13 23,31 4,35 C-19,40 -40,23 -44,1 C-50,-25 -31,-49 -5,-53 C24,-58 51,-37 56,-8 C62,25 39,54 7,59 C-29,65 -61,40 -67,-1 C-74,-45 -48,-80 -7,-86 C37,-93 75,-64 81,-6 C89,42 57,83 9,90 C-39,97 -83,63 -90,-2 C-98,-70 -61,-117 -9,-125 C47,-133 97,-93 105,-3 C114,57 72,110 10,119 C-52,128 -108,84 -117,-4 C-127,-96 -80,-155 -11,-164"/>
+  </svg>
+  <svg style="bottom:-15vh;right:-10vw;" width="65vw" height="65vw" viewBox="-280 -280 560 560">
+    <path id="sp2" fill="none" stroke="#f5f2ed" stroke-width="1.8" stroke-linecap="round" filter="url(#bgWobble)"
+      d="M-1,4 C-5,10 -12,9 -13,3 C-15,-7 -7,-16 2,-17 C12,-19 22,-10 23,2 C25,16 14,28 1,29 C-14,31 -28,18 -29,-1 C-32,-22 -17,-37 2,-39 C24,-42 41,-24 43,-3 C46,21 27,40 4,43 C-22,46 -44,25 -47,-1 C-51,-31 -29,-56 -4,-59 C25,-63 53,-39 56,-5 C60,28 36,58 6,62 C-27,67 -59,41 -62,-2 C-67,-48 -39,-83 -7,-88 C29,-93 66,-63 70,-7 C75,38 44,77 8,82 C-31,88 -73,56 -77,-4 C-83,-67 -48,-108 -9,-114 C35,-121 79,-84 84,-6 C90,52 55,99 10,105 C-38,112 -88,74 -94,-5 C-101,-87 -62,-133 -11,-141"/>
+  </svg>
+  <svg style="top:30vh;right:-5vw;" width="45vw" height="45vw" viewBox="-200 -200 400 400">
+    <path id="sp3" fill="none" stroke="#f5f2ed" stroke-width="1.6" stroke-linecap="round" filter="url(#bgWobble)"
+      d="M1,-2 C3,-6 8,-7 9,-2 C11,4 6,10 1,11 C-6,13 -14,7 -15,-1 C-17,-11 -10,-20 -2,-22 C8,-24 19,-16 20,-4 C22,10 13,22 2,24 C-11,26 -25,15 -27,-1 C-30,-19 -18,-34 -4,-37 C12,-40 28,-26 30,-5 C33,15 19,33 4,36 C-14,39 -33,24 -36,-2 C-39,-30 -23,-51 -5,-55 C16,-59 38,-41 41,-6 C44,24 26,47 6,51 C-18,55 -43,36 -46,-3 C-50,-44 -31,-71 -7,-76 C20,-81 49,-59 52,-8 C57,30 35,60 8,65 C-21,70 -52,47 -56,-4"/>
+  </svg>
+  <svg style="top:4vh;left:35vw;" width="30vw" height="30vw" viewBox="-220 -220 440 440">
+    <path id="sp4" fill="none" stroke="#f5f2ed" stroke-width="1.6" stroke-linecap="round" filter="url(#bgWobble)"
+      d="M-1,3 C-4,8 -10,8 -11,2 C-13,-6 -6,-14 2,-15 C10,-17 19,-9 20,2 C22,14 12,25 1,26 C-12,28 -24,16 -26,-1 C-28,-20 -16,-33 -3,-36 C12,-39 27,-25 29,-4 C31,19 17,37 3,40 C-14,43 -32,27 -34,-1 C-38,-31 -22,-53 -4,-57 C16,-61 37,-43 40,-6 C43,22 27,46 5,50 C-19,54 -44,36 -47,-2 C-51,-42 -31,-68 -6,-73 C21,-78 48,-57 51,-7 C55,28 36,57 7,62 C-22,67 -50,46 -54,-3 C-58,-54 -35,-84 -8,-89 C20,-95 51,-71 55,-8"/>
+  </svg>
+</div>
+
+<svg id="cursor" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="-25 -25 50 50" style="position:fixed;pointer-events:none;z-index:9999;overflow:visible;left:-999px;top:-999px;">
+  <defs>
+    <filter id="wobbly" x="-50%" y="-50%" width="200%" height="200%">
+      <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="5" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <path fill="none" stroke="#e01a1a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#wobbly)"
+    d="M0.3,-0.5 C0.8,-1.2 1.9,-1.8 2.1,-0.9 C2.4,0.3 1.7,1.6 0.6,2.1 C-0.8,2.7 -2.3,2.1 -2.9,0.7 C-3.6,-1.1 -2.8,-3.1 -1.1,-3.9 C0.9,-4.8 3.4,-3.8 4.2,-1.7 C5.2,0.8 4.0,3.7 1.7,4.9 C-1.1,6.3 -4.5,5.0 -5.8,2.1 C-7.3,-1.2 -5.7,-5.2 -2.5,-6.8 C1.3,-8.6 5.9,-6.7 7.5,-2.8 C9.3,1.6 7.1,6.9 2.9,8.8 C-1.8,10.9 -7.8,8.4 -9.7,3.5 C-11.9,-1.9 -9.1,-8.6 -3.8,-10.8 C2.0,-13.2 9.4,-10.1 11.7,-4.1 C14.2,2.4 10.8,10.5 4.3,13.0 C-2.8,15.7 -11.6,12.0 -14.2,4.8 C-17.0,-3.0 -13.1,-12.5 -5.4,-15.4 C2.9,-18.4 13.1,-14.2 16.0,-5.6 C19.1,3.6 14.6,14.5 5.7,17.5"/>
+</svg>
+
+<!-- ACCUEIL -->
+<section id="home">
+  <div class="home-top"><a class="logo" href="#home">DOXAL<span>.</span></a><div class="top-right"><a href="index.html">Version classique ↗</a></div></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Design Graphique & Direction Artistique</p>
+    <h1 class="hero-name" aria-label="DOXAL"><span class="letter">D</span><span class="letter">O</span><span class="letter">X</span><span class="letter">A</span><span class="letter">L</span></h1>
+    <div class="hero-descriptor">
+      <span>Identité Visuelle</span><span>·</span><span>Motion Design</span><span>·</span>
+      <span>Photographie</span><span>·</span><span>Direction Artistique</span><span>·</span><span>Musique</span>
+    </div>
+  </div>
+  <div class="hero-scroll" id="toScene">Défiler</div>
+</section>
+
+<!-- SCÈNE 3D -->
+<section id="scene">
+<div id="sceneFade" aria-hidden="true"></div>
+<canvas id="gl" tabindex="0" aria-label="Bac à vinyles en 3D : flèches pour fouiller, Entrée pour écouter un projet"></canvas>
+
+<div class="hud top">
+  <a class="logo" href="#home" id="toHome">DOXAL<span>.</span></a>
+  <div class="top-right"><a href="index.html">Version classique ↗</a></div>
+</div>
+
+<div class="hud label" id="label" aria-live="polite">
+  <p class="idx"><b id="lIdx">01</b> / <span id="lTotal">05</span></p>
+  <h1 id="lTitle"></h1>
+
+  <p class="year" id="lYear"></p>
+</div>
+
+<div class="hud dshud" id="dsHud">
+  <p class="tr-title">DOXAL Run</p>
+  <div class="tr-actions"><button id="dsBack">← Retour au bac</button></div>
+</div>
+<div class="hud" id="np" aria-live="polite"><b>●</b> Radio · <span id="npTitle"></span><small><button id="radioOff">■ Éteindre</button></small></div>
+
+
+<div class="hud trhud" id="trHud">
+  <p class="tr-title">DOXAL TR-01</p>
+  <div class="tr-actions"><button id="trFull">Interface complète ↗</button><button id="trBack">← Retour au bac</button></div>
+</div>
+</section>
+
+<!-- PRÉSENTATION + CONTACT (comme sur la version classique) -->
+<section id="infos">
+  <section id="about" class="about-section about-disc-layout">
+    <div class="about-left" id="disciplines">
+      <p class="section-label" style="margin-bottom:2rem">Disciplines</p>
+      <div class="disc-stack">
+      <article class="disc-card" style="--i:0; --rot:-2.2deg; --shiftx:1%; --shifty:0px; --topjit:0px;">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">01</span><span class="disc-tag">Design</span></div>
+          <span class="disc-count">01 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">01</span>
+          <h3 class="disc-title">Identité<br>& Typographie</h3>
+          <p class="disc-desc">Construire des systèmes visuels cohérents, du logotype à la grille, jusqu'à la mise en page éditoriale.</p>
+          <ul class="disc-list">
+            <li>Identité Visuelle</li>
+            <li>Typographie</li>
+            <li>Éditorial</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:1; --rot:3.4deg; --shiftx:8%; --shifty:8px; --topjit:12px;">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">02</span><span class="disc-tag">Direction</span></div>
+          <span class="disc-count">02 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">02</span>
+          <h3 class="disc-title">Direction<br>Artistique</h3>
+          <p class="disc-desc">Donner une direction à une idée, définir un concept, un ton et un univers de marque qui tiennent dans la durée.</p>
+          <ul class="disc-list">
+            <li>Direction Artistique</li>
+            <li>Développement Concept</li>
+            <li>Branding</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:2; --rot:-3.6deg; --shiftx:2%; --shifty:-6px; --topjit:-10px;">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">03</span><span class="disc-tag">Image</span></div>
+          <span class="disc-count">03 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">03</span>
+          <h3 class="disc-title">Image<br>& Recherche</h3>
+          <p class="disc-desc">Photographier, retoucher et chercher la bonne image, la matière première avant le bon message.</p>
+          <ul class="disc-list">
+            <li>Photographie</li>
+            <li>Traitement d'Image</li>
+            <li>Recherche Visuelle</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="disc-card" style="--i:3; --rot:2deg; --shiftx:10%; --shifty:14px; --topjit:16px;">
+        <div class="disc-bar">
+          <div class="disc-bar-left"><span class="disc-num">04</span><span class="disc-tag">Outils</span></div>
+          <span class="disc-count">04 / 04</span>
+        </div>
+        <div class="disc-inner">
+          <span class="disc-ghost" aria-hidden="true">04</span>
+          <h3 class="disc-title">Suite<br>Créative</h3>
+          <p class="disc-desc">La suite Adobe au bout des doigts, du premier croquis vectoriel à l'export final prêt pour l'impression.</p>
+          <ul class="disc-list">
+            <li>Illustrator</li>
+            <li>Photoshop</li>
+            <li>InDesign</li>
+          </ul>
+        </div>
+      </article>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-sticky">
+        <p class="section-label">À propos</p>
+        <p class="about-statement fade-in">"EVERYTHING YOU THOUGHT WOULD HAPPEN, WILL NEVER HAPPEN"</p>
+        <p class="about-body">
+          Je suis Oscar Penverne, je travaille sous le nom <em>DOXAL</em>, designer graphique et directeur artistique basé à Bordeaux, étudiant à la LISAA. Mon travail se situe à l'intersection du <em>design graphique, de la culture musicale et de l'expérimentation visuelle</em>, façonné par une identité construite entre la France, la Chine et le Mexique.
+        </p>
+        <p class="about-aside">DOXAL<span>.</span><br>Oscar Penverne<br>Bordeaux — LISAA</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <p class="contact-overline fade-in">Disponible pour des projets créatifs & collaborations</p>
+    <h2 class="contact-title fade-in">On<br><em>travaille ?</em></h2>
+    <a href="mailto:oscar.penverne@gmail.com" class="contact-email fade-in">oscar.penverne@gmail.com</a>
+  </section>
+
+  <footer>
+    <p class="footer-copy">© 2026 DOXAL, Oscar Penverne. Tous droits réservés.</p>
+    <div class="footer-links">
+      <a href="https://instagram.com/oscar_pvrn" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @oscar_pvrn
+      </a>
+      <a href="https://instagram.com/spiral.collectif" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @spiral.collectif
+      </a>
+    </div>
+  </footer>
+</section>
+
+<div id="fade"></div>
+<div id="poster-view" role="dialog" aria-label="Affiche"><img id="poster-img" alt="Affiche du Posterfolio"></div>
+
+<div id="project" aria-hidden="true"><iframe id="frame" title="Projet" allow="autoplay"></iframe></div>
+<button id="project-back">← Retour à la TR-01</button>
+
+
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* ═════════ PROJETS : textes repris tels quels des pages projets (et relus en direct dans la version classique) ═════════ */
+const PROJECTS = [
+ {
+  "cat": "Poster Design & Visual Experimentation",
+  "title": "Poster<br><em>folio</em>",
+  "quote": "\"Expérimentation visuelle, sans brief, sans contraintes.\"",
+  "body": "Une série d'affiches personnelles explorant différentes techniques, glitch, collage, manipulation photo, typographie expérimentale.<br><br> Chaque pièce est indépendante. L'objectif était d'expérimenter et de produire des visuels percutants, pas de suivre un concept.",
+  "year": "2024 — 2026",
+  "id": "posterfolio",
+  "img": "rodeo.jpg"
+ },
+ {
+  "cat": "Identité Visuelle / Collectif",
+  "title": "Spiral<br><em>Collectif</em>",
+  "quote": "“Just Garbage But Fun To Make.”",
+  "body": "Spiral Collectif est un collectif créatif basé à Bordeaux. L'identité visuelle est construite autour de la spirale comme symbole, une forme qui suggère le mouvement et une évolution constante.<br><br> <em>Just Garbage But Fun To Make</em> est le premier album de TAM, deuxième membre du collectif. La pochette le place dans un champ de neige, entouré d'une typographie manuscrite incrustée dans l'image, avec le logo Spiral ancré en bas à droite.",
+  "year": "2026",
+  "id": "spiral",
+  "img": "Cover Just Garbage But Fun To Make.jpg"
+ },
+ {
+  "cat": "Illustration & Univers Personnel",
+  "title": "Mixed<br><em>Media</em>",
+  "quote": "“Un seul personnage, des univers infinis, chaque apparition est un nouveau monde.”",
+  "body": "DOXAL est mon alter ego, un personnage à tête de télé qui existe dans un multivers. À chaque apparition, c'est un nouvel univers avec un nouveau style visuel : dessin, collage photo, numérique, graffiti etc... Même personnage, réalité différente.",
+  "year": "2025",
+  "id": "mixedmedia",
+  "img": "fanzine-2.png",
+  "fit": "contain",
+  "bg": "#e8e3db"
+ },
+ {
+  "cat": "Illustration & Collage",
+  "title": "KICK<br><em>BOXING</em>",
+  "quote": "“Deux boxeurs, un seul coup, quatre atmosphères.”",
+  "body": "",
+  "year": "2026",
+  "id": "kickboxing",
+  "img": "kickboxing-1.jpg",
+  "bg": "#ee5d63"
+ },
+ {
+  "cat": "Identité Visuelle",
+  "title": "SWOOF",
+  "quote": "“Dans un monde où l'humain occupe tout l'espace, cette marque rend la ville à ses vrais habitants.”",
+  "body": "SWOOF est une marque de livraison de nourriture pour chiens construite autour de l'énergie, la vitesse et la personnalité. L'identité s'inspire de la culture de rue, lettrage graffiti, couleurs fortes et un système de mascotte qui rend la marque immédiatement reconnaissable.<br><br> Le logo, le packaging et le merch parlent tous le même langage : fort, fun et conçu pour aller vite.",
+  "year": "2026",
+  "id": "swoof",
+  "img": "SWOOF colo.png",
+  "fit": "contain",
+  "bg": "#0e3d5c"
+ },
+ {
+  "cat": "Direction Artistique / Album",
+  "title": "Replica 2<br><em>Huntrill & Hologram Lo'</em>",
+  "quote": "“Redesign de la cover de Replica 2.”",
+  "body": "Replica 2 est un projet collaboratif entre le rappeur <em>Huntrill</em> et le beatmaker/producteur <em>Hologram Lo'</em>. L'album traite de l'argent, du statut et de la culture de rue.<br><br> La pochette est construite autour d'une seule image, un billet d'un dollar modifié. Le visage est flou et le design altéré pour représenter de l'argent illégitime. En quatrième de couverture, une barre rose censure George Washington, figure présente sur les vrais billets et ici sur la version contrefaite d'Huntrill.",
+  "year": "2025",
+  "id": "replica2",
+  "img": "img-replica-cover.jpg"
+ }
+];
+const N = PROJECTS.length;
+const $ = (id) => document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+/* ═════════ ACCUEIL (intro, lettres, curseur spirale, spirales de fond) ═════════ */
+(() => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&', real = ['D', 'O', 'X', 'A', 'L'];
+  const letters = document.querySelectorAll('#intro-text span'), intro = $('intro');
+  if (reduced) { intro.remove(); return; }
+  document.body.classList.add('locked');
+  letters.forEach((l, i) => setTimeout(() => l.classList.add('visible'), 100 + i * 80));
+  letters.forEach((l, i) => setTimeout(() => {
+    let n = 0;
+    const iv = setInterval(() => {
+      l.textContent = chars[(Math.random() * chars.length) | 0]; l.style.color = Math.random() > 0.5 ? 'var(--red)' : 'var(--white)';
+      if (++n > 6) { clearInterval(iv); l.textContent = real[i]; l.style.color = 'var(--white)'; }
+    }, 60);
+  }, 600 + i * 100));
+  setTimeout(() => $('intro-bar').classList.add('full'), 900);
+  setTimeout(() => $('intro-sub').classList.add('visible'), 1300);
+  setTimeout(() => { intro.classList.add('hide'); document.body.classList.remove('locked'); setTimeout(() => intro.remove(), 600); }, 2400);
+})();
+const cursorEl = $('cursor');
+const touchDev = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+let cmx = -999, cmy = -999, ccx = -999, ccy = -999, cang = 0;
+if (!touchDev) {
+  addEventListener('mousemove', (e) => { cmx = e.clientX; cmy = e.clientY; });
+  const lw = $('lw'); let lwSeed = 0, lwOn = false;
+  document.querySelectorAll('.letter').forEach((l) => {
+    l.addEventListener('mouseenter', () => { lwOn = true; });
+    l.addEventListener('mouseleave', () => { lwOn = false; l.style.transform = ''; l.style.color = ''; l.style.webkitTextStroke = ''; });
+    l.addEventListener('mousemove', (e) => {
+      const r = l.getBoundingClientRect();
+      const dx = (e.clientX - r.left - r.width / 2) / r.width * 18, dy = (e.clientY - r.top - r.height / 2) / r.height * 10;
+      l.style.transform = `translate(${dx}px, ${dy - 10}px) skewX(-6deg)`; l.style.color = 'transparent'; l.style.webkitTextStroke = '2px #e01a1a';
+    });
+  });
+  (function anim() {
+    ccx += (cmx - ccx) * 0.4; ccy += (cmy - ccy) * 0.4; cang += 2;
+    cursorEl.style.left = ccx + 'px'; cursorEl.style.top = ccy + 'px';
+    cursorEl.style.transform = `translate(-50%,-50%) rotate(${cang}deg)`;
+    if (lwOn) { lwSeed += 0.4; lw.setAttribute('seed', Math.floor(lwSeed)); }
+    requestAnimationFrame(anim);
+  })();
+} else cursorEl.style.display = 'none';
+function animateSpiral(id, duration, delay) {
+  const path = document.getElementById(id); if (!path || reduced) return;
+  const len = path.getTotalLength(); path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+  setTimeout(() => {
+    let start = null, drawing = true;
+    (function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      path.style.strokeDashoffset = drawing ? len * (1 - p) : len * p;
+      if (p >= 1) { drawing = !drawing; start = ts; }
+      requestAnimationFrame(step);
+    })(performance.now());
+  }, delay);
+}
+animateSpiral('sp1', 8000, 0); animateSpiral('sp2', 9000, 1200); animateSpiral('sp3', 7000, 2400); animateSpiral('sp4', 10000, 600);
+
+const sceneEl = $('scene'), homeEl = $('home');
+let sceneOnScreen = false, sceneFull = false;
+/* dégradé au défilement : le DOXAL s'efface, la pièce sort peu à peu du bordeaux */
+const heroContent = document.querySelector('#home .hero-content'), sceneFade = $('sceneFade');
+function onScrollFade() {
+  const p = Math.min(1, Math.max(0, 1 - sceneEl.getBoundingClientRect().top / innerHeight));
+  sceneFade.style.opacity = (1 - Math.pow(p, 1.6)).toFixed(3);
+  heroContent.style.opacity = (1 - Math.min(1, p * 1.6)).toFixed(3);
+}
+addEventListener('scroll', onScrollFade, { passive: true }); addEventListener('resize', onScrollFade); onScrollFade();
+new IntersectionObserver(([en]) => { sceneOnScreen = en.isIntersecting; sceneFull = en.intersectionRatio > 0.9; }, { threshold: [0, 0.9] }).observe(sceneEl);
+const fadeObs = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('visible'); fadeObs.unobserve(en.target); } }), { threshold: 0.1 });
+document.querySelectorAll('#infos .fade-in').forEach((el) => fadeObs.observe(el));
+$('toScene').addEventListener('click', () => sceneEl.scrollIntoView({ behavior: 'smooth' }));
+$('toHome').addEventListener('click', (e) => { e.preventDefault(); scrollTo({ top: 0, behavior: 'smooth' }); });
+
+/* ═════════ RENDERER / SCÈNE ═════════ */
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0a);
+scene.fog = new THREE.Fog(0x0a0a0a, 2.2, 5.5);
+
+const camera = new THREE.PerspectiveCamera(48, 1, 0.01, 20);
+
+scene.add(new THREE.HemisphereLight(0xfff1e0, 0x1a1010, 0.55));
+const spot = new THREE.SpotLight(0xffe0bd, 26, 6, 0.62, 0.55, 1.6);
+spot.position.set(0.15, 2.3, 0.6);
+spot.target.position.set(0.3, 0, 0.1);
+spot.castShadow = true;
+spot.shadow.mapSize.set(2048, 2048);
+spot.shadow.bias = -0.0004;
+spot.shadow.radius = 4;
+scene.add(spot, spot.target);
+const redGlow = new THREE.PointLight(0xe01a1a, 1.6, 1.6, 1.8);
+redGlow.position.set(0.95, 0.25, 0.05);
+scene.add(redGlow);
+
+/* ═════════ TEXTURES ═════════ */
+const manager = new THREE.LoadingManager();
+
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+function woodTex(base, dark) {
+  return canvasTex(512, 512, (g, w, h) => {
+    g.fillStyle = base; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 140; i++) {
+      const y = Math.random() * h;
+      g.strokeStyle = `rgba(${dark},${0.08 + Math.random() * 0.22})`;
+      g.lineWidth = 0.5 + Math.random() * 2.5;
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= w; x += 32) g.lineTo(x, y + Math.sin(x * 0.02 + i) * 3 + (Math.random() - 0.5) * 2);
+      g.stroke();
+    }
+  });
+}
+function floorTex() {
+  const t = canvasTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = '#17120f'; g.fillRect(0, 0, w, h);
+    for (let p = 0; p < 8; p++) {           // lames de parquet
+      const y = p * h / 8;
+      g.fillStyle = `hsl(24, 18%, ${7 + Math.random() * 4}%)`; g.fillRect(0, y, w, h / 8 - 3);
+      for (let i = 0; i < 40; i++) {
+        g.strokeStyle = `rgba(0,0,0,${Math.random() * 0.35})`; g.lineWidth = Math.random() * 2;
+        const yy = y + Math.random() * (h / 8);
+        g.beginPath(); g.moveTo(0, yy); g.lineTo(w, yy + (Math.random() - 0.5) * 6); g.stroke();
+      }
+      g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillRect(Math.random() * w, y, 3, h / 8);
+    }
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3);
+  return t;
+}
+
+const loader = new THREE.ImageLoader(manager);
+function loadImage(src) { return new Promise((res) => loader.load(encodeURI(src), res, undefined, () => res(null))); }
+
+/* pochette carrée : image en cover ou contain sur fond de couleur */
+function drawCover(g, img, p, size) {
+  g.fillStyle = p.bg || '#1a1a1a'; g.fillRect(0, 0, size, size);
+  if (!img) return;
+  const r = img.width / img.height;
+  let w, h;
+  if (p.fit === 'contain') { const pad = size * 0.1, box = size - pad * 2; if (r > 1) { w = box; h = box / r; } else { h = box; w = box * r; } }
+  else { if (r > 1) { h = size; w = size * r; } else { w = size; h = size / r; } }
+  g.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+}
+/* disque : sillons + rond central avec la pochette */
+function discTex(img, p) {
+  return canvasTex(1024, 1024, (g, s) => {
+    const c = s / 2;
+    g.fillStyle = '#060606'; g.fillRect(0, 0, s, s);
+    for (let r = c; r > c * 0.36; r -= 2.2) {
+      g.strokeStyle = `rgba(255,255,255,${0.018 + Math.random() * 0.03})`; g.lineWidth = 1;
+      g.beginPath(); g.arc(c, c, r, 0, Math.PI * 2); g.stroke();
+    }
+    [0.98, 0.72, 0.55].forEach((k) => { g.strokeStyle = 'rgba(0,0,0,0.9)'; g.lineWidth = 5; g.beginPath(); g.arc(c, c, c * k, 0, Math.PI * 2); g.stroke(); });
+    const grd = g.createLinearGradient(0, 0, s, s);               // reflet
+    grd.addColorStop(0.35, 'rgba(255,255,255,0)'); grd.addColorStop(0.5, 'rgba(255,255,255,0.07)'); grd.addColorStop(0.65, 'rgba(255,255,255,0)');
+    g.fillStyle = grd; g.beginPath(); g.arc(c, c, c, 0, Math.PI * 2); g.fill();
+    g.save(); g.beginPath(); g.arc(c, c, c * 0.33, 0, Math.PI * 2); g.clip();
+    const lab = document.createElement('canvas'); lab.width = lab.height = 512;
+    drawCover(lab.getContext('2d'), img, p, 512);
+    g.drawImage(lab, c - c * 0.33, c - c * 0.33, c * 0.66, c * 0.66);
+    g.restore();
+    g.fillStyle = '#0a0a0a'; g.beginPath(); g.arc(c, c, 9, 0, Math.PI * 2); g.fill();
+  });
+}
+function backTex(p, i) {
+  return canvasTex(512, 512, (g, s) => {
+    g.fillStyle = '#121212'; g.fillRect(0, 0, s, s);
+    g.fillStyle = '#e01a1a'; g.fillRect(40, 40, 26, 3);
+    g.fillStyle = '#f5f2ed'; g.font = '700 22px "Space Mono", monospace'; g.fillText('DOXAL.', 40, 90);
+    g.fillStyle = 'rgba(245,242,237,0.55)'; g.font = '16px "Space Mono", monospace';
+    g.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0') + ' — ' + p.year, 40, 125);
+    g.fillText(p.cat.toUpperCase().slice(0, 34), 40, 150);
+    g.fillStyle = 'rgba(245,242,237,0.15)'; g.font = '700 150px "Space Mono", monospace'; g.fillText(String(i + 1).padStart(2, '0'), 40, 470);
+  });
+}
+
+/* ═════════ DÉCOR ═════════ */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.MeshStandardMaterial({ map: floorTex(), roughness: 0.85 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true;
+scene.add(floor);
+
+/* bac en bois, avant bas pour laisser basculer les disques */
+const crate = new THREE.Group(); scene.add(crate);
+const woodMat = new THREE.MeshStandardMaterial({ map: woodTex('#6e4a2c', '30,15,5'), roughness: 0.8 });
+const CW = 0.4, CD = 0.42, CH = 0.24, T = 0.016;
+function board(w, h, d, x, y, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), woodMat);
+  m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; crate.add(m); return m;
+}
+board(CW, T, CD, 0, T / 2, 0);                                   // fond
+board(T, CH, CD, -CW / 2 + T / 2, CH / 2, 0);                    // côtés
+board(T, CH, CD, CW / 2 - T / 2, CH / 2, 0);
+board(CW, CH, T, 0, CH / 2, -CD / 2 + T / 2);                    // arrière
+board(CW, 0.055, T, 0, 0.0275, CD / 2 - T / 2);                  // avant (bas)
+crate.rotation.y = 0.06;
+
+/* vinyles */
+const SLEEVE = 0.315, THICK = 0.007;
+const edgeMat = new THREE.MeshStandardMaterial({ color: 0x1c1a18, roughness: 0.9 });
+const records = PROJECTS.map((p, i) => {
+  const pivot = new THREE.Group();                               // pivot = bas du disque
+  const front = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.62 });
+  const back = new THREE.MeshStandardMaterial({ map: backTex(p, i), roughness: 0.8 });
+  const sleeve = new THREE.Mesh(new THREE.BoxGeometry(SLEEVE, SLEEVE, THICK), [edgeMat, edgeMat, edgeMat, edgeMat, front, back]);
+  sleeve.position.y = SLEEVE / 2;
+  sleeve.castShadow = sleeve.receiveShadow = true;
+  sleeve.userData.index = i;
+  pivot.add(sleeve);
+  pivot.userData = { x: (Math.random() - 0.5) * 0.012, rz: (Math.random() - 0.5) * 0.03 };
+  crate.add(pivot);
+  const rec = { p, pivot, sleeve, front, disc: null };
+  loadImage(p.img).then((img) => {
+    front.map = canvasTex(1024, 1024, (g, s) => drawCover(g, img, p, s));
+    front.needsUpdate = true;
+    rec.discMap = discTex(img, p);
+  });
+  return rec;
+});
+
+/* platine au sol */
+const tt = new THREE.Group(); tt.position.set(0.74, 0, 0.2); tt.rotation.y = -0.35; scene.add(tt);
+const plinthMat = new THREE.MeshStandardMaterial({ color: 0x161616, roughness: 0.45, metalness: 0.2 });
+const metal = new THREE.MeshStandardMaterial({ color: 0xb9b6b0, roughness: 0.28, metalness: 0.9 });
+const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.09, 0.36), plinthMat);
+plinth.position.y = 0.045; plinth.castShadow = plinth.receiveShadow = true; tt.add(plinth);
+[[-0.2, -0.15], [0.2, -0.15], [-0.2, 0.15], [0.2, 0.15]].forEach(([x, z]) => {
+  const f = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.026, 0.02, 24), metal); f.position.set(x, -0.0, z); tt.add(f);
+});
+plinth.position.y = 0.055;
+const platter = new THREE.Group(); platter.position.set(-0.045, 0.1, 0); tt.add(platter);
+const plat = new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.152, 0.014, 96), metal); plat.castShadow = true; platter.add(plat);
+const mat = new THREE.Mesh(new THREE.CylinderGeometry(0.149, 0.149, 0.003, 96), new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.95 }));
+mat.position.y = 0.0085; platter.add(mat);
+const spindle = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.03, 12), metal); spindle.position.y = 0.02; platter.add(spindle);
+/* bras de lecture */
+const armPivot = new THREE.Group(); armPivot.position.set(0.165, 0.112, -0.11); tt.add(armPivot);
+const armBase = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.026, 0.03, 24), metal); armPivot.add(armBase);
+const armTube = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.23, 12), metal);
+armTube.rotation.x = Math.PI / 2; armTube.position.set(0, 0.022, 0.115); armPivot.add(armTube);
+const head = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.008, 0.032), plinthMat); head.position.set(0, 0.017, 0.235); armPivot.add(head);
+const counter = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.03, 20), metal); counter.rotation.x = Math.PI / 2; counter.position.set(0, 0.022, -0.035); armPivot.add(counter);
+armPivot.children.forEach((m) => { m.castShadow = true; });
+const ARM_REST = 0.12, ARM_PLAY = -0.42;
+armPivot.rotation.y = ARM_REST;
+/* détails : LED rouge, bouton start */
+const led = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 12, 12), new THREE.MeshBasicMaterial({ color: 0x3a0606 }));
+led.position.set(-0.19, 0.1, 0.165); tt.add(led);
+const startBtn = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.006, 0.025), metal); startBtn.position.set(-0.17, 0.1, 0.14); tt.add(startBtn);
+
+/* le disque qui sort de la pochette */
+const discTop = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.32, metalness: 0.15 });
+const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.148, 0.148, 0.0022, 96), [new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.4 }), discTop, discTop]);
+disc.castShadow = true; disc.visible = false; scene.add(disc);
+
+/* ═════════ TAPIS ABSTRAIT ═════════ */
+function rugTex() {
+  let seed = 7;                                                    // motif fixe d'une visite à l'autre
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  return canvasTex(2048, 1400, (g, w, h) => {
+    const fr = 60, x0 = fr, x1 = w - fr;
+    g.lineWidth = 3;
+    for (let y = 30; y < h - 30; y += 10) {                         // franges
+      g.strokeStyle = `rgba(200,188,170,${0.45 + rnd() * 0.4})`;
+      g.beginPath(); g.moveTo(rnd() * 12, y); g.lineTo(x0 + 2, y); g.stroke();
+      g.beginPath(); g.moveTo(x1 - 2, y); g.lineTo(w - rnd() * 12, y); g.stroke();
+    }
+    g.fillStyle = '#3a0b0b'; g.fillRect(x0, 0, x1 - x0, h);
+    g.strokeStyle = 'rgba(214,201,182,0.55)'; g.lineWidth = 5; g.strokeRect(x0 + 90, 90, x1 - x0 - 180, h - 180);   // un seul filet
+    for (let i = 0; i < 26000; i++) {                               // poils de tapis tufté
+      const x = x0 + rnd() * (x1 - x0), y = rnd() * h;
+      g.fillStyle = rnd() < 0.5 ? `rgba(0,0,0,${rnd() * 0.16})` : `rgba(255,225,205,${rnd() * 0.06})`;
+      g.fillRect(x, y, 1.5 + rnd() * 3, 1.5 + rnd() * 3);
+    }
+  });
+}
+const rugMap = rugTex();
+const rug = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.64), new THREE.MeshStandardMaterial({ map: rugMap, roughness: 1, alphaTest: 0.5, transparent: false }));
+rug.rotation.x = -Math.PI / 2; rug.rotation.z = 0.035; rug.position.set(0.08, 0.002, -0.12); rug.receiveShadow = true;
+scene.add(rug);
+
+/* ═════════ BRODERIE BLANCHE « SPIRAL » SUR LE TAPIS ═════════ */
+loadImage('logo-spiral.jpg').then((img) => {
+  if (!img) return;
+  const W = 1200, H = Math.round(W * img.height / img.width), pad = 24;
+  /* 1. masque : le noir du logo devient du fil, le blanc disparaît */
+  const m = document.createElement('canvas'); m.width = W; m.height = H;
+  const mg = m.getContext('2d'); mg.drawImage(img, 0, 0, W, H);
+  const d = mg.getImageData(0, 0, W, H), px = d.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const a = 255 - (px[i] + px[i + 1] + px[i + 2]) / 3;
+    px[i] = px[i + 1] = px[i + 2] = 255; px[i + 3] = a > 40 ? Math.min(255, a * 1.3) : 0;
+  }
+  mg.putImageData(d, 0, 0);
+  /* 2. fil : point satin en diagonale */
+  const thread = document.createElement('canvas'); thread.width = W; thread.height = H;
+  const tg = thread.getContext('2d');
+  tg.fillStyle = '#efe9df'; tg.fillRect(0, 0, W, H);
+  for (let k = -H; k < W; k += 5) {
+    tg.strokeStyle = (k / 5) % 2 ? 'rgba(255,255,255,0.6)' : 'rgba(140,130,118,0.4)'; tg.lineWidth = 2.2;
+    tg.beginPath(); tg.moveTo(k, H); tg.lineTo(k + H * 0.55, 0); tg.stroke();
+  }
+  tg.globalCompositeOperation = 'destination-in'; tg.drawImage(m, 0, 0);
+  /* 3. couleur : ombre portée, épaisseur du fil (bord sombre décalé), dessus du fil */
+  const tex = canvasTex(W + pad * 2, H + pad * 2, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    g.globalAlpha = 0.7; g.filter = 'blur(4px) brightness(0)'; g.drawImage(m, pad + 5, pad + 9); g.filter = 'none'; g.globalAlpha = 1;
+    g.filter = 'brightness(0.32)';
+    for (let o = 1; o <= 4; o++) g.drawImage(thread, pad + o * 0.5, pad + o);   // tranche du fil
+    g.filter = 'none';
+    g.drawImage(thread, pad, pad);
+  });
+  /* 4. relief : carte de bosses (fil bombé + sillons des points) pour que la lumière accroche */
+  const bump = canvasTex(W + pad * 2, H + pad * 2, (g, w, h) => {
+    g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+    g.filter = 'blur(5px)'; g.drawImage(m, pad, pad); g.filter = 'blur(2px)'; g.drawImage(m, pad, pad); g.filter = 'none';
+    g.globalCompositeOperation = 'multiply';
+    for (let k = -H; k < w; k += 5) { g.strokeStyle = (k / 5) % 2 ? '#fff' : '#9a9a9a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(k + pad, h - pad); g.lineTo(k + pad + H * 0.55, pad); g.stroke(); }
+  });
+  bump.colorSpace = THREE.NoColorSpace;
+  const w = 0.2, h = w * (H + pad * 2) / (W + pad * 2);
+  const patch = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, bumpMap: bump, bumpScale: 4, transparent: true, roughness: 0.75, depthWrite: false }));
+  patch.rotation.set(-Math.PI / 2, 0, 0.12);
+  patch.position.set(-0.1, 0.0029, 0.33);           // sous le bac, à l'écart des vinyles
+  patch.receiveShadow = true;
+  scene.add(patch);
+});
+
+/* ═════════ AFFICHES ÉPARPILLÉES AU SOL (ton Posterfolio) ═════════ */
+const POSTERS = [
+  { src: 'affiche-sol-1.jpg', x: -0.8, z: 0.02, r: 0.28 },
+  { src: 'affiche-sol-3.jpg', x: 0.5, z: 0.0, r: -0.42 },
+  { src: 'affiche-sol-4.jpg', x: -0.38, z: -0.9, r: 0.22 },
+  { src: 'affiche-sol-2.jpg', x: 0.62, z: -0.78, r: -0.34 }
+];
+const posterMeshes = [];
+POSTERS.forEach((p, i) => {
+  loadImage(p.src).then((img) => {
+    if (!img) return;
+    const ratio = img.width / img.height, h = 0.38, w = h * ratio;           // affiches carrées
+    const geo = new THREE.PlaneGeometry(w, h, 10, 10);
+    const pos = geo.attributes.position, curlX = Math.random() < 0.5 ? 1 : -1, curlY = Math.random() < 0.5 ? 1 : -1;
+    for (let v = 0; v < pos.count; v++) {                                     // papier qui gondole, un coin relevé
+      const x = pos.getX(v) / (w / 2), y = pos.getY(v) / (h / 2);
+      const corner = Math.max(0, x * curlX) * Math.max(0, y * curlY);
+      pos.setZ(v, Math.pow(corner, 2.4) * 0.03 + Math.sin(x * 2.1 + i) * 0.0015);
+    }
+    geo.computeVertexNormals();
+    const tex = new THREE.Texture(img); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); tex.needsUpdate = true;
+    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.82, side: THREE.DoubleSide }));
+    m.rotation.set(-Math.PI / 2, 0, p.r);
+    m.position.set(p.x, 0.0035 + i * 0.0007, p.z);
+    m.castShadow = m.receiveShadow = true;
+    m.userData.poster = p.src; posterMeshes.push(m);
+    scene.add(m);
+  });
+});
+
+/* ═════════ MINI SKATEPARK DE FINGERBOARD ═════════ */
+const ply = new THREE.MeshStandardMaterial({ map: woodTex('#c49766', '70,40,15'), roughness: 0.75 });
+const plyDark = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.6 });
+const steel = new THREE.MeshStandardMaterial({ color: 0xd8d6d0, roughness: 0.22, metalness: 1 });
+const park = new THREE.Group(); park.position.set(-0.08, 0.002, -0.56); park.rotation.y = 0.04; scene.add(park);
+function addMesh(geo, material, x, y, z, parent = park) {
+  const m = new THREE.Mesh(geo, material); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m;
+}
+/* quarter pipe noir avec coping */
+(() => {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.lineTo(0.13, 0); s.lineTo(0.13, 0.095); s.lineTo(0.116, 0.095); s.quadraticCurveTo(0.116, 0.0, 0, 0);
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.24, bevelEnabled: false, curveSegments: 28 }); geo.translate(0, 0, -0.12);
+  const q = addMesh(geo, [plyDark, ply], -0.62, 0, 0.02); q.rotation.y = Math.PI;
+  const cop = addMesh(new THREE.CylinderGeometry(0.0042, 0.0042, 0.24, 16), steel, -0.62 - 0.116, 0.095, 0.02); cop.rotation.x = Math.PI / 2;
+})();
+/* rail */
+(() => {
+  const rail = addMesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.36, 14), steel, -0.2, 0.036, 0.1); rail.rotation.z = Math.PI / 2;
+  [-0.34, -0.06].forEach((x) => { addMesh(new THREE.BoxGeometry(0.006, 0.036, 0.006), steel, x, 0.018, 0.1); addMesh(new THREE.BoxGeometry(0.04, 0.003, 0.03), steel, x, 0.0015, 0.1); });
+})();
+/* kicker */
+(() => {
+  const s = new THREE.Shape(); s.moveTo(0, 0); s.lineTo(0.13, 0); s.lineTo(0.13, 0.032); s.closePath();
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.09, bevelEnabled: false }); geo.translate(0, 0, -0.045);
+  const k = addMesh(geo, ply, 0.12, 0, 0.12); k.rotation.y = -0.25;
+})();
+/* ledge (funbox) avec arête métal, la planche est posée dessus */
+const LEDGE = { x: 0.4, z: -0.02, h: 0.038 };
+addMesh(new THREE.BoxGeometry(0.28, LEDGE.h, 0.08), ply, LEDGE.x, LEDGE.h / 2, LEDGE.z);
+addMesh(new THREE.BoxGeometry(0.28, 0.004, 0.004), steel, LEDGE.x, LEDGE.h, LEDGE.z + 0.04);
+/* la fingerboard */
+const fb = { group: new THREE.Group(), t: -1 };
+(() => {
+  const grip = new THREE.MeshStandardMaterial({ color: 0x0b0b0b, roughness: 0.95 });
+  const graphic = new THREE.MeshStandardMaterial({ map: canvasTex(512, 128, (g, w, h) => {
+    g.fillStyle = '#e01a1a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#0a0a0a'; g.font = '900 64px "Space Mono", monospace'; g.textBaseline = 'middle'; g.fillText('DOXAL.', 70, h / 2 + 4);
+  }), roughness: 0.6 });
+  const mats = [grip, grip, grip, graphic, grip, grip];
+  const g = fb.group;
+  addMesh(new THREE.BoxGeometry(0.07, 0.0035, 0.027), mats, 0, 0, 0, g);
+  [-1, 1].forEach((side) => {
+    const kick = addMesh(new THREE.BoxGeometry(0.016, 0.0035, 0.027), mats, side * 0.0425, 0.0028, 0, g); kick.rotation.z = side * 0.38;
+    addMesh(new THREE.BoxGeometry(0.006, 0.006, 0.022), steel, side * 0.026, -0.005, 0, g);
+    [-1, 1].forEach((w) => { const wh = addMesh(new THREE.CylinderGeometry(0.0036, 0.0036, 0.004, 14), new THREE.MeshStandardMaterial({ color: 0xefe6d6, roughness: 0.5 }), side * 0.026, -0.0085, w * 0.012, g); wh.rotation.x = Math.PI / 2; });
+  });
+  g.position.set(LEDGE.x - 0.02, LEDGE.h + 0.012, LEDGE.z); g.rotation.y = 0.35;
+  g.userData.kind = 'fb'; g.userData.base = g.position.clone(); g.userData.ry = g.rotation.y;
+  park.add(g);
+  /* zone de clic invisible, plus large que la planche (et son ledge) */
+  fb.hit = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.09, 0.14), new THREE.MeshBasicMaterial({ visible: false }));
+  fb.hit.position.set(LEDGE.x, LEDGE.h / 2 + 0.02, LEDGE.z); park.add(fb.hit);
+})();
+
+/* ═════════ TR-01 EN 3D (pilote ta vraie boîte à rythme) ═════════ */
+const trG = new THREE.Group(); trG.position.set(-0.66, 0, -0.24); trG.rotation.y = 0.5; trG.userData.kind = 'tr'; scene.add(trG);
+const TRW = 0.44, TRD = 0.27, TRH = 0.048;
+addMesh(new THREE.BoxGeometry(TRW, TRH, TRD), new THREE.MeshStandardMaterial({ color: 0x121212, roughness: 0.45, metalness: 0.25 }), 0, TRH / 2, 0, trG);
+[-1, 1].forEach((s) => addMesh(new THREE.BoxGeometry(0.016, TRH + 0.012, TRD + 0.004), woodMat, s * (TRW / 2 + 0.008), (TRH + 0.012) / 2, 0, trG));
+const ROWS = 8, COLS = 16, KNOB_X = [-0.045, -0.002];
+const padX = (c) => -0.115 + c * 0.0196 + Math.floor(c / 4) * 0.005;
+const padZ = (r) => -0.03 + r * 0.0185;
+let trNames = ['BD', 'SD', 'HH', 'OH', 'CP', 'TOM', 'ACID', 'VOX'];
+const panelCanvas = document.createElement('canvas'); panelCanvas.width = 1024; panelCanvas.height = 640;
+const panelTex = new THREE.CanvasTexture(panelCanvas); panelTex.colorSpace = THREE.SRGBColorSpace; panelTex.anisotropy = 8;
+function drawPanel(bpm = '128') {
+  const g = panelCanvas.getContext('2d'), W = 1024, H = 640;
+  const sx = (x) => (x / (TRW - 0.02) + 0.5) * W, sz = (z) => (z / (TRD - 0.02) + 0.5) * H;
+  g.fillStyle = '#1b1b1b'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#e01a1a'; g.fillRect(36, 34, 46, 5);
+  g.fillStyle = '#f5f2ed'; g.font = '44px Sequel100Wide, "Arial Black", sans-serif'; g.fillText('DOXAL', 36, 92);
+  g.fillStyle = 'rgba(245,242,237,0.5)'; g.font = '700 17px "Space Mono", monospace'; g.fillText('TR-01 / EXPERIMENTAL', 38, 124);
+  g.font = '700 15px "Space Mono", monospace';
+  [['FILTER', KNOB_X[0]], ['PITCH', KNOB_X[1]]].forEach(([l, x]) => g.fillText(l, sx(x) - 26, sz(-0.06)));
+  g.fillText('BPM', sx(0.06) - 15, sz(-0.06));
+  g.fillText('PLAY', sx(0.13) - 18, sz(-0.06)); g.fillText('CLR', sx(0.178) - 14, sz(-0.06));
+  g.fillStyle = '#080808'; g.fillRect(sx(0.044), sz(-0.105), sx(0.076) - sx(0.044), sz(-0.075) - sz(-0.105));
+  g.fillStyle = '#e01a1a'; g.font = '700 30px "Space Mono", monospace'; g.fillText(bpm, sx(0.046), sz(-0.08));
+  g.fillStyle = 'rgba(245,242,237,0.55)'; g.font = '700 14px "Space Mono", monospace';
+  trNames.slice(0, ROWS).forEach((n, r) => g.fillText(n.slice(0, 6), 26, sz(padZ(r)) + 5));
+  for (let c = 0; c < COLS; c += 4) { g.fillStyle = c === 0 ? '#e01a1a' : 'rgba(245,242,237,0.3)'; g.fillRect(sx(padX(c)) - 10, sz(-0.044), 4, 4); }
+  g.fillStyle = 'rgba(245,242,237,0.25)'; g.font = '13px "Space Mono", monospace'; g.fillText('DOXAL TR-01 — AUDIO SYNTHESIS ENGINE / WEB API', 36, H - 22);
+  panelTex.needsUpdate = true;
+}
+drawPanel(); document.fonts.ready.then(() => drawPanel());
+const panel = new THREE.Mesh(new THREE.PlaneGeometry(TRW - 0.02, TRD - 0.02), new THREE.MeshStandardMaterial({ map: panelTex, roughness: 0.55 }));
+panel.rotation.x = -Math.PI / 2; panel.position.y = TRH + 0.0006; panel.receiveShadow = true; trG.add(panel);
+const pads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.0158, 0.005, 0.0142), new THREE.MeshBasicMaterial({ color: 0xffffff }), ROWS * COLS);
+pads.userData.kind = 'pad';
+const m4 = new THREE.Matrix4(), cOff = new THREE.Color(0x262626), cOn = new THREE.Color(0xe01a1a), cHead = new THREE.Color(0xf5f2ed), cHeadOff = new THREE.Color(0x6a6560);
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  m4.makeTranslation(padX(c), TRH + 0.0025, padZ(r)); pads.setMatrixAt(r * COLS + c, m4); pads.setColorAt(r * COLS + c, cOff);
+}
+trG.add(pads);
+function trButton(kind, geo, mat, x, z, y = TRH + 0.004) { const b = addMesh(geo, mat, x, y, z, trG); b.userData.kind = kind; return b; }
+const redBtnMat = new THREE.MeshStandardMaterial({ color: 0xe01a1a, roughness: 0.4, emissive: 0x300000 });
+const greyBtnMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.5 });
+const playBtn = trButton('play', new THREE.BoxGeometry(0.032, 0.008, 0.024), redBtnMat, 0.13, -0.09);
+trButton('bpmDn', new THREE.BoxGeometry(0.012, 0.006, 0.012), greyBtnMat, 0.034, -0.09);
+trButton('bpmUp', new THREE.BoxGeometry(0.012, 0.006, 0.012), greyBtnMat, 0.087, -0.09);
+trButton('clr', new THREE.BoxGeometry(0.022, 0.006, 0.016), greyBtnMat, 0.178, -0.09);
+const knobs = KNOB_X.map((x) => {
+  const k = addMesh(new THREE.CylinderGeometry(0.011, 0.012, 0.012, 28), new THREE.MeshStandardMaterial({ color: 0x0c0c0c, roughness: 0.35, metalness: 0.4 }), x, TRH + 0.006, -0.09, trG);
+  addMesh(new THREE.BoxGeometry(0.002, 0.002, 0.009), new THREE.MeshBasicMaterial({ color: 0xf5f2ed }), 0, 0.0065, -0.004, k);
+  return k;
+});
+const TR_CAM = () => ({
+  pos: trG.localToWorld(new THREE.Vector3(0, 0.5, 0.42)),
+  look: trG.localToWorld(new THREE.Vector3(0, 0, 0.075))
+});
+
+/* lecture de l'état de ta vraie TR-01 (pattern, lecture, tempo) */
+let trLastBpm = '', trNamesRead = false, trPlaying = false;
+function trDoc() { try { const d = frame.contentDocument; return d && d.getElementById('dbTracks') ? d : null; } catch (e) { return null; } }
+function syncTR() {
+  const d = trDoc(); if (!d) return;
+  const rows = d.querySelectorAll('#dbTracks .drumbox-track');
+  if (!trNamesRead && rows.length) { trNames = [...rows].map((r) => (r.querySelector('.drumbox-track-name') || {}).textContent || ''); trNamesRead = true; drawPanel(trLastBpm || '128'); }
+  rows.forEach((row, r) => {
+    if (r >= ROWS) return;
+    row.querySelectorAll('.drumbox-step-btn').forEach((b, c) => {
+      if (c >= COLS) return;
+      const on = b.classList.contains('on'), pl = b.classList.contains('playing');
+      pads.setColorAt(r * COLS + c, pl ? (on ? cHead : cHeadOff) : (on ? cOn : cOff));
+    });
+  });
+  pads.instanceColor.needsUpdate = true;
+  trPlaying = !!d.querySelector('#dbPlay.playing');
+  redBtnMat.emissive.setHex(trPlaying ? 0xb00000 : 0x300000);
+  const bpm = (d.getElementById('dbBpmVal') || {}).textContent || '128';
+  if (bpm !== trLastBpm) { trLastBpm = bpm; drawPanel(bpm); }
+}
+function trPress(kind, id) {
+  const d = trDoc(); if (!d) return;
+  if (kind === 'pad') {
+    const row = d.querySelectorAll('#dbTracks .drumbox-track')[Math.floor(id / COLS)];
+    const b = row && row.querySelectorAll('.drumbox-step-btn')[id % COLS]; if (b) b.click();
+  } else {
+    const map = { play: 'dbPlay', bpmDn: 'dbBpmDn', bpmUp: 'dbBpmUp', clr: 'dbClear' };
+    const el = d.getElementById(map[kind]); if (el) el.click();
+  }
+  syncTR();
+}
+/* tricks : roll = flip (axe long), yaw = shove-it, pitch = rotation avant/arrière, h = hauteur du pop */
+const TRICKS = [
+  { name: 'Kickflip', dur: 0.72, h: 0.1, roll: 1 },
+  { name: 'Heelflip', dur: 0.72, h: 0.1, roll: -1 },
+  { name: 'Pop shove-it', dur: 0.6, h: 0.07, yaw: 0.5 },
+  { name: '360 flip', dur: 0.85, h: 0.12, roll: 1, yaw: 1 },
+  { name: 'Varial kickflip', dur: 0.75, h: 0.1, roll: 1, yaw: 0.5 },
+  { name: 'Hardflip', dur: 0.8, h: 0.11, roll: 1, yaw: -0.5, wave: 0.9 },
+  { name: 'Impossible', dur: 0.8, h: 0.11, pitch: 1 },
+  { name: 'Double kickflip', dur: 0.95, h: 0.14, roll: 2 },
+  { name: 'Laser flip', dur: 0.9, h: 0.13, roll: -1, yaw: -1 },
+  { name: 'Ollie', dur: 0.6, h: 0.09, wave: -0.3 },
+  { name: 'Nose manual', dur: 1.2, h: 0, manual: true }
+];
+let trickDeck = [], lastTrick = null;
+function nextTrick() {
+  if (!trickDeck.length) {                            // toutes les figures passent avant qu'une revienne
+    trickDeck = TRICKS.slice().sort(() => Math.random() - 0.5);
+    if (trickDeck[0] === lastTrick) trickDeck.push(trickDeck.shift());
+  }
+  return (lastTrick = trickDeck.shift());
+}
+function kickflip() {
+  if (fb.t >= 0) return;
+  fb.t = 0; fb.trick = nextTrick();
+  if (audio()) (fb.trick.manual ? [0.02] : [0, fb.trick.dur - 0.08]).forEach((dl) => {   // « clac » du pop puis de la réception
+    const t = ac.currentTime + dl, o = ac.createOscillator(), gg = ac.createGain();
+    o.type = 'triangle'; o.frequency.setValueAtTime(dl ? 430 : 560, t); o.frequency.exponentialRampToValueAtTime(dl ? 300 : 380, t + 0.07);
+    softEnv(gg, t, 0.09, 0.003, 0.09); o.connect(gg); gg.connect(sfx); o.start(t); o.stop(t + 0.12);
+  });
+}
+
+
+/* ═════════ PETITE RADIO (tes morceaux) ═════════ */
+const TRACKS = [
+  { src: 'radio/1.m4a', title: 'Quintana Pt. 2', artist: 'Travis Scott' },
+  { src: 'radio/2.m4a', title: 'Long Time (Intro)', artist: 'Playboi Carti' },
+  { src: 'radio/3.m4a', title: 'Ice Worm', artist: 'Bromo' },
+  { src: 'radio/4.m4a', title: 'Déjeuner en guerre', artist: 'Mairo' },
+  { src: 'radio/5.m4a', title: 'Moscow Mule', artist: 'Bad Bunny' },
+  { src: 'radio/6.m4a', title: 'Music Sounds Better With You', artist: 'Stardust' },
+  { src: 'radio/7.m4a', title: 'Another Brick in the Wall, Pt. 2', artist: 'Pink Floyd' },
+  { src: 'radio/8.m4a', title: 'Vivo (feat. TAM)', artist: 'Andrulas' },
+  { src: 'radio/9.m4a', title: 'Olympien', artist: 'JeanJass' },
+  { src: 'radio/10.m4a', title: 'OCARINA THEME', artist: 'LEDOUBLE' },
+  { src: 'radio/11.m4a', title: 'Mr. Rager', artist: 'Kid Cudi' },
+  { src: 'radio/13.m4a', title: 'Fuck Happy', artist: '' },
+  { src: 'radio/14.m4a', title: 'No Sl33p', artist: 'Playboi Carti' },
+  { src: 'radio/15.m4a', title: 'jrépondsplus', artist: 'GAL' },
+  { src: 'radio/16.m4a', title: 'i need u', artist: 'Ken Carson' }
+];
+const radioG = new THREE.Group(); radioG.position.set(0.6, 0, -0.27); radioG.rotation.y = -0.55; radioG.userData.kind = 'radio'; scene.add(radioG);
+const creamMat = new THREE.MeshStandardMaterial({ color: 0xded5c4, roughness: 0.5 });
+addMesh(new THREE.BoxGeometry(0.24, 0.14, 0.075), creamMat, 0, 0.07, 0, radioG);
+addMesh(new THREE.BoxGeometry(0.244, 0.012, 0.079), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 }), 0, 0.006, 0, radioG);
+const grilleTex = canvasTex(256, 256, (g, s) => {
+  g.fillStyle = '#141414'; g.beginPath(); g.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#2b2b2b';
+  for (let y = 14; y < s; y += 16) for (let x = 14 + ((y / 16) % 2) * 8; x < s; x += 16) if (Math.hypot(x - s / 2, y - s / 2) < s / 2 - 12) { g.beginPath(); g.arc(x, y, 4, 0, Math.PI * 2); g.fill(); }
+});
+const grille = addMesh(new THREE.CircleGeometry(0.05, 48), new THREE.MeshStandardMaterial({ map: grilleTex, roughness: 0.8, transparent: true }), -0.055, 0.072, 0.0381, radioG);
+const dialCanvas = document.createElement('canvas'); dialCanvas.width = 256; dialCanvas.height = 128;
+const dialTex = new THREE.CanvasTexture(dialCanvas); dialTex.colorSpace = THREE.SRGBColorSpace;
+function drawDial(i) {
+  const g = dialCanvas.getContext('2d');
+  g.fillStyle = '#1c1612'; g.fillRect(0, 0, 256, 128);
+  g.strokeStyle = 'rgba(240,226,200,0.6)'; g.lineWidth = 2;
+  for (let x = 16; x <= 240; x += 8) { g.beginPath(); g.moveTo(x, 70); g.lineTo(x, x % 32 === 16 ? 52 : 60); g.stroke(); }
+  g.fillStyle = 'rgba(240,226,200,0.7)'; g.font = '700 18px "Space Mono", monospace'; g.fillText('88  92  96  100  104', 14, 100);
+  const nx = i < 0 ? 16 : 30 + (i / (TRACKS.length - 1)) * 196;
+  g.fillStyle = '#e01a1a'; g.fillRect(nx - 2, 20, 4, 80);
+  dialTex.needsUpdate = true;
+}
+drawDial(-1);
+addMesh(new THREE.PlaneGeometry(0.1, 0.05), new THREE.MeshStandardMaterial({ map: dialTex, roughness: 0.3, emissive: 0x220a00 }), 0.055, 0.095, 0.0381, radioG);
+[0.03, 0.08].forEach((x) => { const k = addMesh(new THREE.CylinderGeometry(0.011, 0.011, 0.012, 24), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4 }), x, 0.04, 0.042, radioG); k.rotation.x = Math.PI / 2; });
+const radioLed = addMesh(new THREE.SphereGeometry(0.0045, 12, 12), new THREE.MeshBasicMaterial({ color: 0x3a0606 }), 0.105, 0.04, 0.038, radioG);
+const handle = addMesh(new THREE.TorusGeometry(0.06, 0.006, 10, 32, Math.PI), new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 }), 0, 0.14, 0, radioG);
+const antenna = addMesh(new THREE.CylinderGeometry(0.0018, 0.0025, 0.32, 8), steel, 0.1, 0.29, -0.02, radioG); antenna.rotation.z = -0.35;
+
+let radioIdx = -1, radioEl = null, radioGain = null, radioAn = null, radioData = null;
+/* lecture aléatoire : tous les morceaux passent avant qu'un revienne, jamais deux fois de suite */
+let radioQueue = [], radioPlayed = 0;
+function randomTrack() {
+  if (!radioQueue.length) {
+    radioQueue = TRACKS.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (radioQueue[0] === radioIdx) radioQueue.push(radioQueue.shift());
+  }
+  return radioQueue.shift();
+}
+function radioChain() {
+  if (radioEl || !audio()) return;
+  radioEl = new Audio(); radioEl.preload = 'none';
+  const srcNode = ac.createMediaElementSource(radioEl);
+  const shelf = ac.createBiquadFilter(); shelf.type = 'lowshelf'; shelf.frequency.value = 90; shelf.gain.value = 3.5;   // basses « caisson », légères
+  const bump = ac.createBiquadFilter(); bump.type = 'peaking'; bump.frequency.value = 55; bump.Q.value = 1.1; bump.gain.value = 1.5;
+  radioGain = ac.createGain(); radioGain.gain.value = 0.85;
+  radioAn = ac.createAnalyser(); radioAn.fftSize = 256; radioData = new Uint8Array(radioAn.frequencyBinCount);
+  srcNode.connect(shelf); shelf.connect(bump); bump.connect(radioGain); radioGain.connect(radioAn); radioAn.connect(ac.destination);
+  radioEl.addEventListener('ended', () => playTrack(randomTrack()));
+}
+function playTrack(i) {
+  radioChain(); if (!radioEl) return;
+  radioIdx = i;
+  if (i < 0) { if (ambientOn) playAmbient(); }
+  else if (ambientOn) pauseAmbient();
+  if (i < 0) { radioEl.pause(); $('np').classList.remove('on'); radioLed.material.color.set(0x3a0606); drawDial(-1); return; }
+  radioEl.src = TRACKS[i].src; radioEl.play().catch(() => {});
+  $('npTitle').textContent = TRACKS[i].title + (TRACKS[i].artist ? ' — ' + TRACKS[i].artist : ''); $('np').classList.add('on');
+  radioLed.material.color.set(0xe01a1a); drawDial(i);
+}
+$('radioOff').addEventListener('click', () => { radioPlayed = 0; playTrack(-1); });   // éteindre : l'ambiance revient
+function radioNext() {                                 // clic : morceau au hasard ; après un tour complet, la radio s'éteint
+  if (radioIdx >= 0 && radioPlayed >= TRACKS.length) { radioPlayed = 0; playTrack(-1); return; }
+  radioPlayed++; playTrack(randomTrack());
+}
+function radioDuck(on) { if (radioGain) radioGain.gain.setTargetAtTime(on ? 0.3 : 0.85, ac.currentTime, 0.25); }
+
+
+/* ═════════ CONSOLE PORTABLE À DEUX ÉCRANS + DOXAL RUN ═════════ */
+/* le jeu de la version classique, même physique, mêmes images, mêmes messages */
+const GW = 400, GH = 300, G_GROUND = GH - 28;
+const gameCanvas = document.createElement('canvas'); gameCanvas.width = GW; gameCanvas.height = GH;
+const gctx = gameCanvas.getContext('2d');
+const padCanvas = document.createElement('canvas'); padCanvas.width = GW; padCanvas.height = GH;
+const tacoImg = new Image(); tacoImg.src = 'taco.png';
+const cactusImgs = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => { const i = new Image(); i.src = `cactus-${n}.png`; return i; });
+const game = { state: 'idle', player: null, obstacles: [], speed: 6.5, score: 0, lastSpawn: 0, frame: 0, msg: ['Cliquez pour jouer', 'Espace ou clic pour sauter'] };
+function gameReset() {
+  Object.assign(game, { player: { x: 26, y: G_GROUND - 27, w: 28, h: 27, vy: 0, jumping: false }, obstacles: [], speed: 6.5, score: 0, lastSpawn: 0, frame: 0 });
+}
+gameReset();
+function gameDraw() {
+  const g = gctx;
+  g.fillStyle = '#0d0d0d'; g.fillRect(0, 0, GW, GH);
+  g.strokeStyle = 'rgba(245,242,237,0.25)'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(0, G_GROUND + 0.5); g.lineTo(GW, G_GROUND + 0.5); g.stroke();
+  const p = game.player;
+  if (tacoImg.complete && tacoImg.naturalWidth) g.drawImage(tacoImg, p.x, p.y, p.w, p.h); else { g.fillStyle = '#e01a1a'; g.fillRect(p.x, p.y, p.w, p.h); }
+  game.obstacles.forEach((o) => {
+    if (!o.img.complete) return;
+    const y = G_GROUND - o.h;
+    g.save();
+    if (o.flip) { g.translate(o.x + o.w, y); g.scale(-1, 1); g.drawImage(o.img, 0, 0, o.w, o.h); } else g.drawImage(o.img, o.x, y, o.w, o.h);
+    g.restore();
+  });
+  g.fillStyle = 'rgba(245,242,237,0.6)'; g.font = '700 14px "Space Mono", monospace'; g.textAlign = 'right';
+  g.fillText(String(Math.floor(game.score / 5)).padStart(5, '0'), GW - 14, 24);
+  if (game.state !== 'running') {
+    g.fillStyle = 'rgba(10,10,10,0.55)'; g.fillRect(0, 0, GW, GH);
+    g.textAlign = 'center'; g.fillStyle = '#f5f2ed'; g.font = '700 18px "Space Mono", monospace';
+    g.fillText(game.msg[0], GW / 2, GH / 2 - 6);
+    g.fillStyle = 'rgba(245,242,237,0.55)'; g.font = '12px "Space Mono", monospace';
+    g.fillText(game.msg[1], GW / 2, GH / 2 + 18);
+  }
+  g.textAlign = 'left';
+  gameTex.needsUpdate = true;
+}
+function gameStep() {
+  if (game.state !== 'running') return;
+  const p = game.player;
+  game.frame++;
+  p.vy += 0.55; p.y += p.vy;
+  if (p.y > G_GROUND - p.h) { p.y = G_GROUND - p.h; p.vy = 0; p.jumping = false; }
+  if (game.frame - game.lastSpawn > Math.max(34, 70 - game.speed * 3)) {
+    const img = cactusImgs[(Math.random() * cactusImgs.length) | 0], h = 40 + Math.random() * 32;
+    const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 0.33;
+    game.obstacles.push({ x: GW + 10, w: h * ratio, h, img, flip: Math.random() < 0.5 });
+    game.lastSpawn = game.frame;
+  }
+  for (let i = game.obstacles.length - 1; i >= 0; i--) { game.obstacles[i].x -= game.speed; if (game.obstacles[i].x + game.obstacles[i].w < 0) game.obstacles.splice(i, 1); }
+  for (const o of game.obstacles) {
+    const oy = G_GROUND - o.h;
+    if (p.x < o.x + o.w && p.x + p.w > o.x && p.y < oy + o.h && p.y + p.h > oy) {
+      game.state = 'over'; game.msg = ['Perdu — score ' + Math.floor(game.score / 5), 'Cliquez pour réessayer']; drawPad(); return;
+    }
+  }
+  game.score++; game.speed += 0.004;
+  if (game.score % 5 === 0) drawPad();
+}
+function gameJump() {
+  if (game.state !== 'running') { gameReset(); game.state = 'running'; drawPad(); return; }
+  if (!game.player.jumping) { game.player.vy = -11.5; game.player.jumping = true; }
+}
+function drawPad() {                                     // écran du bas : titre, score, gros bouton saut
+  const g = padCanvas.getContext('2d');
+  g.fillStyle = '#111'; g.fillRect(0, 0, GW, GH);
+  g.fillStyle = '#e01a1a'; g.fillRect(24, 26, 34, 4);
+  g.fillStyle = '#f5f2ed'; g.font = '30px Sequel100Wide, "Arial Black", sans-serif'; g.fillText('DOXAL RUN', 24, 66);
+  g.fillStyle = 'rgba(245,242,237,0.5)'; g.font = '700 13px "Space Mono", monospace';
+  g.fillText('SCORE ' + String(Math.floor(game.score / 5)).padStart(5, '0'), 26, 92);
+  g.beginPath(); g.arc(GW / 2, 196, 64, 0, Math.PI * 2); g.fillStyle = '#e01a1a'; g.fill();
+  g.fillStyle = '#0a0a0a'; g.font = '700 18px "Space Mono", monospace'; g.textAlign = 'center'; g.fillText('SAUTER', GW / 2, 202); g.textAlign = 'left';
+  padTex.needsUpdate = true;
+}
+const gameTex = new THREE.CanvasTexture(gameCanvas); gameTex.colorSpace = THREE.SRGBColorSpace;
+const padTex = new THREE.CanvasTexture(padCanvas); padTex.colorSpace = THREE.SRGBColorSpace;
+tacoImg.onload = gameDraw; document.fonts.ready.then(() => { gameDraw(); drawPad(); });
+gameDraw(); drawPad();
+
+/* la console : rouge mat, ouverte, posée au sol */
+const dsG = new THREE.Group(); dsG.position.set(0.36, 0, 0.27); dsG.rotation.y = -0.35; dsG.userData.kind = 'ds'; scene.add(dsG);
+const DW = 0.133, DD = 0.074, DT = 0.011;
+const shellMat = new THREE.MeshStandardMaterial({ color: 0xa31414, roughness: 0.42, metalness: 0.05 });
+const darkMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.6 });
+const bezelMat = new THREE.MeshStandardMaterial({ color: 0x0c0c0c, roughness: 0.3 });
+const screenMat = (map) => new THREE.MeshBasicMaterial({ map, toneMapped: false });
+/* moitié du bas : écran tactile, croix, boutons */
+const dsBottom = addMesh(new RoundedBoxGeometry(DW, DT, DD, 3, 0.006), shellMat, 0, DT / 2, 0, dsG);
+addMesh(new THREE.BoxGeometry(0.07, 0.0006, 0.054), bezelMat, 0, DT + 0.0003, 0.002, dsG);
+const padScreen = addMesh(new THREE.PlaneGeometry(0.062, 0.0465), screenMat(padTex), 0, DT + 0.0008, 0.002, dsG);
+padScreen.rotation.x = -Math.PI / 2;
+[[0.014, 0.0045], [0.0045, 0.014]].forEach(([w, d]) => addMesh(new THREE.BoxGeometry(w, 0.003, d), darkMat, -0.05, DT + 0.0015, -0.006, dsG));
+[[0, -0.0065], [0.0065, 0], [0, 0.0065], [-0.0065, 0]].forEach(([x, z], i) => {
+  addMesh(new THREE.CylinderGeometry(0.0028, 0.0028, 0.003, 18), i === 1 ? new THREE.MeshStandardMaterial({ color: 0xf5f2ed, roughness: 0.4 }) : darkMat, 0.05 + x, DT + 0.0015, -0.006 + z, dsG);
+});
+[-0.006, 0.006].forEach((x) => addMesh(new THREE.CylinderGeometry(0.0014, 0.0014, 0.002, 12), darkMat, 0.05 + x, DT + 0.001, 0.022, dsG));
+/* charnière + moitié du haut, ouverte vers nous */
+addMesh(new THREE.CylinderGeometry(0.0055, 0.0055, DW - 0.02, 18), shellMat, 0, DT, -DD / 2, dsG).rotation.z = Math.PI / 2;
+const dsLid = new THREE.Group(); dsLid.position.set(0, DT, -DD / 2); dsLid.rotation.x = -1.95; dsG.add(dsLid);
+addMesh(new RoundedBoxGeometry(DW, DT * 0.8, DD, 3, 0.005), shellMat, 0, DT * 0.4, DD / 2, dsLid);
+addMesh(new THREE.BoxGeometry(0.07, 0.0006, 0.054), bezelMat, 0, -0.0003, DD / 2, dsLid);
+const topScreen = addMesh(new THREE.PlaneGeometry(0.062, 0.0465), screenMat(gameTex), 0, -0.0008, DD / 2, dsLid);
+topScreen.rotation.x = Math.PI / 2;
+[-1, 1].forEach((side) => { for (let i = 0; i < 6; i++) addMesh(new THREE.CylinderGeometry(0.0007, 0.0007, 0.001, 8), darkMat, side * 0.052, -0.0004, DD / 2 - 0.008 + (i % 3) * 0.005 + (i > 2 ? 0.001 : 0), dsLid).position.x += (i > 2 ? 0.004 : 0) * side; });
+const screenGlow = new THREE.PointLight(0xf5f2ed, 0.06, 0.25, 2); screenGlow.position.set(0, 0.06, 0.03); dsG.add(screenGlow);
+const DS_CAM = () => ({ pos: dsG.localToWorld(new THREE.Vector3(0, 0.19, 0.155)), look: dsG.localToWorld(new THREE.Vector3(0, 0.035, -0.02)) });
+function enterDS() {
+  if (mode !== 'browse') return;
+  audio(); mode = 'dsIn'; canvas.classList.remove('pointer'); document.body.classList.add('busy');
+  tweenCam(DS_CAM(), 1.0, () => { mode = 'ds'; document.body.classList.add('ds-mode'); });
+}
+function leaveDS() {
+  if (mode !== 'ds') return;
+  mode = 'dsOut'; document.body.classList.remove('ds-mode');
+  if (game.state === 'running') { game.state = 'idle'; game.msg = ['Cliquez pour jouer', 'Espace ou clic pour sauter']; gameDraw(); drawPad(); }
+  tweenCam(CAM.crate, 0.9, () => { mode = 'browse'; document.body.classList.remove('busy'); });
+}
+$('dsBack').addEventListener('click', leaveDS);
+
+
+/* ═════════ SON D'AMBIANCE (comme sur la version classique) ═════════ */
+const bgAudio = $('bg-audio'), soundToggle = $('sound-toggle'), soundPrompt = $('sound-prompt');
+let ambientOn = false, fadeIv = null;
+function fadeAmbient(target, done) {
+  clearInterval(fadeIv);
+  fadeIv = setInterval(() => {
+    const v = bgAudio.volume, step = 0.02;
+    if (Math.abs(v - target) <= step) { bgAudio.volume = target; clearInterval(fadeIv); if (done) done(); }
+    else bgAudio.volume = v + (target > v ? step : -step);
+  }, 60);
+}
+function playAmbient() {
+  if (radioIdx >= 0) return;                            // la radio a la priorité
+  bgAudio.volume = 0;
+  const p = bgAudio.play(); if (p && p.then) p.then(() => fadeAmbient(0.35)).catch(() => {}); else fadeAmbient(0.35);
+}
+function pauseAmbient() { fadeAmbient(0, () => bgAudio.pause()); }
+function setSound(on) {
+  ambientOn = on;
+  soundToggle.classList.add('shown');
+  soundToggle.classList.toggle('playing', on);
+  $('sound-toggle-label').textContent = on ? 'Son' : 'Muet';
+  if (on) playAmbient(); else pauseAmbient();
+}
+$('sound-yes').addEventListener('click', () => { soundPrompt.classList.remove('visible'); setSound(true); });
+$('sound-no').addEventListener('click', () => { soundPrompt.classList.remove('visible'); setSound(false); });
+soundToggle.addEventListener('click', () => setSound(!ambientOn));
+setTimeout(() => soundPrompt.classList.add('visible'), 3200);   // après l'intro, comme avant
+
+/* ═════════ AFFICHE EN GRAND ═════════ */
+function openPoster(src) {
+  if (mode !== 'browse') return;
+  $('poster-img').src = src;
+  $('poster-view').classList.add('open'); document.body.classList.add('locked');
+}
+function closePoster() { $('poster-view').classList.remove('open'); document.body.classList.remove('locked'); canvas.focus({ preventScroll: true }); }
+$('poster-view').addEventListener('click', closePoster);
+
+/* ═════════ ÉTAT ═════════ */
+let current = 0, mode = 'browse', t = 0, sel = null, spin = 0, spinSpeed = 0;
+const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
+const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const ph = (x, a, b) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+const lerp = THREE.MathUtils.lerp;
+
+/* pose de chaque disque dans le bac selon celui qu'on regarde */
+function targetPose(j) {
+  if (j < current) {                                  // déjà feuilletés : basculés vers nous
+    const d = current - 1 - j;
+    return { z: 0.165 - d * 0.012, rx: 0.62 + d * 0.08, y: 0.016 };
+  }
+  const d = j - current;                              // devant nous, puis ceux de derrière
+  return { z: 0.115 - d * 0.05, rx: -0.3 - d * 0.035, y: 0.016 + (d === 0 ? 0.02 : 0) };
+}
+records.forEach((r, j) => { const tp = targetPose(j); r.pivot.position.set(r.pivot.userData.x, tp.y, tp.z); r.pivot.rotation.set(tp.rx, 0, r.pivot.userData.rz); });
+
+/* caméra : vues clés */
+const CAM = {
+  crate: { pos: new THREE.Vector3(-0.04, 1.02, 0.9), look: new THREE.Vector3(-0.07, 0.15, 0.0) },
+  tt: { pos: new THREE.Vector3(0.5, 0.82, 0.92), look: new THREE.Vector3(0.66, 0.08, 0.2) },
+  close: { pos: new THREE.Vector3(0.63, 0.36, 0.52), look: new THREE.Vector3(0.69, 0.1, 0.22) }
+};
+const camPos = CAM.crate.pos.clone(), camLook = CAM.crate.look.clone();
+const mouse = { x: 0, y: 0 };
+
+function updateLabel() {
+  const p = PROJECTS[current];
+  $('lIdx').textContent = String(current + 1).padStart(2, '0'); $('lTotal').textContent = String(N).padStart(2, '0');
+  $('lTitle').innerHTML = p.title; $('lYear').textContent = p.year;
+}
+updateLabel();
+
+/* ═════════ SON (craquements, feuilletage, pose du diamant) ═════════ */
+let ac = null, crackle = null;
+let sfx = null;                                          // bus des bruitages : volume bas, aigus adoucis
+function audio() {
+  if (ac) return ac;
+  try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+  const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200; lp.Q.value = 0.5;
+  const comp = ac.createDynamicsCompressor(); comp.threshold.value = -24; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+  sfx = ac.createGain(); sfx.gain.value = 0.7;
+  sfx.connect(lp); lp.connect(comp); comp.connect(ac.destination);
+  return ac;
+}
+function softEnv(g, t, peak, attack, release) {           // montée et descente douces, sans clic
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + attack + release);
+}
+function noiseBuf(sec, fn) {
+  const b = ac.createBuffer(1, ac.sampleRate * sec, ac.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = fn(i, d.length);
+  return b;
+}
+function flipSound() {
+  if (!audio()) return;
+  const t = ac.currentTime, s = ac.createBufferSource();
+  s.buffer = noiseBuf(0.3, (i, n) => (Math.random() * 2 - 1) * Math.pow(Math.sin(Math.PI * i / n), 2));
+  const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 850 + Math.random() * 350; f.Q.value = 0.45;
+  const g = ac.createGain(); softEnv(g, t, 0.1, 0.04, 0.24);
+  s.connect(f); f.connect(g); g.connect(sfx); s.start(t);
+}
+function dropSound() {
+  if (!audio()) return;
+  const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime;
+  o.frequency.setValueAtTime(70, t0); o.frequency.exponentialRampToValueAtTime(36, t0 + 0.2);
+  softEnv(g, t0, 0.16, 0.012, 0.45);
+  o.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + 0.5);
+  const s = ac.createBufferSource();
+  s.buffer = noiseBuf(4, () => (Math.random() < 0.0005 ? (Math.random() * 2 - 1) * 0.6 : 0) + (Math.random() * 2 - 1) * 0.01);
+  s.loop = true;
+  const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2200; f.Q.value = 0.4;
+  const cg = ac.createGain(); cg.gain.value = 0; cg.gain.setTargetAtTime(0.18, t0, 0.4);
+  s.connect(f); f.connect(cg); cg.connect(sfx); s.start();
+  crackle = { s, g: cg };
+}
+function stopCrackle() {
+  if (!crackle) return;
+  crackle.g.gain.setTargetAtTime(0, ac.currentTime, 0.15);
+  const c = crackle; crackle = null; setTimeout(() => c.s.stop(), 900);
+}
+
+/* ═════════ INTERACTION ═════════ */
+function flip(dir) {
+  if (mode !== 'browse') return;
+  const n = Math.max(0, Math.min(N - 1, current + dir));
+  if (n === current) return;
+  current = n; updateLabel(); flipSound();
+}
+function select(i) {
+  if (mode !== 'browse') return;
+  if (i !== current) { current = i; updateLabel(); flipSound(); return; }
+  const r = records[current];
+  if (!r.discMap) return;
+  audio();
+  mode = 'play'; t = 0; document.body.classList.add('busy'); canvas.classList.remove('pointer');
+  sel = { r, pos: r.pivot.position.clone(), rx: r.pivot.rotation.x, rz: r.pivot.rotation.z, dropped: false };
+  discTop.map = r.discMap; discTop.needsUpdate = true;
+  sendProject(r.p.id);
+}
+
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let hoverKey = null;
+const isIn = (o, root) => { for (; o; o = o.parent) if (o === root) return true; return false; };
+function pick(cx, cy) {
+  const rect = canvas.getBoundingClientRect();
+  ndc.set(((cx - rect.left) / rect.width) * 2 - 1, -((cy - rect.top) / rect.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  if (mode === 'ds') return ray.intersectObject(dsG, true)[0] ? { kind: 'dsJump' } : null;
+  if (mode === 'tr') {                                 // devant la TR-01 : pads et boutons
+    const h = ray.intersectObjects(trG.children, false).find((x) => x.object.userData.kind && x.object.userData.kind !== 'tr');
+    return h ? { kind: h.object.userData.kind, id: h.instanceId } : null;
+  }
+  const h = ray.intersectObjects([...records.map((r) => r.sleeve), trG, fb.group, fb.hit, radioG, dsG, ...posterMeshes], true)[0];
+  if (!h) return null;
+  if (isIn(h.object, trG)) return { kind: 'tr' };
+  if (isIn(h.object, fb.group) || h.object === fb.hit) return { kind: 'fb' };
+  if (isIn(h.object, radioG)) return { kind: 'radio' };
+  if (isIn(h.object, dsG)) return { kind: 'ds' };
+  if (h.object.userData.poster) return { kind: 'poster', src: h.object.userData.poster };
+  return { kind: 'record', id: h.object.userData.index };
+}
+function act(hit) {
+  if (!hit) return;
+  if (hit.kind === 'record') select(hit.id);
+  else if (hit.kind === 'fb') kickflip();
+  else if (hit.kind === 'radio') radioNext();
+  else if (hit.kind === 'ds') enterDS();
+  else if (hit.kind === 'poster') openPoster(hit.src);
+  else if (hit.kind === 'dsJump') gameJump();
+  else if (hit.kind === 'tr') enterTR();
+  else trPress(hit.kind, hit.id);
+}
+
+let down = null, wheelAcc = 0, wheelLock = 0;
+canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, moved: false }; audio(); });
+canvas.addEventListener('pointermove', (e) => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1; mouse.y = (e.clientY / innerHeight) * 2 - 1;
+  if (down) {
+    const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    if (Math.abs(dx) > 42 || (e.pointerType === 'mouse' && Math.abs(dy) > 42)) { flip((Math.abs(dx) > Math.abs(dy) ? dx < 0 : dy > 0) ? 1 : -1); down = { x: e.clientX, y: e.clientY, moved: true }; }
+  } else if ((mode === 'browse' || mode === 'tr' || mode === 'ds') && e.pointerType === 'mouse') {
+    const hp = pick(e.clientX, e.clientY);
+    canvas.classList.toggle('pointer', !!hp);
+    hoverKey = hp ? (hp.kind === 'poster' ? hp.src : hp.kind === 'record' ? 'record' + hp.id : hp.kind) : null;
+  }
+});
+canvas.addEventListener('pointerup', (e) => {
+  if (down && !down.moved) act(pick(e.clientX, e.clientY));
+  down = null;
+});
+canvas.addEventListener('wheel', (e) => {
+  const dir = e.deltaY + e.deltaX;
+  if (!sceneFull) return;                              // la page est encore en train de défiler
+  if (mode === 'browse' && dir < 0 && current === 0 && wheelAcc <= 0) return;   // tout en haut du bac : on remonte vers l'accueil
+  if (mode === 'browse' && dir > 0 && current === N - 1 && wheelAcc >= 0) return;  // au dernier vinyle : on descend vers la présentation
+  e.preventDefault();
+  if (mode !== 'browse') return;
+  const now = performance.now();
+  wheelAcc += e.deltaY + e.deltaX;
+  if (Math.abs(wheelAcc) > 50 && now > wheelLock) { flip(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; wheelLock = now + 160; }
+}, { passive: false });
+addEventListener('keydown', (e) => {
+  if ($('poster-view').classList.contains('open')) { if (e.key === 'Escape') closePoster(); return; }
+  if ($('project').classList.contains('open')) { if (e.key === 'Escape') closeProject(); return; }
+  if (!sceneFull) return;
+  if (mode === 'ds') {
+    if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); gameJump(); }
+    else if (e.key === 'Escape' || e.key === 'Backspace') leaveDS();
+    return;
+  }
+  if (mode === 'tr') {
+    if (e.key === ' ') { e.preventDefault(); trPress('play'); }
+    else if (e.key === 'Escape' || e.key === 'Backspace') leaveTR();
+    return;
+  }
+  if (['ArrowRight', 'ArrowDown'].includes(e.key)) { e.preventDefault(); audio(); flip(1); }
+  else if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); audio(); flip(-1); }
+  else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(current); }
+});
+
+/* ═════════ PAGE PROJET (version classique, à l'identique) ═════════ */
+const frame = $('frame');
+let frameReady = false, pending = null;
+frame.src = 'index.html?embed&v=' + Date.now();   // toujours la dernière version des pages projets
+addEventListener('message', (e) => {
+  if (e.source !== frame.contentWindow || !e.data || !e.data.fm) return;
+  if (e.data.type === 'ready') {
+    try {                                              // mêmes textes que les pages projets, toujours à jour
+      const d = frame.contentDocument;
+      PROJECTS.forEach((p) => {
+        const pg = d.getElementById('page-' + p.id); if (!pg) return;
+        const q = (s) => pg.querySelector(s);
+        if (q('.cs-eyebrow')) p.cat = q('.cs-eyebrow').textContent.trim();
+        if (q('.cs-title')) p.title = q('.cs-title').innerHTML.trim();
+        if (q('.cs-quote')) p.quote = q('.cs-quote').textContent.trim();
+        if (q('.cs-body')) p.body = q('.cs-body').innerHTML.trim();
+      });
+      updateLabel();
+    } catch (err) {}
+    frameReady = true; if (pending) { sendProject(pending); pending = null; } }
+  if (e.data.type === 'close') closeProject();
+});
+function sendProject(id) {
+  if (frameReady) frame.contentWindow.postMessage({ fm: 1, type: 'show', target: id }, '*'); else pending = id;
+}
+function openProject() {
+  mode = 'project';
+  $('project').classList.add('open'); $('project').setAttribute('aria-hidden', 'false'); document.body.classList.add('locked', 'project-open'); radioDuck(true);
+  $('fade').classList.remove('on');
+  stopCrackle();
+  setTimeout(() => { try { frame.focus(); } catch (e) {} }, 100);
+}
+/* ── TR-01 : on s'approche, on joue sur les pads, interface complète au besoin */
+let overlayFrom = null, camTween = null;
+function tweenCam(to, dur, done) { camTween = { fp: camPos.clone(), fl: camLook.clone(), tp: to.pos.clone(), tl: to.look.clone(), t: 0, dur, done }; }
+function enterTR() {
+  if (mode !== 'browse') return;
+  audio(); mode = 'trIn'; canvas.classList.remove('pointer');
+  document.body.classList.add('busy');
+  tweenCam(TR_CAM(), 1.0, () => { mode = 'tr'; document.body.classList.add('tr-mode'); });
+}
+function leaveTR() {
+  if (mode !== 'tr') return;
+  mode = 'trOut'; document.body.classList.remove('tr-mode');
+  tweenCam(CAM.crate, 0.9, () => { mode = 'browse'; document.body.classList.remove('busy'); });
+}
+function openTRInterface() {
+  if (mode !== 'tr') return;
+  overlayFrom = 'tr'; sendProject('sampler');
+  document.body.classList.remove('tr-mode'); $('project-back').classList.add('fallback');
+  openProject();
+}
+$('trFull').addEventListener('click', openTRInterface);
+$('trBack').addEventListener('click', leaveTR);
+
+function closeProject() {
+  if (mode !== 'project') return;
+  $('project').classList.remove('open'); $('project').setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked', 'project-open'); radioDuck(false);
+  if (overlayFrom === 'tr') {                          // retour devant la TR-01
+    overlayFrom = null; $('project-back').classList.remove('fallback');
+    mode = 'tr'; document.body.classList.add('tr-mode'); clock.getDelta(); canvas.focus({ preventScroll: true });
+    return;
+  }
+  mode = 'return'; t = 0; clock.getDelta();
+  /* le disque retourne dans sa pochette pendant qu'on revient au bac */
+  disc.visible = false; spinSpeed = 0; armPivot.rotation.set(0, ARM_REST, 0); led.material.color.set(0x3a0606);
+  discFrom = null; sel = null;
+  camPos.copy(CAM.close.pos); camLook.copy(CAM.close.look);
+  canvas.focus({ preventScroll: true });
+}
+$('project-back').addEventListener('click', closeProject);
+
+/* ═════════ ANIMATION ═════════ */
+const LIFT = { pos: new THREE.Vector3(0.02, 0.5, 0.36), rx: -0.95 };
+const platTop = () => platter.localToWorld(tmpV.set(0, 0.0115, 0)).clone();
+const qFlat = new THREE.Quaternion();
+const qFromSleeve = new THREE.Quaternion();
+let discFrom = null;
+
+function playStep(dt) {
+  t += dt;
+  const r = sel.r, pv = r.pivot;
+  /* 1. on sort la pochette du bac et on la lève vers soi */
+  const a = ease(ph(t, 0, 0.75)), back = ease(ph(t, 1.45, 2.1));
+  const k = a * (1 - back);
+  pv.position.set(lerp(sel.pos.x, LIFT.pos.x, k), lerp(sel.pos.y, LIFT.pos.y, k), lerp(sel.pos.z, LIFT.pos.z, k));
+  pv.rotation.set(lerp(sel.rx, LIFT.rx, k), 0, lerp(sel.rz, 0, k));
+
+  /* 2. le disque glisse hors de la pochette */
+  if (t > 0.75 && t <= 1.45) {
+    disc.visible = true;
+    const s = ease(ph(t, 0.75, 1.45));
+    pv.updateMatrixWorld(true);
+    disc.position.copy(pv.localToWorld(tmpV.set(s * 0.24, SLEEVE / 2, 0)));
+    pv.getWorldQuaternion(tmpQ);
+    disc.quaternion.copy(tmpQ).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
+    discFrom = { pos: disc.position.clone(), q: disc.quaternion.clone() };
+  }
+  /* 3. on se tourne vers la platine, le disque suit et se met à plat */
+  if (t > 1.45 && discFrom) {
+    const m = ease(ph(t, 1.45, 2.6)), low = ease(ph(t, 2.6, 2.95));
+    const top = platTop();
+    const above = top.clone().add(new THREE.Vector3(0, 0.2, 0));
+    const p = discFrom.pos.clone().lerp(above, m);
+    p.y += Math.sin(m * Math.PI) * 0.08;
+    p.lerp(top.clone().add(new THREE.Vector3(0, 0.0012, 0)), low);
+    disc.position.copy(p);
+    disc.quaternion.copy(discFrom.q).slerp(qFlat, m);
+    if (low >= 1) { spinSpeed = Math.min(3.6, spinSpeed + dt * 4); }
+    if (low >= 1 && !sel.dropped) { sel.dropped = true; led.material.color.set(0xe01a1a); }
+  }
+  /* 4. le bras se pose, craquements */
+  const arm = ease(ph(t, 3.0, 3.6));
+  armPivot.rotation.y = lerp(ARM_REST, ARM_PLAY, arm);
+  armPivot.rotation.z = Math.sin(arm * Math.PI) * 0.06;
+  if (t > 3.55 && !crackle && !sel.needle) { sel.needle = true; dropSound(); }
+
+  /* caméra */
+  const c1 = ease(ph(t, 1.45, 2.6)), c2 = ease(ph(t, 3.6, 4.5));
+  camPos.copy(CAM.crate.pos).lerp(CAM.tt.pos, c1).lerp(CAM.close.pos, c2);
+  camLook.copy(CAM.crate.look).lerp(CAM.tt.look, c1).lerp(CAM.close.look, c2);
+
+  if (t > 4.15) $('fade').classList.add('on');
+  if (t > 4.65) openProject();
+}
+
+function returnStep(dt) {
+  t += dt;
+  const k = ease(ph(t, 0, 1.1));
+  camPos.copy(CAM.close.pos).lerp(CAM.crate.pos, k);
+  camLook.copy(CAM.close.look).lerp(CAM.crate.look, k);
+  if (k >= 1) { mode = 'browse'; document.body.classList.remove('busy'); }
+}
+
+/* ═════════ RENDU « JEU INDÉ » : basse résolution, tramage, grain ═════════ */
+const IndieShader = {
+  uniforms: { tDiffuse: { value: null }, res: { value: new THREE.Vector2(1, 1) }, time: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform vec2 res; uniform float time; varying vec2 vUv;
+    float bayer2(vec2 a){ a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
+    float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+    float rnd(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+    void main(){
+      vec2 off = (vUv - 0.5) * 0.0015;                                   // aberration chromatique légère
+      vec3 c = vec3(texture2D(tDiffuse, vUv + off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - off).b);
+      c += (rnd(floor(vUv * res) + floor(time * 18.0)) - 0.5) * 0.022;  // grain animé, au pixel
+      float levels = 40.0;                                              // palette réduite + tramage ordonné
+      c = floor(c * levels + bayer4(gl_FragCoord.xy) - 0.25) / levels;
+      c = mix(c, c * vec3(1.04, 0.98, 0.93), 0.3);                      // tonalité chaude
+      gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+    }`
+};
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new OutputPass());
+const indiePass = new ShaderPass(IndieShader);
+composer.addPass(indiePass);
+const PIXEL = 1.5;                                                        // 1 pixel du rendu = 2 points d'écran, sur tous les écrans
+
+const clock = new THREE.Clock();
+let frameNo = 0, gameAcc = 0;
+function resize() {
+  const w = sceneEl.clientWidth, h = sceneEl.clientHeight, pr = 1 / PIXEL;
+  renderer.setPixelRatio(pr); composer.setPixelRatio(pr);
+  renderer.setSize(w, h, false); composer.setSize(w, h);
+  indiePass.uniforms.res.value.set(w * pr, h * pr);
+  camera.aspect = w / h;
+  camera.fov = w / h < 0.8 ? 68 : 48;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+function frameLoop() {
+  requestAnimationFrame(frameLoop);
+  if (mode === 'project' || !sceneOnScreen) { clock.getDelta(); return; }   // la page projet couvre tout / scène hors écran
+  const dt = Math.min(0.05, clock.getDelta()), time = clock.elapsedTime;
+
+  if (mode === 'browse') {
+    records.forEach((r, j) => {
+      const tp = targetPose(j), pv = r.pivot, f = 1 - Math.pow(0.0008, dt);
+      pv.position.x = lerp(pv.position.x, pv.userData.x, f);
+      pv.position.y = lerp(pv.position.y, tp.y, f);
+      pv.position.z = lerp(pv.position.z, tp.z, f);
+      pv.rotation.x = lerp(pv.rotation.x, tp.rx, f);
+      pv.rotation.z = lerp(pv.rotation.z, pv.userData.rz, f);
+    });
+    const look = CAM.crate.look.clone(); look.z = lerp(0.02, -0.05, current / (N - 1));
+    camPos.lerp(CAM.crate.pos, 0.08); camLook.lerp(look, 0.08);
+  } else if (mode === 'play') playStep(dt);
+  else if (mode === 'return') returnStep(dt);
+
+  if (camTween) {
+    camTween.t += dt;
+    const k = ease(Math.min(1, camTween.t / camTween.dur));
+    camPos.copy(camTween.fp).lerp(camTween.tp, k); camLook.copy(camTween.fl).lerp(camTween.tl, k);
+    if (k >= 1) { const done = camTween.done; camTween = null; if (done) done(); }
+  }
+
+  /* survol : l'objet se soulève légèrement (radio, TR-01, console, affiches) */
+  const lift = (obj, key, h) => {
+    if (!obj) return;
+    if (obj.userData.restY === undefined) obj.userData.restY = obj.position.y;
+    const to = obj.userData.restY + (mode === 'browse' && hoverKey === key ? h : 0);
+    obj.position.y += (to - obj.position.y) * Math.min(1, dt * 12);
+  };
+  lift(radioG, 'radio', 0.012); lift(trG, 'tr', 0.01); lift(dsG, 'ds', 0.012);
+  posterMeshes.forEach((m) => lift(m, m.userData.poster, 0.012));
+  if (fb.t < 0) lift(fb.group, 'fb', 0.012);
+
+  /* figures de la fingerboard (une différente à chaque clic) */
+  if (fb.t >= 0) {
+    fb.t += dt;
+    const tr = fb.trick, g = fb.group, b = g.userData.base, ry = g.userData.ry;
+    const k = Math.min(1, fb.t / tr.dur), e = ease(k), arc = Math.sin(k * Math.PI), TAU = Math.PI * 2;
+    g.rotation.order = 'YZX';                          // flip dans l'axe de la planche, puis rotation au sol
+    if (tr.manual) {                                   // nose manual : la planche roule sur ses roues avant
+      const d = arc * 0.05;
+      g.position.set(b.x + Math.cos(ry) * d, b.y + arc * 0.006, b.z - Math.sin(ry) * d);
+      g.rotation.set(0, ry, -arc * 0.22);
+    } else {
+      const pop = 0.32 * Math.sin(Math.min(1, k / 0.22) * Math.PI);           // le tail claque, le nez monte
+      g.position.set(b.x, b.y + arc * tr.h, b.z);
+      g.rotation.set((tr.roll || 0) * TAU * e, ry + (tr.yaw || 0) * TAU * e, (tr.pitch || 0) * TAU * e + pop + (tr.wave || 0) * arc);
+    }
+    if (k >= 1) { fb.t = -1; g.position.copy(b); g.rotation.set(0, ry, 0); }
+  }
+
+  /* DOXAL Run sur la console */
+  if (mode === 'ds' && game.state === 'running') {
+    gameAcc += dt;
+    while (gameAcc >= 1 / 60) { gameStep(); gameAcc -= 1 / 60; }
+    gameDraw();
+  }
+
+  /* la radio : haut-parleur qui pulse sur les basses */
+  if (radioAn && radioIdx >= 0) {
+    radioAn.getByteFrequencyData(radioData);
+    const lowE = (radioData[1] + radioData[2] + radioData[3]) / 765;
+    grille.scale.setScalar(1 + lowE * 0.06); grille.position.z = 0.0381 + lowE * 0.004;
+  }
+
+  /* la TR-01 3D reflète ta vraie boîte à rythme (pads, tête de lecture, tempo) */
+  if (frameNo++ % 3 === 0) syncTR();
+  knobs.forEach((k, i) => { k.rotation.y = trPlaying ? Math.sin(time * (1.3 + i)) * 0.6 : k.rotation.y * 0.95; });
+
+  /* platine qui tourne, disque posé dessus */
+  spin += spinSpeed * dt;
+  platter.rotation.y = -spin;
+  if (sel && sel.dropped) { disc.rotation.set(0, -spin, 0); disc.quaternion.setFromEuler(disc.rotation); }
+
+  /* première personne : respiration + regard qui suit la souris */
+  const sway = reduced ? 0 : 1;
+  camera.position.set(
+    camPos.x + Math.sin(time * 0.6) * 0.006 * sway + mouse.x * 0.02 * sway,
+    camPos.y + Math.sin(time * 1.1) * 0.004 * sway,
+    camPos.z
+  );
+  camera.lookAt(camLook.x + mouse.x * 0.035 * sway, camLook.y - mouse.y * 0.02 * sway, camLook.z);
+  indiePass.uniforms.time.value = time;
+  composer.render(dt);
+}
+frameLoop();
+</script>
+</body>
+</html>
