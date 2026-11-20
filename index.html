@@ -36,6 +36,7 @@
   #intro-sub.visible { opacity: 1; }
   .bg-spirals { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; opacity: 0.07; }
   .bg-spirals svg { position: absolute; }
+  body.past-home .bg-spirals { visibility: hidden; }
   #cursor { position: fixed; pointer-events: none; z-index: 9999; overflow: visible; left: -999px; top: -999px; }
   body.project-open #cursor { display: none; }   /* la page projet a déjà son propre curseur spirale */
 
@@ -729,6 +730,11 @@ if (!touchDev) {
     requestAnimationFrame(anim);
   })();
 } else cursorEl.style.display = 'none';
+let pastHome = false;                                     // l'accueil n'est plus à l'écran
+addEventListener('scroll', () => {
+  const p = scrollY > innerHeight * 0.95;
+  if (p !== pastHome) { pastHome = p; document.body.classList.toggle('past-home', p); }
+}, { passive: true });
 function animateSpiral(id, duration, delay) {
   const path = document.getElementById(id); if (!path || reduced) return;
   const len = path.getTotalLength(); path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
@@ -737,7 +743,7 @@ function animateSpiral(id, duration, delay) {
     (function step(ts) {
       if (!start) start = ts;
       const p = Math.min((ts - start) / duration, 1);
-      path.style.strokeDashoffset = drawing ? len * (1 - p) : len * p;
+      if (!pastHome) path.style.strokeDashoffset = drawing ? len * (1 - p) : len * p;   // inutile hors de l'accueil
       if (p >= 1) { drawing = !drawing; start = ts; }
       requestAnimationFrame(step);
     })(performance.now());
@@ -766,7 +772,7 @@ const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(2, devicePixelRatio));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 
@@ -781,7 +787,7 @@ const spot = new THREE.SpotLight(0xffe0bd, 26, 6, 0.62, 0.55, 1.6);
 spot.position.set(0.15, 2.3, 0.6);
 spot.target.position.set(0.3, 0, 0.1);
 spot.castShadow = true;
-spot.shadow.mapSize.set(2048, 2048);
+spot.shadow.mapSize.set(1024, 1024);
 spot.shadow.bias = -0.0004;
 spot.shadow.radius = 4;
 scene.add(spot, spot.target);
@@ -1620,7 +1626,7 @@ function act(hit) {
   else trPress(hit.kind, hit.id);
 }
 
-let down = null, wheelAcc = 0, wheelLock = 0;
+let down = null, wheelAcc = 0, wheelLock = 0, hoverAt = null;
 canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, moved: false }; audio(); });
 canvas.addEventListener('pointermove', (e) => {
   mouse.x = (e.clientX / innerWidth) * 2 - 1; mouse.y = (e.clientY / innerHeight) * 2 - 1;
@@ -1628,9 +1634,7 @@ canvas.addEventListener('pointermove', (e) => {
     const dx = e.clientX - down.x, dy = e.clientY - down.y;
     if (Math.abs(dx) > 42 || (e.pointerType === 'mouse' && Math.abs(dy) > 42)) { flip((Math.abs(dx) > Math.abs(dy) ? dx < 0 : dy > 0) ? 1 : -1); down = { x: e.clientX, y: e.clientY, moved: true }; }
   } else if ((mode === 'browse' || mode === 'tr' || mode === 'ds') && e.pointerType === 'mouse') {
-    const hp = pick(e.clientX, e.clientY);
-    canvas.classList.toggle('pointer', !!hp);
-    hoverKey = hp ? (hp.kind === 'poster' ? hp.src : hp.kind === 'record' ? 'record' + hp.id : hp.kind) : null;
+    hoverAt = { x: e.clientX, y: e.clientY };
   }
 });
 canvas.addEventListener('pointerup', (e) => {
@@ -1910,7 +1914,12 @@ function frameLoop() {
   }
 
   /* la TR-01 3D reflète ta vraie boîte à rythme (pads, tête de lecture, tempo) */
-  if (frameNo++ % 3 === 0) syncTR();
+  if (hoverAt && (mode === 'browse' || mode === 'tr' || mode === 'ds')) {
+    const hp = pick(hoverAt.x, hoverAt.y); hoverAt = null;
+    canvas.classList.toggle('pointer', !!hp);
+    hoverKey = hp ? (hp.kind === 'poster' ? hp.src : hp.kind === 'record' ? 'record' + hp.id : hp.kind) : null;
+  }
+  if (frameNo++ % 6 === 0) syncTR();
   knobs.forEach((k, i) => { k.rotation.y = trPlaying ? Math.sin(time * (1.3 + i)) * 0.6 : k.rotation.y * 0.95; });
 
   /* platine qui tourne, disque posé dessus */
